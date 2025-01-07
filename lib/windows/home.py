@@ -762,7 +762,10 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                     util.waitForConsumption('update_response', timeout=200)
                 finally:
                     self._shuttingDown = True
+                    self._ignoreTick = True
+                    self.stopRetryingRequests()
                     #self.closeOption = "update"
+                    self.unhookSignals()
                     self.doClose()
                     return True
 
@@ -792,8 +795,14 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
         super(HomeWindow, self).doClose()
 
+    def stopRetryingRequests(self):
+        util.DEBUG_LOG("Stopping request retries")
+        plexnet.asyncadapter.STOP_RETRYING_REQUESTS = True
+
     def shutdown(self):
         self._shuttingDown = True
+        self._ignoreTick = True
+        self.stopRetryingRequests()
         try:
             self.serverList.reset()
         except AttributeError:
