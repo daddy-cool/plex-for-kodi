@@ -76,7 +76,7 @@ class AsyncTimeout(float):
         return self
 
 
-DEFAULT_TIMEOUT = AsyncTimeout(10).setConnectTimeout(10)
+DEFAULT_TIMEOUT = AsyncTimeout(5).setConnectTimeout(5)
 
 
 class AsyncVerifiedHTTPSConnection(VerifiedHTTPSConnection):

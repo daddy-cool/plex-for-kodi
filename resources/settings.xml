@@ -463,7 +463,7 @@
                 </setting>
                 <setting id="requests_timeout_read" type="number" label="33636" help="33637">
                     <level>0</level>
-                    <default>10</default>
+                    <default>5</default>
                     <constraints>
                         <minimum>0.5</minimum>
                         <step>0.5</step>
