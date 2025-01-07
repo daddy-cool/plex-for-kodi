@@ -103,7 +103,12 @@ def update_loop():
                             try:
                                 waitForGPEmpty('running', timeout=waitForSecs * 10)
                             except IPCTimeoutException:
-                                raise UpdateException('Timeout waiting for UI to close')
+                                #raise UpdateException('Timeout waiting for UI to close')
+                                log('Timeout waiting for UI to close')
+                                try:
+                                    xbmc.executebuiltin('StopScript(script.plexmod)')
+                                except:
+                                    pass
                         else:
                             raise UpdaterSkipException()
 
