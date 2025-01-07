@@ -180,7 +180,7 @@ class SeekDialog(kodigui.BaseDialog, PlexSubtitleDownloadMixin):
         self._delayedSeekThread = None
         self._delayedSeekTimeout = 0
         self._osdHideAnimationTimeout = 0
-        self._hideDelay = self.HIDE_DELAY
+        self._hideDelay = util.addonSettings.osdHideDelay if util.SKIN_PLEXTUARY else 4
         self._autoSeekDelay = util.addonSettings.autoSeek and util.addonSettings.autoSeekDelay or 0
         self._atSkipStep = -1
         self._lastSkipDirection = None

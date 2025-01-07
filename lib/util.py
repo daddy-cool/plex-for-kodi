@@ -172,6 +172,7 @@ class AddonSettings(object):
         ("honor_plextv_pam", True),
         ("coreelec_resume_seek_wait", 500),
         ("background_resolution_scale_perc", 100),
+        ("osd_hide_delay", 4.0),
     )
 
     def __init__(self):
