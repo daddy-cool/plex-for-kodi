@@ -6,6 +6,7 @@ import atexit
 import threading
 import six
 import sys
+import logging
 
 from kodi_six import xbmc
 
@@ -22,6 +23,7 @@ from .windows import background, userselect, home, windowutils, kodigui, busy
 from . import player
 from . import backgroundthread
 from . import util
+from .logging import KodiLogProxyHandler
 from .data_cache import dcm
 
 BACKGROUND = None
@@ -33,6 +35,13 @@ if six.PY2:
     _Timer = threading._Timer
 else:
     _Timer = threading.Timer
+
+
+if util.addonSettings.debugRequests:
+    logger = logging.getLogger("urllib3")
+    logger.addHandler(KodiLogProxyHandler(level=logging.DEBUG,
+                                          log_func=lambda *a, **kw: util.log(*a, prepend_msg="[urllib3]", **kw)))
+    logger.setLevel(logging.DEBUG)
 
 
 def waitForThreads():
