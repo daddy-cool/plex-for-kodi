@@ -630,6 +630,10 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             if controlID == self.LIST_OPTIONS_BUTTON_ID and self.checkOptionsAction(action):
                 return
             elif action == xbmcgui.ACTION_CONTEXT_MENU:
+                if controlID in (self.PLAY_BUTTON_ID, self.PLAY_BUTTON_ID + 1000) and util.getSetting('assume_resume'):
+                    self.playButtonClicked(force_resume_menu=True)
+                    return
+
                 if not xbmc.getCondVisibility('ControlGroup({0}).HasFocus(0)'.format(self.OPTIONS_GROUP_ID)):
                     self.lastNonOptionsFocusID = self.lastFocusID
                     self.setFocusId(self.OPTIONS_GROUP_ID)
@@ -906,7 +910,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         section_id = self.show_.getLibrarySectionId()
         self.processCommand(search.dialog(self, section_id=section_id or None))
 
-    def playButtonClicked(self, shuffle=False, force_episode=None, from_auto_play=False):
+    def playButtonClicked(self, shuffle=False, force_episode=None, from_auto_play=False, force_resume_menu=False):
         if shuffle:
             seasonOrShow = self.season or self.show_
             items = seasonOrShow.all()
@@ -917,7 +921,8 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             return True
 
         else:
-            return self.episodeListClicked(force_episode=force_episode, from_auto_play=from_auto_play)
+            return self.episodeListClicked(force_episode=force_episode, from_auto_play=from_auto_play,
+                                           force_resume_menu=force_resume_menu)
 
     def shuffleButtonClicked(self):
         self.playButtonClicked(shuffle=True)
@@ -964,7 +969,8 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         )
         self.cameFrom = "info"
 
-    def episodeListClicked(self, force_episode=None, from_auto_play=False):
+    def episodeListClicked(self, force_episode=None, from_auto_play=False, force_resume_menu=False,
+                           force_startover=False):
         if (not self.currentItemLoaded or self.playBtnClicked) and not from_auto_play:
             util.DEBUG_LOG("Not honoring play action: currentItemLoaded: {0}, "
                            "playBtnClicked: {1}, from_auto_play: {2}",
@@ -985,8 +991,8 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             return
 
         resume = False
-        if episode.viewOffset.asInt():
-            if not util.getSetting('assume_resume'):
+        if episode.viewOffset.asInt() and not force_startover:
+            if not util.getSetting('assume_resume') or force_resume_menu:
                 choice = dropdown.showDropdown(
                     options=[
                         {'key': 'resume', 'display': T(32429, 'Resume from {0}').format(util.timeDisplay(episode.viewOffset.asInt()).lstrip('0').lstrip(':'))},
@@ -1035,6 +1041,10 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
 
         if mli and not mli.getProperty("is.boundary"):
             inProgress = mli.dataSource.viewOffset.asInt()
+            if inProgress and util.getSetting('assume_resume'):
+                options.append({'key': 'play_startover', 'display': T(32317, 'Play from beginning')})
+                options.append(dropdown.SEPARATOR)
+
             if not mli.dataSource.isWatched or inProgress:
                 options.append({'key': 'mark_watched', 'display': T(32319, 'Mark Played')})
             if mli.dataSource.isWatched or inProgress:
@@ -1122,7 +1132,8 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         elif choice['key'] == 'refresh':
             mli.dataSource.refresh()
             self.updateItems(mli)
-
+        elif choice['key'] == 'play_startover':
+            self.episodeListClicked(force_startover=True)
 
     def mediaButtonClicked(self):
         options = []
