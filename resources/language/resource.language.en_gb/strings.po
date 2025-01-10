@@ -2517,7 +2517,7 @@ msgid "Show ratings for"
 msgstr ""
 
 msgctxt "#33710"
-msgid "Show reviews"
+msgid "Show reviews for"
 msgstr ""
 
 msgctxt "#33711"
@@ -2550,4 +2550,8 @@ msgstr ""
 
 msgctxt "#33718"
 msgid "Socket deadline extensions/retries"
+msgstr ""
+
+msgctxt "#33719"
+msgid "Watched"
 msgstr ""

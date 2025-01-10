@@ -3108,8 +3108,8 @@ msgid "Show ratings for"
 msgstr "Bewertungen anzeigen für"
 
 msgctxt "#33710"
-msgid "Show reviews"
-msgstr "Kritiken anzeigen"
+msgid "Show reviews for"
+msgstr "Kritiken anzeigen für"
 
 msgctxt "#33711"
 msgid "Always resume media"
@@ -3134,3 +3134,7 @@ msgstr "OSD Versteck-Verzögerung"
 msgctxt "#33716"
 msgid "How long to wait until hiding the OSD. Only works with Plextuary skin or others with configurable OSD timeout. Default: 4s (+/- 1s)"
 msgstr "Nach wieviel Sekunden das OSD automatisch versteckt werden soll. Funktioniert nur mit dem Plextuary Skin oder anderen Skins mit konfigurierbarer OSD Verzögerung. Standard: 4s (+/- 1s)"
+
+msgctxt "#33719"
+msgid "Watched"
+msgstr "Geschaut"

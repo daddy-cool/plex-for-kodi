@@ -703,7 +703,12 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         items = []
         idx = 0
 
-        if not util.getSetting('show_reviews') or not self.video.reviews:
+        show_reviews = util.getSetting('show_reviews1')
+        fully_watched = self.video.isFullyWatched
+
+        if (not show_reviews or not self.video.reviews or
+                ("unwatched" not in show_reviews and not fully_watched) or
+                ("watched" not in show_reviews and fully_watched)):
             self.reviewsListControl.reset()
             return False
 

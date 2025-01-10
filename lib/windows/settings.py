@@ -647,8 +647,13 @@ class Settings(object):
                         ('movies', T(32348, 'Movies')),
                     ]
                 ),
-                BoolSetting(
-                    'show_reviews', T(33710, ''), True
+                MultiOptionsSetting(
+                    'show_reviews1', T(33710, 'Show reviews for'),
+                    ["watched", "unwatched"],
+                    [
+                        ('watched', T(33719, 'Watched')),
+                        ('unwatched', T(33010, 'Unwatched')),
+                    ]
                 ),
                 MultiOptionsSetting(
                     'no_episode_spoilers4', T(33006, ''),
