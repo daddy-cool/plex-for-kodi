@@ -2547,3 +2547,7 @@ msgstr ""
 msgctxt "#33717"
 msgid "Debug requests"
 msgstr ""
+
+msgctxt "#33718"
+msgid "Socket deadline extensions/retries"
+msgstr ""

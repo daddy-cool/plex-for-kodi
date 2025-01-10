@@ -117,6 +117,7 @@ class AddonSettings(object):
     _proxiedSettings = (
         ("debug", False),
         ("debug_requests", False),
+        ("socket_deadline_extensions", 5),
         ("kodi_skip_stepping", False),
         ("auto_seek", True),
         ("auto_seek_delay", 1),

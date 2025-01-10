@@ -95,9 +95,15 @@ class AsyncVerifiedHTTPSConnection(VerifiedHTTPSConnection):
         self.dl_reset_count = 0
         self._timeout = AsyncTimeout(DEFAULT_TIMEOUT)
 
+    def __str__(self):
+        return '{0}({1})'.format(self.__class__.__name__, self.identifier)
+
+    def __repr__(self):
+        return str(self)
+
     def _check_timeout(self):
         if time.time() > self.deadline:
-            raise ConnectTimeoutError('connection timed out')
+            raise ConnectTimeoutError('connection timed out: {0}'.format(str(self)))
 
     def create_connection(self, address, timeout=None, source_address=None):
         """Connect to *address* and return the socket object.
@@ -134,7 +140,7 @@ class AsyncVerifiedHTTPSConnection(VerifiedHTTPSConnection):
                     sock.bind(source_address)
                 for msg in self._connect(sock, sa):
                     if self._canceled or ABORT_FLAG_FUNCTION():
-                        raise CanceledException('Request canceled')
+                        raise CanceledException('Request canceled: {0}'.format(str(self)))
                 sock.setblocking(True)
                 return sock
 
@@ -173,13 +179,15 @@ class AsyncVerifiedHTTPSConnection(VerifiedHTTPSConnection):
                                 self.identifier,
                                 self._timeout.getConnectTimeout(), MAX_DEADLINE_SOCKET_EXTENSIONS),
                             xbmc.LOGINFO)
-                    raise ConnectTimeoutError('connection timed out (too many deadline extensions)')
+                    raise ConnectTimeoutError('connection timed out (too many deadline extensions): {0}'.format(str(self)))
             # elif status in (errno.EWOULDBLOCK, errno.EALREADY) or (os.name == 'nt' and status == errno.WSAEINVAL):
             #     pass
             yield
 
         if self._canceled or ABORT_FLAG_FUNCTION():
-            raise CanceledException('Request canceled')
+            if DEBUG_REQUESTS:
+                xbmc.log('AsyncVerifiedHTTPSConnection._connect: Canceled: {0}'.format(self.identifier), xbmc.LOGINFO)
+            raise CanceledException('Request canceled: {0}'.format(str(self)))
 
         error = sock.getsockopt(socket.SOL_SOCKET, socket.SO_ERROR)
         if error:
