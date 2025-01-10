@@ -693,7 +693,7 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
             args['unwatched'] = '1'
 
         pq = playqueue.createPlayQueueForItem(self.section, options={'shuffle': shuffle}, args=args)
-        opener.open(pq, auto_play=True)
+        opener.open(pq, auto_play=True, auto_play_open=True)
 
     def shuffleButtonClicked(self):
         self.playButtonClicked(shuffle=True)

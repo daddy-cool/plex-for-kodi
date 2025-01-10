@@ -74,6 +74,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.lastNonOptionsFocusID = None
         self.initialized = False
         self.relatedPaginator = None
+        self.openedWithAutoPlay = False
 
     def doClose(self):
         self.relatedPaginator = None
@@ -92,6 +93,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
     def doAutoPlay(self):
         # First reload the video to get all the other info
         self.video.reload(checkFiles=1, **VIDEO_RELOAD_KW)
+        self.openedWithAutoPlay = True
         return self.playVideo(from_auto_play=True)
 
     @busy.dialog()

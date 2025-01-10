@@ -306,7 +306,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         self.initialEpisode.reload(checkFiles=1, **VIDEO_RELOAD_KW)
 
         # We're not hitting onFirstInit when autoplaying from home, setup hooks here, so we can grab video progress
-        self._setup_hooks()
+        #self._setup_hooks()
         self.openedWithAutoPlay = True
         return self.playButtonClicked(force_episode=self.initialEpisode, from_auto_play=True)
 
