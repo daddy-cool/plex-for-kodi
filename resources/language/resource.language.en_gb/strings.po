@@ -1851,11 +1851,11 @@ msgid "[Spoilers removed]"
 msgstr ""
 
 msgctxt "#33009"
-msgid "Blur amount for unwatched/in-progress episodes"
+msgid "Blur amount for unplayed/in-progress episodes"
 msgstr ""
 
 msgctxt "#33010"
-msgid "Unwatched"
+msgid "Unplayed"
 msgstr ""
 
 msgctxt "#33011"
@@ -1863,7 +1863,7 @@ msgid "In progress"
 msgstr ""
 
 msgctxt "#33012"
-msgid "No unwatched episode titles"
+msgid "No unplayed episode titles"
 msgstr ""
 
 msgctxt "#33013"
@@ -1903,11 +1903,11 @@ msgid "Choose action"
 msgstr ""
 
 msgctxt "#33022"
-msgid "Watched indicators"
+msgid "Played indicators"
 msgstr ""
 
 msgctxt "#33023"
-msgid "Classic: Show orange triangle for unwatched items\nModern: Show green checkmark for watched items\nModern (2024): Show white checkmark for watched items\n(default: Modern (2024))"
+msgid "Classic: Show orange triangle for unplayed items\nModern: Show green checkmark for played items\nModern (2024): Show white checkmark for played items\n(default: Modern (2024))"
 msgstr ""
 
 msgctxt "#33024"
@@ -1915,7 +1915,7 @@ msgid "Hide background in modern indicators"
 msgstr ""
 
 msgctxt "#33025"
-msgid "When the above is enabled, hide the black backdrop of the watched state."
+msgid "When the above is enabled, hide the black backdrop of the played state."
 msgstr ""
 
 msgctxt "#33026"
@@ -2553,5 +2553,5 @@ msgid "Socket deadline extensions/retries"
 msgstr ""
 
 msgctxt "#33719"
-msgid "Watched"
+msgid "Played"
 msgstr ""
