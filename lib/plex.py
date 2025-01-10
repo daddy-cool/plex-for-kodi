@@ -326,6 +326,7 @@ plexapp.util.ACCEPT_LANGUAGE = util.ACCEPT_LANGUAGE_CODE
 plexapp.setUserAgent(defaultUserAgent())
 plexnet_util.BASE_HEADERS = plexnet_util.getPlexHeaders()
 asyncadapter.MAX_RETRIES = int(util.addonSettings.maxRetries1)
+asyncadapter.DEBUG_REQUESTS = util.addonSettings.debugRequests
 if util.addonSettings.useCertBundle != "system":
     util.LOG("Using certificate bundle: {}".format(util.addonSettings.useCertBundle))
     plexnet_util.USE_CERT_BUNDLE = util.addonSettings.useCertBundle

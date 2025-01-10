@@ -1,11 +1,10 @@
 from __future__ import absolute_import
 import time
 import socket
-import six
-
 import requests
 import six
 
+from kodi_six import xbmc
 from requests.packages.urllib3 import HTTPConnectionPool, HTTPSConnectionPool
 from requests.packages.urllib3.connection import HTTPConnection
 from requests.packages.urllib3.poolmanager import PoolManager, proxy_from_url
@@ -26,6 +25,8 @@ DEFAULT_POOLBLOCK = False
 SSL_KEYWORDS = ('key_file', 'cert_file', 'cert_reqs', 'ca_certs',
                 'ssl_version')
 
+DEBUG_REQUESTS = False
+
 WIN_WSAEINVAL = 10022
 WIN_EWOULDBLOCK = 10035
 WIN_ECONNRESET = 10054
@@ -35,9 +36,13 @@ WIN_EHOSTUNREACH = 10065
 
 MAX_RETRIES = 3
 
+MAX_DEADLINE_SOCKET_EXTENSIONS = 5
+
 
 def ABORT_FLAG_FUNCTION():
-    return False
+    if STOP_RETRYING_REQUESTS and DEBUG_REQUESTS:
+        xbmc.log('AsyncVerifiedHTTPSConnection: Abort flag set!', xbmc.LOGINFO)
+    return STOP_RETRYING_REQUESTS
 
 
 class CanceledException(Exception):
@@ -80,12 +85,14 @@ DEFAULT_TIMEOUT = AsyncTimeout(5).setConnectTimeout(5)
 
 
 class AsyncVerifiedHTTPSConnection(VerifiedHTTPSConnection):
-    __slots__ = ("_canceled", "deadline", "_timeout")
+    __slots__ = ("_canceled", "deadline", "dl_reset_count", "identifier", "_timeout")
 
     def __init__(self, *args, **kwargs):
         VerifiedHTTPSConnection.__init__(self, *args, **kwargs)
         self._canceled = False
         self.deadline = 0
+        self.identifier = None
+        self.dl_reset_count = 0
         self._timeout = AsyncTimeout(DEFAULT_TIMEOUT)
 
     def _check_timeout(self):
@@ -104,8 +111,13 @@ class AsyncVerifiedHTTPSConnection(VerifiedHTTPSConnection):
         for the socket to bind as a source address before making the connection.
         An host of '' or port 0 tells the OS to use the default.
         """
+        if DEBUG_REQUESTS:
+            xbmc.log(
+                'AsyncVerifiedHTTPSConnection.create_connection: {0} {1} {2}'.format(address, timeout, repr(timeout)),
+                xbmc.LOGINFO)
         timeout = AsyncTimeout.fromTimeout(timeout)
         self._timeout = timeout
+        self.identifier = address
 
         host, port = address
         err = None
@@ -129,7 +141,7 @@ class AsyncVerifiedHTTPSConnection(VerifiedHTTPSConnection):
             except socket.error as _:
                 err = _
                 if sock is not None:
-                    sock.shutdown(socket.SHUT_RDWR)
+                    #sock.shutdown(socket.SHUT_RDWR)
                     sock.close()
 
         if err is not None:
@@ -145,7 +157,23 @@ class AsyncVerifiedHTTPSConnection(VerifiedHTTPSConnection):
             if not status or status in (errno.EISCONN, WIN_EISCONN):
                 break
             elif status in (errno.EINPROGRESS, WIN_EWOULDBLOCK):
+                if DEBUG_REQUESTS:
+                    xbmc.log('AsyncVerifiedHTTPSConnection._connect: '
+                             'Resetting deadline: {0} {1}, {2}/{3}'.format(self.identifier,
+                                                                           self._timeout.getConnectTimeout(),
+                                                                           self.dl_reset_count + 1,
+                                                                           MAX_DEADLINE_SOCKET_EXTENSIONS),
+                             xbmc.LOGINFO)
                 self.deadline = time.time() + self._timeout.getConnectTimeout()
+                self.dl_reset_count += 1
+                if self.dl_reset_count >= MAX_DEADLINE_SOCKET_EXTENSIONS:
+                    if DEBUG_REQUESTS:
+                        xbmc.log(
+                            'AsyncVerifiedHTTPSConnection._connect: Deadline reset {2} times, stopping: {0} {1}'.format(
+                                self.identifier,
+                                self._timeout.getConnectTimeout(), MAX_DEADLINE_SOCKET_EXTENSIONS),
+                            xbmc.LOGINFO)
+                    raise ConnectTimeoutError('connection timed out (too many deadline extensions)')
             # elif status in (errno.EWOULDBLOCK, errno.EALREADY) or (os.name == 'nt' and status == errno.WSAEINVAL):
             #     pass
             yield
