@@ -237,8 +237,7 @@ class PlexObject(Checks):
         return self.__dict__.get('art') and self.art or PlexValue('', self)
 
     def refresh(self):
-        import requests
-        self.server.query('%s/refresh' % self.key, method=requests.put)
+        self.server.query('%s/refresh' % self.key, method="put")
 
     def reload(self, _soft=False, **kwargs):
         """ Reload the data for this object from PlexServer XML. """

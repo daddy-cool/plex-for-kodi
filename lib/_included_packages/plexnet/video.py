@@ -317,6 +317,9 @@ class Video(media.MediaItem, AudioCodecMixin):
         """
         self.server.query('/%s/analyze' % self.key)
 
+    def refresh(self):
+        self.server.query('/library/metadata/%s/refresh' % self.ratingKey, method="put")
+
     def markWatched(self, **kwargs):
         path = '/:/scrobble?key=%s&identifier=com.plexapp.plugins.library' % self.ratingKey
         self.server.query(path)
@@ -337,8 +340,6 @@ class Video(media.MediaItem, AudioCodecMixin):
     # def play(self, client):
     #     client.playMedia(self)
 
-    def refresh(self):
-        self.server.query('%s/refresh' % self.key, method=self.server.session.put)
 
     def _getStreamURL(self, **params):
         if self.TYPE not in ('movie', 'episode', 'track'):
@@ -716,9 +717,6 @@ class Show(Video, media.RelatedMixin, SectionOnDeckMixin):
 
     def unwatched(self):
         return self.episodes(watched=False)
-
-    def refresh(self):
-        self.server.query('/library/metadata/%s/refresh' % self.ratingKey)
 
     def genres(self):
         genres = dcm.getCacheData("show_genres", self.ratingKey)

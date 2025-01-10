@@ -5,7 +5,7 @@ import threading
 
 from kodi_six import xbmc
 from kodi_six import xbmcgui
-from plexnet import playlist, util as pnUtil
+from plexnet import playlist, util as pnUtil, plexapp
 
 from lib import metadata
 from lib import player
@@ -458,12 +458,16 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
                     options.append(dropdown.SEPARATOR)
 
                 options.append({'key': 'playback_settings', 'display': T(32925, 'Playback Settings')})
-                if item.server.allowsMediaDeletion:
+                if plexapp.ACCOUNT.isAdmin and item.server.allowsMediaDeletion:
                     options.append(dropdown.SEPARATOR)
+                    if plexapp.ACCOUNT.isAdmin:
+                        options.append({'key': 'refresh', 'display': T(33720, 'Refresh metadata')})
                     options.append({'key': 'delete', 'display': T(32322, 'Delete')})
             elif item.type == "season":
-                if item.server.allowsMediaDeletion:
+                if plexapp.ACCOUNT.isAdmin and item.server.allowsMediaDeletion:
                     options.append(dropdown.SEPARATOR)
+                    if plexapp.ACCOUNT.isAdmin:
+                        options.append({'key': 'refresh', 'display': T(33720, 'Refresh metadata')})
                     options.append({'key': 'delete', 'display': T(32975, 'Delete Season')})
 
         # if xbmc.getCondVisibility('Player.HasAudio') and self.section.TYPE == 'artist':
@@ -511,6 +515,10 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
                 self.setup()
                 self.initialized = True
                 self.setFocusId(self.PLAY_BUTTON_ID)
+        elif choice['key'] == 'refresh':
+            item.refresh()
+            self.updateItems()
+            self.updateProperties()
 
     def roleClicked(self):
         mli = self.rolesListControl.getSelectedItem()

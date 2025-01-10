@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from kodi_six import xbmc
 from kodi_six import xbmcgui
-from plexnet import plexplayer, media, util as pnUtil
+from plexnet import plexplayer, media, util as pnUtil, plexapp
 
 from lib import metadata
 from lib import util
@@ -251,8 +251,12 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         if self.video.type in ('episode', 'movie'):
             options.append({'key': 'to_section', 'display': T(32324, u'Go to {0}').format(self.video.getLibrarySectionTitle())})
 
-        if self.video.server.allowsMediaDeletion:
-            options.append({'key': 'delete', 'display': T(32322, 'Delete')})
+        if plexapp.ACCOUNT.isAdmin:
+            options.append(dropdown.SEPARATOR)
+            options.append({'key': 'refresh', 'display': T(33720, 'Refresh metadata')})
+
+            if self.video.server.allowsMediaDeletion:
+                options.append({'key': 'delete', 'display': T(32322, 'Delete')})
         # if xbmc.getCondVisibility('Player.HasAudio') and self.section.TYPE == 'artist':
         #     options.append({'key': 'add_to_queue', 'display': 'Add To Queue'})
 
@@ -285,6 +289,9 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             self.goHome(self.video.getLibrarySectionId())
         elif choice['key'] == 'delete':
             self.delete()
+        elif choice['key'] == 'refresh':
+            self.video.refresh()
+            self.refreshInfo()
 
     def mediaButtonClicked(self):
         options = []

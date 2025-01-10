@@ -1059,8 +1059,11 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             options.append({'key': 'playback_settings', 'display': T(32925, 'Playback Settings')})
             options.append(dropdown.SEPARATOR)
 
-        if mli.dataSource.server.allowsMediaDeletion:
-            options.append({'key': 'delete', 'display': T(32322, 'Delete')})
+        if plexapp.ACCOUNT.isAdmin:
+            options.append({'key': 'refresh', 'display': T(33720, 'Refresh metadata')})
+
+            if mli.dataSource.server.allowsMediaDeletion:
+                options.append({'key': 'delete', 'display': T(32322, 'Delete')})
 
         # if xbmc.getCondVisibility('Player.HasAudio') and self.section.TYPE == 'artist':
         #     options.append({'key': 'add_to_queue', 'display': 'Add To Queue'})
@@ -1116,6 +1119,10 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             self.delete(mli.dataSource)
         elif choice['key'] == 'playback_settings':
             self.playbackSettings(self.show_, pos, bottom)
+        elif choice['key'] == 'refresh':
+            mli.dataSource.refresh()
+            self.updateItems(mli)
+
 
     def mediaButtonClicked(self):
         options = []

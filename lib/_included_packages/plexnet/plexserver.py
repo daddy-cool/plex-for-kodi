@@ -4,6 +4,8 @@ from __future__ import absolute_import
 import time
 import re
 import json
+
+import six
 import urllib3.exceptions
 
 from . import http
@@ -231,7 +233,10 @@ class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
             return ""
 
     def query(self, path, method=None, **kwargs):
-        method = method or self.session.get
+        if method and isinstance(method, six.string_types):
+            method = getattr(self.session, method)
+        else:
+            method = method or self.session.get
 
         limit = kwargs.pop("limit", None)
         params = kwargs.pop("params", None)

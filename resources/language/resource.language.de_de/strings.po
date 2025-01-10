@@ -3138,3 +3138,7 @@ msgstr "Nach wieviel Sekunden das OSD automatisch versteckt werden soll. Funktio
 msgctxt "#33719"
 msgid "Played"
 msgstr "Geschaut"
+
+msgctxt "#33720"
+msgid "Refresh metadata"
+msgstr "Metadaten aktualisieren"

@@ -2555,3 +2555,7 @@ msgstr ""
 msgctxt "#33719"
 msgid "Played"
 msgstr ""
+
+msgctxt "#33720"
+msgid "Refresh metadata"
+msgstr ""
