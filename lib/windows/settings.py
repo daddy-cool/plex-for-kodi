@@ -651,7 +651,7 @@ class Settings(object):
                     'show_reviews1', T(33710, 'Show reviews for'),
                     ["watched", "unwatched"],
                     [
-                        ('watched', T(33719, 'Watched')),
+                        ('watched', T(33718, 'Watched')),
                         ('unwatched', T(33010, 'Unwatched')),
                     ]
                 ),

@@ -461,13 +461,13 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
                 if plexapp.ACCOUNT.isAdmin and item.server.allowsMediaDeletion:
                     options.append(dropdown.SEPARATOR)
                     if plexapp.ACCOUNT.isAdmin:
-                        options.append({'key': 'refresh', 'display': T(33720, 'Refresh metadata')})
+                        options.append({'key': 'refresh', 'display': T(33719, 'Refresh metadata')})
                     options.append({'key': 'delete', 'display': T(32322, 'Delete')})
             elif item.type == "season":
                 if plexapp.ACCOUNT.isAdmin and item.server.allowsMediaDeletion:
                     options.append(dropdown.SEPARATOR)
                     if plexapp.ACCOUNT.isAdmin:
-                        options.append({'key': 'refresh', 'display': T(33720, 'Refresh metadata')})
+                        options.append({'key': 'refresh', 'display': T(33719, 'Refresh metadata')})
                     options.append({'key': 'delete', 'display': T(32975, 'Delete Season')})
 
         # if xbmc.getCondVisibility('Player.HasAudio') and self.section.TYPE == 'artist':

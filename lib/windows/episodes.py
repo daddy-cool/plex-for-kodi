@@ -1070,7 +1070,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             options.append(dropdown.SEPARATOR)
 
         if plexapp.ACCOUNT.isAdmin:
-            options.append({'key': 'refresh', 'display': T(33720, 'Refresh metadata')})
+            options.append({'key': 'refresh', 'display': T(33719, 'Refresh metadata')})
 
             if mli.dataSource.server.allowsMediaDeletion:
                 options.append({'key': 'delete', 'display': T(32322, 'Delete')})

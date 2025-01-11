@@ -2549,13 +2549,9 @@ msgid "Debug requests"
 msgstr ""
 
 msgctxt "#33718"
-msgid "Socket deadline extensions/retries"
-msgstr ""
-
-msgctxt "#33719"
 msgid "Played"
 msgstr ""
 
-msgctxt "#33720"
+msgctxt "#33719"
 msgid "Refresh metadata"
 msgstr ""

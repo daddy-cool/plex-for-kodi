@@ -255,7 +255,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
 
         if plexapp.ACCOUNT.isAdmin:
             options.append(dropdown.SEPARATOR)
-            options.append({'key': 'refresh', 'display': T(33720, 'Refresh metadata')})
+            options.append({'key': 'refresh', 'display': T(33719, 'Refresh metadata')})
 
             if self.video.server.allowsMediaDeletion:
                 options.append({'key': 'delete', 'display': T(32322, 'Delete')})

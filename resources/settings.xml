@@ -553,18 +553,6 @@
                         <popup>false</popup>
                     </control>
                 </setting>
-                <setting id="socket_deadline_extensions" type="number" label="33718">
-                    <level>0</level>
-                    <default>5</default>
-                    <constraints>
-                        <minimum>2</minimum>
-                        <step>1</step>
-                        <maximum>1000</maximum>
-                    </constraints>
-                    <control type="slider" format="number">
-                        <popup>false</popup>
-                    </control>
-                </setting>
                 <setting id="tickrate" type="number" label="33098" help="33099">
                     <level>0</level>
                     <default>1.0</default>

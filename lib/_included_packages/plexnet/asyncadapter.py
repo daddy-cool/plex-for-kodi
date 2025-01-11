@@ -36,8 +36,6 @@ WIN_EHOSTUNREACH = 10065
 
 MAX_RETRIES = 3
 
-MAX_DEADLINE_SOCKET_EXTENSIONS = 5
-
 
 def ABORT_FLAG_FUNCTION():
     if STOP_RETRYING_REQUESTS and DEBUG_REQUESTS:
@@ -92,7 +90,7 @@ class AsyncVerifiedHTTPSConnection(VerifiedHTTPSConnection):
         self._canceled = False
         self.deadline = 0
         self.identifier = None
-        self.dl_reset_count = 0
+        self.deadline_extended = False
         self._timeout = AsyncTimeout(DEFAULT_TIMEOUT)
 
     def __str__(self):
@@ -163,23 +161,11 @@ class AsyncVerifiedHTTPSConnection(VerifiedHTTPSConnection):
             if not status or status in (errno.EISCONN, WIN_EISCONN):
                 break
             elif status in (errno.EINPROGRESS, WIN_EWOULDBLOCK):
-                if DEBUG_REQUESTS:
-                    xbmc.log('AsyncVerifiedHTTPSConnection._connect: '
-                             'Resetting deadline: {0} {1}, {2}/{3}'.format(self.identifier,
-                                                                           self._timeout.getConnectTimeout(),
-                                                                           self.dl_reset_count + 1,
-                                                                           MAX_DEADLINE_SOCKET_EXTENSIONS),
-                             xbmc.LOGINFO)
-                self.deadline = time.time() + self._timeout.getConnectTimeout()
-                self.dl_reset_count += 1
-                if self.dl_reset_count >= MAX_DEADLINE_SOCKET_EXTENSIONS:
-                    if DEBUG_REQUESTS:
-                        xbmc.log(
-                            'AsyncVerifiedHTTPSConnection._connect: Deadline reset {2} times, stopping: {0} {1}'.format(
-                                self.identifier,
-                                self._timeout.getConnectTimeout(), MAX_DEADLINE_SOCKET_EXTENSIONS),
-                            xbmc.LOGINFO)
-                    raise ConnectTimeoutError('connection timed out (too many deadline extensions): {0}'.format(str(self)))
+                # extend the deadline once at most, otherwise count towards our connect timeout
+                if not self.deadline_extended:
+                    self.deadline = time.time() + self._timeout.getConnectTimeout()
+                    self.deadline_extended = True
+
             # elif status in (errno.EWOULDBLOCK, errno.EALREADY) or (os.name == 'nt' and status == errno.WSAEINVAL):
             #     pass
             yield
