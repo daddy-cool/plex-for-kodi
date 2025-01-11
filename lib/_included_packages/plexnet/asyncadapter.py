@@ -81,18 +81,7 @@ class AsyncTimeout(float):
 
 DEFAULT_TIMEOUT = AsyncTimeout(5).setConnectTimeout(5)
 
-
-class AsyncVerifiedHTTPSConnection(VerifiedHTTPSConnection):
-    __slots__ = ("_canceled", "deadline", "dl_reset_count", "identifier", "_timeout")
-
-    def __init__(self, *args, **kwargs):
-        VerifiedHTTPSConnection.__init__(self, *args, **kwargs)
-        self._canceled = False
-        self.deadline = 0
-        self.identifier = None
-        self.deadline_extended = False
-        self._timeout = AsyncTimeout(DEFAULT_TIMEOUT)
-
+class AsyncConnectionMixin:
     def __str__(self):
         return '{0}({1})'.format(self.__class__.__name__, self.identifier)
 
@@ -117,7 +106,7 @@ class AsyncVerifiedHTTPSConnection(VerifiedHTTPSConnection):
         """
         if DEBUG_REQUESTS:
             xbmc.log(
-                'AsyncVerifiedHTTPSConnection.create_connection: {0} {1} {2}'.format(address, timeout, repr(timeout)),
+                '{3}.create_connection: {0} {1} {2}'.format(address, timeout, repr(timeout), self.__class__.__name__),
                 xbmc.LOGINFO)
         timeout = AsyncTimeout.fromTimeout(timeout)
         self._timeout = timeout
@@ -172,7 +161,7 @@ class AsyncVerifiedHTTPSConnection(VerifiedHTTPSConnection):
 
         if self._canceled or ABORT_FLAG_FUNCTION():
             if DEBUG_REQUESTS:
-                xbmc.log('AsyncVerifiedHTTPSConnection._connect: Canceled: {0}'.format(self.identifier), xbmc.LOGINFO)
+                xbmc.log('{1}._connect: Canceled: {0}'.format(self.identifier, self.__class__.__name__), xbmc.LOGINFO)
             raise CanceledException('Request canceled: {0}'.format(str(self)))
 
         error = sock.getsockopt(socket.SOL_SOCKET, socket.SO_ERROR)
@@ -192,15 +181,29 @@ class AsyncVerifiedHTTPSConnection(VerifiedHTTPSConnection):
         self._canceled = True
 
 
-class AsyncHTTPConnection(HTTPConnection):
-    __slots__ = ("_canceled", "deadline")
+class AsyncVerifiedHTTPSConnection(AsyncConnectionMixin, VerifiedHTTPSConnection):
+    __slots__ = ("_canceled", "deadline", "dl_reset_count", "identifier", "_timeout")
+
     def __init__(self, *args, **kwargs):
-        HTTPConnection.__init__(self, *args, **kwargs)
+        super(AsyncVerifiedHTTPSConnection, self).__init__(*args, **kwargs)
         self._canceled = False
         self.deadline = 0
+        self.identifier = None
+        self.deadline_extended = False
+        self._timeout = AsyncTimeout(DEFAULT_TIMEOUT)
 
-    def cancel(self):
-        self._canceled = True
+
+class AsyncHTTPConnection(AsyncConnectionMixin, HTTPConnection):
+    __slots__ = ("_canceled", "deadline", "dl_reset_count", "identifier", "_timeout")
+
+    def __init__(self, *args, **kwargs):
+        super(AsyncHTTPConnection, self).__init__(*args, **kwargs)
+        self._canceled = False
+        self.deadline = 0
+        self.identifier = None
+        self.deadline_extended = False
+        self._timeout = AsyncTimeout(DEFAULT_TIMEOUT)
+
 
 
 class AsyncHTTPConnectionPool(HTTPConnectionPool):
