@@ -2466,7 +2466,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                 return
 
         # store last used server
-        util.setSetting('previous_server.{}'.format(plexapp.ACCOUNT.ID), plexapp.SERVERMANAGER.selectedServer.uuid)
+        prevUUID = plexapp.SERVERMANAGER.selectedServer.uuid
 
         self.changingServer = True
 
@@ -2491,6 +2491,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             if not changed:
                 bc.ignoreSignal = True
                 self.changingServer = False
+            else:
+                util.setSetting('previous_server.{}'.format(plexapp.ACCOUNT.ID), prevUUID)
 
     def showUserMenu(self, mouse=False):
         items = []
