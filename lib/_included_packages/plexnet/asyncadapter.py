@@ -182,7 +182,7 @@ class AsyncConnectionMixin:
 
 
 class AsyncVerifiedHTTPSConnection(AsyncConnectionMixin, VerifiedHTTPSConnection):
-    __slots__ = ("_canceled", "deadline", "dl_reset_count", "identifier", "_timeout")
+    __slots__ = ("_canceled", "deadline", "deadline_extended", "identifier", "_timeout")
 
     def __init__(self, *args, **kwargs):
         super(AsyncVerifiedHTTPSConnection, self).__init__(*args, **kwargs)
@@ -194,7 +194,7 @@ class AsyncVerifiedHTTPSConnection(AsyncConnectionMixin, VerifiedHTTPSConnection
 
 
 class AsyncHTTPConnection(AsyncConnectionMixin, HTTPConnection):
-    __slots__ = ("_canceled", "deadline", "dl_reset_count", "identifier", "_timeout")
+    __slots__ = ("_canceled", "deadline", "deadline_extended", "identifier", "_timeout")
 
     def __init__(self, *args, **kwargs):
         super(AsyncHTTPConnection, self).__init__(*args, **kwargs)
