@@ -636,7 +636,11 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
     @property
     def currentHub(self):
-        hub_focus = int(self.getProperty('hub.focus'))
+        try:
+            hub_focus = int(self.getProperty('hub.focus'))
+        except ValueError:
+            return None
+
         if len(self.hubControls) > hub_focus and self.hubControls[hub_focus]:
             hub_control = self.hubControls[hub_focus]
             hub = hub_control.dataSource
