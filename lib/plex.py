@@ -199,6 +199,7 @@ class PlexInterface(plexapp.AppInterface):
             s = asyncadapter.Session()
             s.cache.responses["stored_urls"] = plexnet_util.CACHED_PLEX_URLS
             s.cache.responses["last_shutdown_successful"] = True
+            s.remove_expired_responses()
             util.LOG('PlexInterface: Stored cached urls.')
         else:
             self.clearRequestsCache()
@@ -377,6 +378,7 @@ plexapp.setUserAgent(defaultUserAgent())
 plexnet_util.BASE_HEADERS = plexnet_util.getPlexHeaders()
 asyncadapter.MAX_RETRIES = int(util.addonSettings.maxRetries1)
 asyncadapter.DEBUG_REQUESTS = plexnet_util.DEBUG_REQUESTS = util.addonSettings.debugRequests
+asyncadapter.REQUESTS_CACHE_EXPIRY = util.addonSettings.requestsCacheExpiry
 if util.addonSettings.useCertBundle != "system":
     util.LOG("Using certificate bundle: {}".format(util.addonSettings.useCertBundle))
     plexnet_util.USE_CERT_BUNDLE = util.addonSettings.useCertBundle

@@ -3174,3 +3174,7 @@ msgstr "Anstatt den Cache beim Beenden zu löschen, behalte ihn. Achtung: Es wir
 msgctxt "#33727"
 msgid "Store Plex server responses for items and library views in a local SQLite database. Doesn't cache anything else (Home/Hubs are always up to date). Massively speeds up consecutive visits to items and libraries. Certain important events, such as watch state changes, automatically delete the item cache and its corresponding library cache. (Default: Off)"
 msgstr "Speichere die Plex-Server-Antworten für Items und Bibliothekansichten in einer lokalen SQLite-Datenbank. Gilt nur für diese zwei Datenbereiche (Start/Hubs sind immer aktuell). Erzeugt massiven Geschwindigkeitsvorteil bei aufeinanderfolgenden Besuchen von Items und Bibliotheken. Bestimmte, wichtige Ereignisse, wie z. B. Abgespielt-Status, löschen automatisch den Item-Cache und die dazugehörigen Bibliothek-Caches. (Standard: Aus)"
+
+msgctxt "#33729"
+msgid "Expire cached Plex data after (hours)"
+msgstr "Ablauf gecachter Plex-Daten (Stunden)"

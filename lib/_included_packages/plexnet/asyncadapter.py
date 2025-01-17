@@ -3,6 +3,7 @@ import time
 import socket
 import six
 import os
+import datetime
 
 from kodi_six import xbmc
 from requests.packages.urllib3 import HTTPConnectionPool, HTTPSConnectionPool
@@ -37,6 +38,7 @@ WIN_ENOTCONN = 10057
 WIN_EHOSTUNREACH = 10065
 
 MAX_RETRIES = 3
+REQUESTS_CACHE_EXPIRY = 168
 
 
 def ABORT_FLAG_FUNCTION():
@@ -377,8 +379,8 @@ class Session(CachedSession):
         kwargs['cache_name'] = os.path.join(TEMP_PATH, "pm4k_requests_cache")
         kwargs['backend'] = "sqlite"
         kwargs['fast_save'] = True
-            #kwargs['ignored_parameters'] = ("checkFiles", "includeChapters", "includeMarkers", "includeExtras",
-            #                                "includeExtrasCount", "includeReviews", "X-Plex-Token")
+        if REQUESTS_CACHE_EXPIRY:
+            kwargs['expire_after'] = datetime.timedelta(hours=REQUESTS_CACHE_EXPIRY)  # 7 days
         CachedSession.__init__(self, *args, **kwargs)
 
         self.mount('https://', AsyncHTTPAdapter(max_retries=StoppableRetry(MAX_RETRIES)))

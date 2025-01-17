@@ -2591,3 +2591,7 @@ msgstr ""
 msgctxt "#33728"
 msgid "Clear cache for item"
 msgstr ""
+
+msgctxt "#33729"
+msgid "Expire cached Plex data after (hours)"
+msgstr ""

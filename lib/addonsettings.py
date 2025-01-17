@@ -67,6 +67,7 @@ class AddonSettings(object):
         ("coreelec_resume_seek_wait", 500),
         ("background_resolution_scale_perc", 100),
         ("osd_hide_delay", 4.0),
+        ("requests_cache_expiry", 168),
     )
 
     def __init__(self):
