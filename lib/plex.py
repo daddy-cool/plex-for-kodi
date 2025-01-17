@@ -155,6 +155,9 @@ class PlexInterface(plexapp.AppInterface):
     def setPreference(self, pref, value):
         util.setSetting(pref, value)
 
+    def getRCBaseKey(self):
+        return "_".join((plexapp.SERVERMANAGER.selectedServer.uuid[-8:], plexapp.ACCOUNT.ID))
+
     def clearRequestsCache(self):
         try:
             util.DEBUG_LOG('Main: Clearing requests cache...')

@@ -243,10 +243,15 @@ class PlexObject(Checks):
             except Exception as e:
                 util.LOG('Failed to delete cached URL {0}: {1}', url, e)
 
+        # compact DB
+        s.cache.vacuum()
+
+        base = util.CACHED_PLEX_URLS.get(util.INTERFACE.getRCBaseKey(), {})
+
         # delete cache keys for collected urls
         for ck in cks:
             try:
-                del util.CACHED_PLEX_URLS[ck]
+                del base[ck]
             except:
                 pass
 
@@ -257,26 +262,30 @@ class PlexObject(Checks):
             # get cache key no matter what, even if the specific type isn't cached, we still want to clear the library
             # cache regardless
             ck = self.getCacheRef(always_return=True)
+            urls = []
             if ck:
-                urls = util.CACHED_PLEX_URLS.get(ck, [])
-                cks = [ck, ]
+                base = util.CACHED_PLEX_URLS.get(util.INTERFACE.getRCBaseKey(), {})
+                cks = []
+                if base:
+                    urls = base.get(ck, [])
+                    cks.append(ck)
 
-                if _type in ("movie", "episode", "show", "season"):
-                    # library cache
-                    libID = self.getLibrarySectionId()
-                    if libID:
-                        urls += util.CACHED_PLEX_URLS.get("section_%s" % libID, [])
-                        cks.append("section_%s" % libID)
+                    if _type in ("movie", "episode", "show", "season"):
+                        # library cache
+                        libID = self.getLibrarySectionId()
+                        if libID:
+                            urls += base.get("section_%s" % libID, [])
+                            cks.append("section_%s" % libID)
 
-                    # parents caches
-                    if _type == "episode":
-                        urls += util.CACHED_PLEX_URLS.get("season_%s" % self.parentRatingKey, [])
-                        urls += util.CACHED_PLEX_URLS.get("show_%s" % self.grandparentRatingKey, [])
-                        cks += ["season_%s" % self.parentRatingKey, "show_%s" % self.grandparentRatingKey]
+                        # parents caches
+                        if _type == "episode":
+                            urls += base.get("season_%s" % self.parentRatingKey, [])
+                            urls += base.get("show_%s" % self.grandparentRatingKey, [])
+                            cks += ["season_%s" % self.parentRatingKey, "show_%s" % self.grandparentRatingKey]
 
-                    if _type == "season":
-                        urls += util.CACHED_PLEX_URLS.get("show_%s" % self.parentRatingKey, [])
-                        cks.append("show_%s" % self.parentRatingKey)
+                        if _type == "season":
+                            urls += base.get("show_%s" % self.parentRatingKey, [])
+                            cks.append("show_%s" % self.parentRatingKey)
 
                 if return_urls:
                     return cks, urls

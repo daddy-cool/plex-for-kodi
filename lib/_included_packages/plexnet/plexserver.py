@@ -235,7 +235,6 @@ class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
             return ""
 
     def query(self, path, method=None, **kwargs):
-        orig_path = path
         if method and isinstance(method, six.string_types):
             method = getattr(self.session, method)
         else:
@@ -281,19 +280,28 @@ class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
                 codename = http.status_codes.get(response.status_code, ['Unknown'])[0]
                 raise exceptions.BadRequest('({0}) {1}'.format(response.status_code, codename))
 
+            # caching
             if hasattr(response, "from_cache") and with_cache:
                 if util.DEBUG_REQUESTS:
                     util.LOG('{0} (from cache: {2}) {1}', method.__name__.upper(),
                              re.sub('X-Plex-Token=[^&]+', 'X-Plex-Token=****', url), response.from_cache)
 
-                if cache_ref not in util.CACHED_PLEX_URLS:
-                    util.CACHED_PLEX_URLS[cache_ref] = []
+                # scope for server+user; URLs itself don't need to be scoped as they differ on X-Plex-Token and domain
+                base_key = util.INTERFACE.getRCBaseKey()
+
+                if base_key not in util.CACHED_PLEX_URLS:
+                    util.CACHED_PLEX_URLS[base_key] = {}
+
+                base = util.CACHED_PLEX_URLS[base_key]
+
+                if cache_ref not in base:
+                    base[cache_ref] = []
 
                 # fixme: this could be faster with a dict
-                if url not in util.CACHED_PLEX_URLS[cache_ref]:
-                    util.CACHED_PLEX_URLS[cache_ref].append(url)
+                if url not in base[cache_ref]:
+                    base[cache_ref].append(url)
                     if util.DEBUG_REQUESTS:
-                        util.DEBUG_LOG('Storing URL for cached response in {0}: {1}'.format(cache_ref, url))
+                        util.DEBUG_LOG('Storing URL for cached response in {0}: {1}: {2}'.format(base_key, cache_ref, url))
 
             data = response.text.encode('utf8')
         except asyncadapter.TimeoutException:
