@@ -65,7 +65,7 @@ LAN_REACHABILITY_TIMEOUT = 0.01                     # s
 CHECK_LOCAL = False
 LOCAL_OVER_SECURE = False
 DEBUG_REQUESTS = False
-REQUESTS_CACHE = {}
+CACHED_PLEX_URLS = {}
 X_PLEX_CONTAINER_SIZE = 50                          # max results to return in a single search page
 
 ACCEPT_LANGUAGE = 'en-US,en'

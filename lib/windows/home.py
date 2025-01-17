@@ -1467,9 +1467,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
         elif choice["key"] == "cache_reset":
             try:
-                from requests_cache import Session
-                util.DEBUG_LOG('Clearing requests cache...')
-                Session().cache.clear()
+                plexapp.util.INTERFACE.clearRequestsCache()
             except Exception as e:
                 util.DEBUG_LOG("Couldn't clear requests cache: {}", e)
 

@@ -155,6 +155,52 @@ class PlexInterface(plexapp.AppInterface):
     def setPreference(self, pref, value):
         util.setSetting(pref, value)
 
+    def clearRequestsCache(self):
+        try:
+            util.DEBUG_LOG('Main: Clearing requests cache...')
+            asyncadapter.Session().cache.clear()
+            plexnet_util.CACHED_PLEX_URLS = {}
+        except:
+            pass
+
+    def prepareCache(self):
+        plexnet_util.CACHED_PLEX_URLS = self.loadCachedURLs()
+
+    def loadCachedURLs(self):
+        if not util.getSetting('persist_requests_cache'):
+            return {}
+
+        s = asyncadapter.Session()
+        urls = {}
+        try:
+            urls = s.cache.responses["stored_urls"]
+            success = s.cache.responses["last_shutdown_successful"] == True
+        except KeyError:
+            success = False
+
+        if not success:
+            util.LOG('PlexInterface: Last cache state invalid, clearing cache.')
+            self.clearRequestsCache()
+        else:
+            util.LOG('PlexInterface: Loaded cached URLs.')
+            try:
+                del s.cache.responses["last_shutdown_successful"]
+            except KeyError:
+                # this should never happen; might've been old interference with the service and the old style of
+                # initializing the cache load in global space, not via plex.init()
+                pass
+        return urls
+
+    def shutdownCache(self):
+        if util.getSetting('persist_requests_cache'):
+            s = asyncadapter.Session()
+            s.cache.responses["stored_urls"] = plexnet_util.CACHED_PLEX_URLS
+            s.cache.responses["last_shutdown_successful"] = True
+            util.LOG('PlexInterface: Stored cached urls.')
+        else:
+            self.clearRequestsCache()
+            util.LOG('PlexInterface: Cleared requests cache.')
+
     def getRegistry(self, reg, default=None, sec=None):
         if sec == 'myplex' and reg == 'MyPlexAccount':
             ret = util.getSetting('{0}.{1}'.format(sec, reg), default=default)
@@ -292,7 +338,8 @@ def onManualIPChange(**kwargs):
     plexapp.refreshResources(True)
 
 
-plexapp.util.setInterface(PlexInterface())
+PLEX_INTERFACE = PlexInterface()
+plexapp.util.setInterface(PLEX_INTERFACE)
 plexapp.util.INTERFACE.playbackManager = PlaybackManager()
 plexapp.util.APP.on('change:smart_discover_local', onSmartDiscoverLocalChange)
 plexapp.util.APP.on('change:prefer_local', onPreferLANChange)
@@ -381,6 +428,8 @@ class CallbackEvent(plexapp.util.CompatEvent):
 
 def init():
     util.DEBUG_LOG('Initializing...')
+
+    PLEX_INTERFACE.prepareCache()
 
     timed_out = False
     retries = 0

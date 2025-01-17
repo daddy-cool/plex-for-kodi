@@ -741,12 +741,16 @@ class Show(CachableItemsMixin, Video, media.RelatedMixin, SectionOnDeckMixin):
 
     def clearCache(self, **kwargs):
         # clear caches of all seasons and items
+        cks = []
         urls = []
         for e in self.episodes():
-            urls += e.clearCache(return_urls=True)
+            cks_, urls_= e.clearCache(return_urls=True)
+            cks += cks_
+            urls += urls_
 
+        cks = list(set(cks))
         urls = list(set(urls))
-        self._clearCache(urls)
+        self._clearCache(cks, urls)
 
 
 @plexobjects.registerLibType

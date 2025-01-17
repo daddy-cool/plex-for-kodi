@@ -286,12 +286,12 @@ class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
                     util.LOG('{0} (from cache: {2}) {1}', method.__name__.upper(),
                              re.sub('X-Plex-Token=[^&]+', 'X-Plex-Token=****', url), response.from_cache)
 
-                if cache_ref not in util.REQUESTS_CACHE:
-                    util.REQUESTS_CACHE[cache_ref] = []
+                if cache_ref not in util.CACHED_PLEX_URLS:
+                    util.CACHED_PLEX_URLS[cache_ref] = []
 
                 # fixme: this could be faster with a dict
-                if url not in util.REQUESTS_CACHE[cache_ref]:
-                    util.REQUESTS_CACHE[cache_ref].append(url)
+                if url not in util.CACHED_PLEX_URLS[cache_ref]:
+                    util.CACHED_PLEX_URLS[cache_ref].append(url)
                     if util.DEBUG_REQUESTS:
                         util.DEBUG_LOG('Storing URL for cached response in {0}: {1}'.format(cache_ref, url))
 

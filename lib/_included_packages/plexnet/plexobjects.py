@@ -228,7 +228,7 @@ class PlexObject(Checks):
                 and ('items' in util.INTERFACE.getPreference('cache_requests') or always_return)):
             return "_".join((self.TYPE, self.ratingKey))
 
-    def _clearCache(self, urls):
+    def _clearCache(self, cks, urls):
         if not urls:
             return
 
@@ -243,6 +243,13 @@ class PlexObject(Checks):
             except Exception as e:
                 util.LOG('Failed to delete cached URL {0}: {1}', url, e)
 
+        # delete cache keys for collected urls
+        for ck in cks:
+            try:
+                del util.CACHED_PLEX_URLS[ck]
+            except:
+                pass
+
     def clearCache(self, override_type=None, return_urls=False):
         # fixme: cache handling should be in a separate manager class
         _type = override_type or self.TYPE
@@ -251,26 +258,30 @@ class PlexObject(Checks):
             # cache regardless
             ck = self.getCacheRef(always_return=True)
             if ck:
-                urls = util.REQUESTS_CACHE.get(ck, [])
+                urls = util.CACHED_PLEX_URLS.get(ck, [])
+                cks = [ck, ]
 
                 if _type in ("movie", "episode", "show", "season"):
                     # library cache
                     libID = self.getLibrarySectionId()
                     if libID:
-                        urls += util.REQUESTS_CACHE.get("section_%s" % libID, [])
+                        urls += util.CACHED_PLEX_URLS.get("section_%s" % libID, [])
+                        cks.append("section_%s" % libID)
 
                     # parents caches
                     if _type == "episode":
-                        urls += util.REQUESTS_CACHE.get("season_%s" % self.parentRatingKey, [])
-                        urls += util.REQUESTS_CACHE.get("show_%s" % self.grandparentRatingKey, [])
+                        urls += util.CACHED_PLEX_URLS.get("season_%s" % self.parentRatingKey, [])
+                        urls += util.CACHED_PLEX_URLS.get("show_%s" % self.grandparentRatingKey, [])
+                        cks += ["season_%s" % self.parentRatingKey, "show_%s" % self.grandparentRatingKey]
 
                     if _type == "season":
-                        urls += util.REQUESTS_CACHE.get("show_%s" % self.parentRatingKey, [])
+                        urls += util.CACHED_PLEX_URLS.get("show_%s" % self.parentRatingKey, [])
+                        cks.append("show_%s" % self.parentRatingKey)
 
                 if return_urls:
-                    return urls
+                    return cks, urls
 
-                self._clearCache(urls)
+                self._clearCache(cks, urls)
 
 
     def isFullObject(self):
