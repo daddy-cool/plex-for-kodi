@@ -793,7 +793,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             x, y = self.getRoleItemDDPosition()
 
             options = [{'role': r, 'display': r.reasonTitle} for r in sectionRoles]
-            choice = dropdown.showDropdown(options, (x, y), pos_is_bottom=True, close_direction='bottom')
+            choice = dropdown.showDropdown(options, (x, y), pos_is_bottom=False, close_direction='bottom')
 
             if not choice:
                 return
@@ -805,7 +805,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         self.processCommand(opener.open(role))
 
     def getRoleItemDDPosition(self):
-        y = 980
+        y = 900
         if xbmc.getCondVisibility('Control.IsVisible(500)'):
             y += 380
         if xbmc.getCondVisibility('Control.IsVisible(501)'):

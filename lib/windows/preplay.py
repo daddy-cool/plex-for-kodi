@@ -367,7 +367,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             x, y = self.getRoleItemDDPosition()
 
             options = [{'role': r, 'display': r.reasonTitle} for r in sectionRoles]
-            choice = dropdown.showDropdown(options, (x, y), pos_is_bottom=True, close_direction='bottom')
+            choice = dropdown.showDropdown(options, (x, y), pos_is_bottom=False, close_direction='bottom')
 
             if not choice:
                 return
@@ -457,19 +457,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         return True
 
     def getRoleItemDDPosition(self):
-        y = 200
-        if xbmc.getCondVisibility('Control.IsVisible(500)'):
-            y += 360
-        if xbmc.getCondVisibility('Control.IsVisible(501)'):
-            y += 520
-        if xbmc.getCondVisibility('!String.IsEmpty(Window.Property(on.extras))'):
-            y -= 300
-        if xbmc.getCondVisibility('Integer.IsGreater(Window.Property(hub.focus),0) + Control.IsVisible(500)'):
-            y -= 500
-        if xbmc.getCondVisibility('Integer.IsGreater(Window.Property(hub.focus),1) + Control.IsVisible(501)'):
-            y -= 500
-        if xbmc.getCondVisibility('Integer.IsGreater(Window.Property(hub.focus),2) + Control.IsVisible(502)'):
-            y -= 500
+        y = util.vscale(600)
 
         tries = 0
         focus = xbmc.getInfoLabel('Container(400).Position')
