@@ -494,6 +494,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         self.doClose()
 
     def onReInit(self):
+        util.DEBUG_LOG("Home: On ReInit")
         if self._ignoreReInit:
             return
 
