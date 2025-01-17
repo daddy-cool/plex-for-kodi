@@ -376,6 +376,7 @@ class Session(CachedSession):
     def __init__(self, *args, **kwargs):
         kwargs['cache_name'] = os.path.join(TEMP_PATH, "pm4k_requests_cache")
         kwargs['backend'] = "sqlite"
+        kwargs['fast_save'] = True
             #kwargs['ignored_parameters'] = ("checkFiles", "includeChapters", "includeMarkers", "includeExtras",
             #                                "includeExtrasCount", "includeReviews", "X-Plex-Token")
         CachedSession.__init__(self, *args, **kwargs)

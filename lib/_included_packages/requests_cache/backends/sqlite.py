@@ -6,8 +6,10 @@
 
     ``sqlite3`` cache backend
 """
+import os
+
 from .base import BaseCache
-from .storage.dbdict import DbDict, DbPickleDict
+from .storage.dbdict import DbDict, DbPickleDict, sqlite
 
 
 class DbCache(BaseCache):
@@ -25,5 +27,19 @@ class DbCache(BaseCache):
         :param extension: extension for filename (default: ``'.sqlite'``)
         """
         super(DbCache, self).__init__(**options)
-        self.responses = DbPickleDict(location + extension, 'responses', fast_save=fast_save)
-        self.keys_map = DbDict(location + extension, 'urls')
+        tries = 0
+        while tries < 2:
+            try:
+                self.responses = DbPickleDict(location + extension, 'responses', fast_save=fast_save)
+                break
+            except sqlite.DatabaseError:
+                tries += 1
+                # DB corrupted
+                try:
+                    os.remove(location + extension)
+                except OSError:
+                    pass
+        self.keys_map = DbDict(location + extension, 'urls', fast_save=fast_save)
+
+    def vacuum(self):
+        self.responses.vacuum()

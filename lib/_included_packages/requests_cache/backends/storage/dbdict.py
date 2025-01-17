@@ -154,6 +154,10 @@ class DbDict(MutableMapping):
                         self.table_name)
             con.execute("vacuum")
 
+    def vacuum(self):
+        with self.connection(True) as con:
+            con.execute("vacuum")
+
     def __str__(self):
         return str(dict(self.items()))
 
