@@ -75,6 +75,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.initialized = False
         self.relatedPaginator = None
         self.openedWithAutoPlay = False
+        self.needs_related_divider = False
 
     def doClose(self):
         self.relatedPaginator = None
@@ -113,7 +114,12 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         util.setGlobalProperty('hide.resume', '' if self.video.viewOffset.asInt() else '1')
         # skip setting background when coming from reinit (other window) if we've focused something other than main
         self.setInfo(skip_bg=from_reinit and not (self.PLAY_BUTTON_ID <= oldFocusId <= self.MEDIA_BUTTON_ID))
-        self.fillRelated()
+        show_reviews = util.getSetting('show_reviews1')
+        if show_reviews:
+            if "watched" in show_reviews and "unwatched" not in show_reviews:
+                self.fillReviews()
+
+        self.fillRelated(self.needs_related_divider)
         xbmc.sleep(100)
 
         if oldFocusId == self.PLAY_BUTTON_ID:
@@ -542,7 +548,8 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         hasRoles = self.fillRoles()
         hasReviews = self.fillReviews()
         hasExtras = self.fillExtras()
-        self.fillRelated(hasRoles and not hasExtras and not hasReviews)
+        self.needs_related_divider = hasRoles and not hasExtras and not hasReviews
+        self.fillRelated(self.needs_related_divider)
 
     def setInfo(self, skip_bg=False):
         if not skip_bg:
