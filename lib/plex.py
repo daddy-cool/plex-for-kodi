@@ -326,12 +326,13 @@ plexapp.util.ACCEPT_LANGUAGE = util.ACCEPT_LANGUAGE_CODE
 plexapp.setUserAgent(defaultUserAgent())
 plexnet_util.BASE_HEADERS = plexnet_util.getPlexHeaders()
 asyncadapter.MAX_RETRIES = int(util.addonSettings.maxRetries1)
-asyncadapter.DEBUG_REQUESTS = util.addonSettings.debugRequests
+asyncadapter.DEBUG_REQUESTS = plexnet_util.DEBUG_REQUESTS = util.addonSettings.debugRequests
 if util.addonSettings.useCertBundle != "system":
     util.LOG("Using certificate bundle: {}".format(util.addonSettings.useCertBundle))
     plexnet_util.USE_CERT_BUNDLE = util.addonSettings.useCertBundle
 plexnet_util.translatePath = util.translatePath
 plexnet_util.DEFAULT_SETTINGS = util.DEFAULT_SETTINGS
+plexnet_util.TEMP_PATH = asyncadapter.TEMP_PATH = util.translatePath("special://temp/")
 
 
 class CallbackEvent(plexapp.util.CompatEvent):

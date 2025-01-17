@@ -27,6 +27,8 @@ from six.moves import range
 TOTAL_QUERIES = 0
 DEFAULT_BASEURI = 'http://localhost:32400'
 
+CACHE_MAP = {}
+
 
 class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
     TYPE = 'PLEXSERVER'
@@ -233,6 +235,7 @@ class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
             return ""
 
     def query(self, path, method=None, **kwargs):
+        orig_path = path
         if method and isinstance(method, six.string_types):
             method = getattr(self.session, method)
         else:
@@ -240,6 +243,8 @@ class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
 
         limit = kwargs.pop("limit", None)
         params = kwargs.pop("params", None)
+        cachable = kwargs.pop("cachable", False)
+        cache_ref = kwargs.pop("cache_ref", None)
         if params:
             if limit is None:
                 limit = params.get("limit", None)
@@ -265,12 +270,31 @@ class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
             url = http.addUrlParam(url, "X-Plex-Container-Start=%s" % offset)
             url = http.addUrlParam(url, "X-Plex-Container-Size=%s" % limit)
 
-        util.LOG('{0} {1}', method.__name__.upper(), re.sub('X-Plex-Token=[^&]+', 'X-Plex-Token=****', url))
+        with_cache = False
+        if cachable and cache_ref:
+            kwargs['with_cache'] = with_cache = True
+
+        util.LOG('{0} (cache enabled: {2}) {1}', method.__name__.upper(), re.sub('X-Plex-Token=[^&]+', 'X-Plex-Token=****', url), with_cache)
         try:
             response = method(url, **kwargs)
             if response.status_code not in (200, 201):
                 codename = http.status_codes.get(response.status_code, ['Unknown'])[0]
                 raise exceptions.BadRequest('({0}) {1}'.format(response.status_code, codename))
+
+            if hasattr(response, "from_cache") and with_cache:
+                if util.DEBUG_REQUESTS:
+                    util.LOG('{0} (from cache: {2}) {1}', method.__name__.upper(),
+                             re.sub('X-Plex-Token=[^&]+', 'X-Plex-Token=****', url), response.from_cache)
+
+                if cache_ref not in util.REQUESTS_CACHE:
+                    util.REQUESTS_CACHE[cache_ref] = []
+
+                # fixme: this could be faster with a dict
+                if url not in util.REQUESTS_CACHE[cache_ref]:
+                    util.REQUESTS_CACHE[cache_ref].append(url)
+                    if util.DEBUG_REQUESTS:
+                        util.DEBUG_LOG('Storing URL for cached response in {0}: {1}'.format(cache_ref, url))
+
             data = response.text.encode('utf8')
         except asyncadapter.TimeoutException:
             util.ERROR()

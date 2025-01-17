@@ -236,6 +236,13 @@ def _main():
         util.DEBUG_LOG('Main: SHUTTING DOWN...')
         dcm.storeDataCache()
         dcm.deinit()
+        if not util.getSetting('persist_requests_cache'):
+            try:
+                from plexnet.asyncadapter import Session
+                util.DEBUG_LOG('Main: Clearing requests cache...')
+                Session().cache.clear()
+            except:
+                pass
         plexapp.util.INTERFACE.playbackManager.deinit()
         player.shutdown()
         plexapp.util.APP.preShutdown()

@@ -855,6 +855,9 @@ class SeekPlayerHandler(BasePlayerHandler):
             #    self.triggerProgressEvent()
             if self.player.isPlaying():
                 self.player.stopAndWait()
+
+            self.player.trigger('playback.stopped', session_id=self.sessionID, video=self.player.video)
+
             if not self.playlist or not self.playlist.hasNext():
                 if not self.shouldShowPostPlay():
                     self.sessionEnded()

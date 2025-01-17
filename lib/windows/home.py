@@ -1290,8 +1290,16 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             sections = [playlists_section] + plexapp.SERVERMANAGER.selectedServer.library.sections()
             options = []
 
+            use_sep = False
             if "order" in self.librarySettings and self.librarySettings["order"]:
                 options.append({'key': 'reset_order', 'display': T(33040, "Reset library order")})
+                use_sep = True
+
+            if util.getSetting('cache_requests'):
+                options.append({'key': 'cache_reset', 'display': T(33720, "Clear all caches")})
+                use_sep = True
+
+            if use_sep:
                 options.append(dropdown.SEPARATOR)
 
             had_section = False
@@ -1340,6 +1348,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
         else:
             options = []
+
             if plexapp.ACCOUNT.isAdmin and section != playlists_section:
                 options = [{'key': 'refresh', 'display': T(33082, "Scan Library Files")},
                            {'key': 'emptyTrash', 'display': T(33083, "Empty Trash")},
@@ -1362,6 +1371,10 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             options.append({'key': 'hide', 'display': T(33028, "Hide library")})
             options.append({'key': 'move', 'display': T(33039, "Move")})
             options.append(dropdown.SEPARATOR)
+
+            if 'libraries' in util.getSetting('cache_requests'):
+                options.append({'key': 'section_cache_reset', 'display': T(33721, "Clear library cache (not items)")})
+                options.append(dropdown.SEPARATOR)
 
             if self.hubSettings:
                 for section_hub_key in self.ignoredHubs:
@@ -1452,6 +1465,21 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                 section.analyze()
             return
 
+        elif choice["key"] == "cache_reset":
+            try:
+                from requests_cache import Session
+                util.DEBUG_LOG('Clearing requests cache...')
+                Session().cache.clear()
+            except Exception as e:
+                util.DEBUG_LOG("Couldn't clear requests cache: {}", e)
+
+        elif choice["key"] == "section_cache_reset":
+            try:
+                util.DEBUG_LOG('Clearing requests cache for section {}...', section.title)
+                section.clearCache()
+            except Exception as e:
+                util.DEBUG_LOG("Couldn't clear library cache: {}", e)
+
     def hubMenu(self, hubControlID):
         hub = self.currentHub
         if not hub:
@@ -1516,6 +1544,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                 options.append({'key': 'to_show', 'display': T(32323, "Go To Show")})
                 if mli.dataSource.TYPE == 'episode':
                     options.append({'key': 'to_season', 'display': T(32400, "Go To Season")})
+
+            if 'items' in util.getSetting('cache_requests'):
+                options.append({'key': 'cache_reset', 'display': T(33728, "Clear cache for item")})
 
         choice = dropdown.showDropdown(
             options,
@@ -1593,6 +1624,13 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             except util.NoDataException:
                 util.ERROR("No data - disconnected?", notify=True, time_ms=5000)
                 return
+
+        elif choice["key"] == "cache_reset":
+            try:
+                util.DEBUG_LOG('Clearing requests cache for {}...', mli.dataSource)
+                mli.dataSource.clearCache()
+            except Exception as e:
+                util.DEBUG_LOG("Couldn't clear cache: {}", e)
 
     def sectionMover(self, item, action):
         def stop_moving(reset=False):

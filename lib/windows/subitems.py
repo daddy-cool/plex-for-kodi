@@ -479,6 +479,10 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
         options.append(dropdown.SEPARATOR)
 
         options.append({'key': 'to_section', 'display': u'Go to {0}'.format(self.mediaItem.getLibrarySectionTitle())})
+
+        if 'items' in util.getSetting('cache_requests'):
+            options.append({'key': 'cache_reset', 'display': T(33728, "Clear cache for item")})
+
         pos = (880, 618)
         if from_item:
             viewPos = self.subItemListControl.getViewPosition()
@@ -519,6 +523,15 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
             item.refresh()
             self.updateItems()
             self.updateProperties()
+
+        elif choice["key"] == "cache_reset":
+            try:
+                util.DEBUG_LOG('Clearing requests cache for {}...', item)
+                item.clearCache()
+                self.updateItems()
+                self.updateProperties()
+            except Exception as e:
+                util.DEBUG_LOG("Couldn't clear cache: {}", e)
 
     def roleClicked(self):
         mli = self.rolesListControl.getSelectedItem()

@@ -163,6 +163,8 @@ class Checks(object):
 
 class PlexObject(Checks):
     __slots__ = ("initpath", "key", "server", "container", "mediaChoice", "titleSort", "deleted", "_reloaded", "data")
+    TYPE = None
+    cachable = False
 
     def __init__(self, data, initpath=None, server=None, container=None):
         self.initpath = initpath
@@ -218,6 +220,60 @@ class PlexObject(Checks):
     def init(self, data):
         pass
 
+    @property
+    def cacheRef(self):
+        return self.getCacheRef()
+
+    def getCacheRef(self, always_return=False):
+        if (hasattr(self, "TYPE") and self.TYPE and self.get('ratingKey')
+                and ('items' in util.INTERFACE.getPreference('cache_requests') or always_return)):
+            return "_".join((self.TYPE, self.ratingKey))
+
+    def _clearCache(self, urls):
+        if not urls:
+            return
+
+        if util.DEBUG_REQUESTS:
+            util.DEBUG_LOG("Clearing cache for: {0}, {1}".format(self, urls))
+
+        from .asyncadapter import Session
+        s = Session()
+        for url in urls:
+            try:
+                s.cache.delete_url(url)
+            except Exception as e:
+                util.LOG('Failed to delete cached URL {0}: {1}', url, e)
+
+    def clearCache(self, override_type=None, return_urls=False):
+        # fixme: cache handling should be in a separate manager class
+        _type = override_type or self.TYPE
+        if self.cachable:
+            # get cache key no matter what, even if the specific type isn't cached, we still want to clear the library
+            # cache regardless
+            ck = self.getCacheRef(always_return=True)
+            if ck:
+                urls = util.REQUESTS_CACHE.get(ck, [])
+
+                if _type in ("movie", "episode", "show", "season"):
+                    # library cache
+                    libID = self.getLibrarySectionId()
+                    if libID:
+                        urls += util.REQUESTS_CACHE.get("section_%s" % libID, [])
+
+                    # parents caches
+                    if _type == "episode":
+                        urls += util.REQUESTS_CACHE.get("season_%s" % self.parentRatingKey, [])
+                        urls += util.REQUESTS_CACHE.get("show_%s" % self.grandparentRatingKey, [])
+
+                    if _type == "season":
+                        urls += util.REQUESTS_CACHE.get("show_%s" % self.parentRatingKey, [])
+
+                if return_urls:
+                    return urls
+
+                self._clearCache(urls)
+
+
     def isFullObject(self):
         return self.initpath is None or self.key is None or self.initpath == self.key
 
@@ -238,6 +294,7 @@ class PlexObject(Checks):
 
     def refresh(self):
         self.server.query('%s/refresh' % self.key, method="put")
+        self.clearCache()
 
     def reload(self, _soft=False, **kwargs):
         """ Reload the data for this object from PlexServer XML. """
@@ -246,7 +303,10 @@ class PlexObject(Checks):
 
         try:
             if self.get('ratingKey'):
-                data = self.server.query('/library/metadata/{0}'.format(self.ratingKey), params=kwargs)
+                data = self.server.query('/library/metadata/{0}'.format(self.ratingKey),
+                                         cachable=self.cachable,
+                                         cache_ref=self.cacheRef,
+                                         params=kwargs)
             else:
                 data = self.server.query(self.key, params=kwargs)
             self._reloaded = True

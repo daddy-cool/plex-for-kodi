@@ -146,6 +146,7 @@ class VideoPlayerWindow(kodigui.ControlledWindow, windowutils.UtilMixin, Spoiler
 
     def onFirstInit(self):
         player.PLAYER.on('session.ended', self.sessionEnded)
+        player.PLAYER.on('playback.stopped', self.playbackStopped)
         player.PLAYER.on('av.started', self.playerPlaybackStarted)
         player.PLAYER.on('starting.video', self.onVideoStarting)
         player.PLAYER.on('started.video', self.onVideoStarted)
@@ -350,6 +351,12 @@ class VideoPlayerWindow(kodigui.ControlledWindow, windowutils.UtilMixin, Spoiler
         util.DEBUG_LOG('VideoPlayerWindow: Session ended - closing (ID: {0})', id(self))
         self.doClose()
 
+    def playbackStopped(self, session_id=None, video=None, **kwargs):
+        if session_id != id(self):
+            return
+
+        video.clearCache()
+
     def play(self, resume=False, handler=None):
         self.hidePostPlay()
 
@@ -384,7 +391,7 @@ class VideoPlayerWindow(kodigui.ControlledWindow, windowutils.UtilMixin, Spoiler
                 util.DEBUG_LOG("Stopping BGM before starting playback")
                 player.PLAYER.stopAndWait()
 
-            while player.PLAYER.bgmPlaying:
+            while player.PLAYER.bgmPlaying or player.PLAYER.isPlayingAudio():
                 util.MONITOR.waitForAbort(0.1)
 
         self.setBackground()
@@ -727,6 +734,7 @@ def play(video=None, play_queue=None, resume=False, bgm=False, **kwargs):
         raise
     finally:
         player.PLAYER.off('session.ended', w.sessionEnded)
+        player.PLAYER.off('playback.stopped', w.playbackStopped)
         player.PLAYER.off('post.play', w.postPlay)
         player.PLAYER.off('av.started', w.playerPlaybackStarted)
         player.PLAYER.off('starting.video', w.onVideoStarting)

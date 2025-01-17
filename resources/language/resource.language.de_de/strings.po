@@ -3142,3 +3142,35 @@ msgstr "Geschaut"
 msgctxt "#33719"
 msgid "Refresh metadata"
 msgstr "Metadaten aktualisieren"
+
+msgctxt "#33720"
+msgid "Clear all caches"
+msgstr "Alle Caches leeren"
+
+msgctxt "#33721"
+msgid "Clear library cache (not items)"
+msgstr "Bibliothek-Cache löschen (ausg. Items)"
+
+msgctxt "#33722"
+msgid "Libraries"
+msgstr "Bibliotheken"
+
+msgctxt "#33723"
+msgid "Media Items"
+msgstr "Medien"
+
+msgctxt "#33724"
+msgid "Cache Plex data for"
+msgstr "Plex-Daten cachen für"
+
+msgctxt "#33725"
+msgid "Persist cached Plex data"
+msgstr "Gecachte Plex-Daten persistieren"
+
+msgctxt "#33726"
+msgid "Instead of clearing the cache when exiting the addon, persist it instead. Warning: You'll most likely encounter missing items in libraries or outdated data. Use the corresponding menu functionalities to clear the cache for specific items or libraries."
+msgstr "Anstatt den Cache beim Beenden zu löschen, behalte ihn. Achtung: Es wird sehr wahrscheinlich zu fehlenden Items in Bibliotheken oder abgelaufene Daten kommen. Die korrespondierenden Menüfunktionalitäten benutzen um den Cache für spezifische Items oder Bibliotheken zu leeren."
+
+msgctxt "#33727"
+msgid "Store Plex server responses for items and library views in a local SQLite database. Doesn't cache anything else (Home/Hubs are always up to date). Massively speeds up consecutive visits to items and libraries. Certain important events, such as watch state changes, automatically delete the item cache and its corresponding library cache. (Default: Off)"
+msgstr "Speichere die Plex-Server-Antworten für Items und Bibliothekansichten in einer lokalen SQLite-Datenbank. Gilt nur für diese zwei Datenbereiche (Start/Hubs sind immer aktuell). Erzeugt massiven Geschwindigkeitsvorteil bei aufeinanderfolgenden Besuchen von Items und Bibliotheken. Bestimmte, wichtige Ereignisse, wie z. B. Abgespielt-Status, löschen automatisch den Item-Cache und die dazugehörigen Bibliothek-Caches. (Standard: Aus)"

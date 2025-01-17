@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 import time
 import socket
-import requests
 import six
+import os
 
 from kodi_six import xbmc
 from requests.packages.urllib3 import HTTPConnectionPool, HTTPSConnectionPool
@@ -17,6 +17,7 @@ except ImportError:
 
 from requests.adapters import HTTPAdapter, Retry
 from requests.compat import urlparse
+from requests_cache import CachedSession
 
 #from six.moves.http_client import HTTPConnection
 import errno
@@ -26,6 +27,7 @@ SSL_KEYWORDS = ('key_file', 'cert_file', 'cert_reqs', 'ca_certs',
                 'ssl_version')
 
 DEBUG_REQUESTS = False
+TEMP_PATH = None
 
 WIN_WSAEINVAL = 10022
 WIN_EWOULDBLOCK = 10035
@@ -370,11 +372,22 @@ class StoppableRetry(Retry):
         return super(StoppableRetry, self).increment(*args, **kwargs)
 
 
-class Session(requests.Session):
+class Session(CachedSession):
     def __init__(self, *args, **kwargs):
-        requests.Session.__init__(self, *args, **kwargs)
+        kwargs['cache_name'] = os.path.join(TEMP_PATH, "pm4k_requests_cache")
+        kwargs['backend'] = "sqlite"
+            #kwargs['ignored_parameters'] = ("checkFiles", "includeChapters", "includeMarkers", "includeExtras",
+            #                                "includeExtrasCount", "includeReviews", "X-Plex-Token")
+        CachedSession.__init__(self, *args, **kwargs)
+
         self.mount('https://', AsyncHTTPAdapter(max_retries=StoppableRetry(MAX_RETRIES)))
         self.mount('http://', AsyncHTTPAdapter(max_retries=StoppableRetry(MAX_RETRIES)))
+
+    def request(self, method, url, *args, **kwargs):
+        self._is_cache_disabled = not kwargs.pop('with_cache', False)
+        if DEBUG_REQUESTS:
+            xbmc.log("Session.request: (cache enabled: %s) %s %s" % (not self._is_cache_disabled, method, url), xbmc.LOGINFO)
+        return CachedSession.request(self, method, url, *args, **kwargs)
 
     def cancel(self):
         for v in self.adapters.values():

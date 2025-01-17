@@ -1085,6 +1085,9 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         options.append({'key': 'to_section', 'display': T(32324, u'Go to {0}').format(
             self.show_.getLibrarySectionTitle())})
 
+        if 'items' in util.getSetting('cache_requests'):
+            options.append({'key': 'cache_reset', 'display': T(33728, "Clear cache for item")})
+
         pos = (500, util.vscalei(620))
         bottom = False
         if from_item:
@@ -1134,6 +1137,14 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             self.updateItems(mli)
         elif choice['key'] == 'play_startover':
             self.episodeListClicked(force_startover=True)
+        elif choice["key"] == "cache_reset":
+            try:
+                util.DEBUG_LOG('Clearing requests cache for {}...', mli.dataSource)
+                mli.dataSource.clearCache()
+                mli.dataSource.reload()
+                self.updateItems(mli)
+            except Exception as e:
+                util.DEBUG_LOG("Couldn't clear cache: {}", e)
 
     def mediaButtonClicked(self):
         options = []

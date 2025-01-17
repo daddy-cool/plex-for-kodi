@@ -265,6 +265,9 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
 
             if self.video.server.allowsMediaDeletion:
                 options.append({'key': 'delete', 'display': T(32322, 'Delete')})
+
+        if 'items' in util.getSetting('cache_requests'):
+            options.append({'key': 'cache_reset', 'display': T(33728, "Clear cache for item")})
         # if xbmc.getCondVisibility('Player.HasAudio') and self.section.TYPE == 'artist':
         #     options.append({'key': 'add_to_queue', 'display': 'Add To Queue'})
 
@@ -300,6 +303,13 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         elif choice['key'] == 'refresh':
             self.video.refresh()
             self.refreshInfo()
+        elif choice["key"] == "cache_reset":
+            try:
+                util.DEBUG_LOG('Clearing requests cache for {}...', self.video)
+                self.video.clearCache()
+                self.refreshInfo()
+            except Exception as e:
+                util.DEBUG_LOG("Couldn't clear cache: {}", e)
 
     def mediaButtonClicked(self):
         options = []

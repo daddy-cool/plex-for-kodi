@@ -64,6 +64,8 @@ CONN_CHECK_TIMEOUT = 2.5                            # s
 LAN_REACHABILITY_TIMEOUT = 0.01                     # s
 CHECK_LOCAL = False
 LOCAL_OVER_SECURE = False
+DEBUG_REQUESTS = False
+REQUESTS_CACHE = {}
 X_PLEX_CONTAINER_SIZE = 50                          # max results to return in a single search page
 
 ACCEPT_LANGUAGE = 'en-US,en'
@@ -75,6 +77,7 @@ X_PLEX_PLATFORM_VERSION = platform.uname()[2]  # Operating system version, eg 4.
 X_PLEX_PRODUCT = PROJECT                       # Plex application name, eg Laika, Plex Media Server, Media Link
 X_PLEX_VERSION = VERSION                       # Plex application version number
 USER_AGENT = '{0}/{1}'.format(PROJECT, VERSION)
+TEMP_PATH = None
 
 USE_CERT_BUNDLE = False
 

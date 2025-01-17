@@ -2555,3 +2555,39 @@ msgstr ""
 msgctxt "#33719"
 msgid "Refresh metadata"
 msgstr ""
+
+msgctxt "#33720"
+msgid "Clear all caches"
+msgstr ""
+
+msgctxt "#33721"
+msgid "Clear library cache (not items)"
+msgstr ""
+
+msgctxt "#33722"
+msgid "Libraries"
+msgstr ""
+
+msgctxt "#33723"
+msgid "Media Items"
+msgstr ""
+
+msgctxt "#33724"
+msgid "Cache Plex data for"
+msgstr ""
+
+msgctxt "#33725"
+msgid "Persist cached Plex data"
+msgstr ""
+
+msgctxt "#33726"
+msgid "Instead of clearing the cache when exiting the addon, persist it instead. Warning: You'll most likely encounter missing items in libraries or outdated data. Use the corresponding menu functionalities to clear the cache for specific items or libraries."
+msgstr ""
+
+msgctxt "#33727"
+msgid "Store Plex server responses for items and library views in a local SQLite database. Doesn't cache anything else (Home/Hubs are always up to date). Massively speeds up consecutive visits to items and libraries. Certain important events, such as watch state changes, automatically delete the item cache and its corresponding library cache. (Default: Off)"
+msgstr ""
+
+msgctxt "#33728"
+msgid "Clear cache for item"
+msgstr ""
