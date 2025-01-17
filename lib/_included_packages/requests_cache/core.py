@@ -70,7 +70,12 @@ class CachedSession(OriginalSession):
                                    credentials or access tokens, passed as parameters.
         :param old_data_on_error: If `True` it will return expired cached response if update fails
         """
-        self.cache = backends.create_backend(backend, cache_name, backend_options)
+        try:
+            self.cache = backends.create_backend(backend, cache_name, backend_options)
+        except:
+            self.cache = backends.create_backend("memory", cache_name, backend_options)
+            self._is_cache_disabled = True
+
         self._cache_name = cache_name
 
         if expire_after is not None and not isinstance(expire_after, timedelta):
