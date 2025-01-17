@@ -53,14 +53,14 @@ def getGlobalProperty(key, consume=False, wait=False, interval=0.1, timeout=3600
     return resp
 
 
-def waitForGPEmpty(key, interval=0.1, timeout=36000):
-    resp = _getGlobalProperty(key)
+def waitForGPEmpty(key, interval=0.1, timeout=36000, base='script.plex.{0}'):
+    resp = _getGlobalProperty(key, base=base)
     if resp:
         waited = 0
         while not MONITOR.abortRequested() and resp and waited < timeout:
             if MONITOR.waitForAbort(interval):
                 break
-            resp = _getGlobalProperty(key)
+            resp = _getGlobalProperty(key, base=base)
             waited += 1
         if waited >= timeout:
             raise IPCTimeoutException('Timed out while waiting for emptiness of: {}'.format(key))
