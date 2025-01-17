@@ -1793,7 +1793,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         # fixme: this can be done in a better way, probably
         waited = 0
         while any(self.tasks) and waited < 20:
-            self.showBusy(True)
+            if waited > 5:
+                self.showBusy(True)
             util.MONITOR.waitForAbort(0.1)
             waited += 1
         self.showBusy(False)
@@ -1981,6 +1982,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                         rp[identifier] = (str(mli.dataSource.ratingKey), pos)
         return rp
 
+    @busy.busy_property()
     def _showHubs(self, section=None, update=False, force=False, reselect_pos_dict=None):
         if not update:
             self.clearHubs()
@@ -1989,10 +1991,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             return
 
         if section.key is False:
-            self.showBusy(False)
             return
-
-        self.showBusy(True)
 
         hubs = self.sectionHubs.get(section.key)
         section_stale = False
@@ -2004,7 +2003,6 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             # hubs.invalid is True when the last hub update errored. if the hub is stale, refresh it, though
             if hubs is not None and hubs.invalid and not section_stale:
                 util.DEBUG_LOG("Section fetch has failed: {}", section.key)
-                self.showBusy(False)
                 self.setBoolProperty('no.content', True)
                 return
 
@@ -2015,7 +2013,6 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                         break
 
                 if section.type != "home":
-                    self.showBusy(False)
                     self.setBoolProperty('no.content', True)
                 return
 
@@ -2038,49 +2035,46 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             return
 
         util.DEBUG_LOG('Showing hubs - Section: {0} - Update: {1}', section.key, update)
-        try:
-            hasContent = False
-            skip = {}
+        hasContent = False
+        skip = {}
 
-            for hub in hubs:
-                identifier = hub.getCleanHubIdentifier(is_home=not section.key)
+        for hub in hubs:
+            identifier = hub.getCleanHubIdentifier(is_home=not section.key)
 
-                if identifier not in self.HUBMAP:
-                    util.DEBUG_LOG('UNHANDLED - Hub: {0} [{1}]({2})'.format(hub.hubIdentifier, identifier,
-                                                                            len(hub.items)))
+            if identifier not in self.HUBMAP:
+                util.DEBUG_LOG('UNHANDLED - Hub: {0} [{1}]({2})'.format(hub.hubIdentifier, identifier,
+                                                                        len(hub.items)))
+                continue
+
+            skip[self.HUBMAP[identifier]['index']] = 1
+
+            if self.showHub(hub, is_home=not section.key,
+                            reselect_pos=reselect_pos_dict.get(identifier) if reselect_pos_dict else None):
+                if hub.items:
+                    hasContent = True
+                if self.HUBMAP[identifier].get('do_updates'):
+                    self.updateHubs[identifier] = hub
+
+        if not hasContent:
+            self.setBoolProperty('no.content', True)
+
+        lastSkip = 0
+        if skip:
+            lastSkip = min(skip.keys())
+
+        focus = None
+        if update:
+            for i, control in enumerate(self.hubControls):
+                if i in skip:
+                    lastSkip = i
                     continue
+                if self.getFocusId() == control.getId():
+                    focus = lastSkip
+                control.reset()
 
-                skip[self.HUBMAP[identifier]['index']] = 1
-
-                if self.showHub(hub, is_home=not section.key,
-                                reselect_pos=reselect_pos_dict.get(identifier) if reselect_pos_dict else None):
-                    if hub.items:
-                        hasContent = True
-                    if self.HUBMAP[identifier].get('do_updates'):
-                        self.updateHubs[identifier] = hub
-
-            if not hasContent:
-                self.setBoolProperty('no.content', True)
-
-            lastSkip = 0
-            if skip:
-                lastSkip = min(skip.keys())
-
-            focus = None
-            if update:
-                for i, control in enumerate(self.hubControls):
-                    if i in skip:
-                        lastSkip = i
-                        continue
-                    if self.getFocusId() == control.getId():
-                        focus = lastSkip
-                    control.reset()
-
-                if focus is not None:
-                    self.setFocusId(focus)
-            self.storeLastBG()
-        finally:
-            self.showBusy(False)
+            if focus is not None:
+                self.setFocusId(focus)
+        self.storeLastBG()
 
     def showHub(self, hub, items=None, is_home=False, reselect_pos=None):
         identifier = hub.getCleanHubIdentifier(is_home=is_home)

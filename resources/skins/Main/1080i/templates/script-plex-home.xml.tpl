@@ -7474,7 +7474,7 @@
 
 <control type="group">
     <visible>!String.IsEmpty(Window.Property(busy))</visible>
-    <animation effect="fade" start="0" end="100" delay="500">Visible</animation>
+    <animation effect="fade" start="0" end="100">Visible</animation>
     <posx>840</posx>
     <posy>{{ vscale(465) }}</posy>
     <control type="image">
