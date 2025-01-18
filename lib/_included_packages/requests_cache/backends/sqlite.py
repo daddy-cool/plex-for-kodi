@@ -44,3 +44,7 @@ class DbCache(BaseCache):
 
     def vacuum(self):
         self.responses.vacuum()
+
+    def clear(self):
+        super(DbCache, self).clear()
+        self.other.clear()
