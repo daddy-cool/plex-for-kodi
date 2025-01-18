@@ -35,14 +35,13 @@ set_waiting_for_start = False
 try:
     # reactivate/maximize
     if getGlobalProperty('running'):
-        if not getGlobalProperty('is_active'):
-            try:
-                log('Main: script.plexmod: Trying to reactivate minimized addon')
-                xbmc.executebuiltin('NotifyAll({0},{1},{2})'.format('script.plexmod', 'RESTORE', '{}'))
-            except:
-                log('Main: script.plexmod: Already running or faulty, couldn\'t reactivate other instance, exiting.')
-            else:
-                sys.exit(0)
+        try:
+            log('Main: script.plexmod: Trying to reactivate minimized addon')
+            xbmc.executebuiltin('NotifyAll({0},{1},{2})'.format('script.plexmod', 'RESTORE', '{}'))
+        except:
+            log('Main: script.plexmod: Already running or faulty, couldn\'t reactivate other instance, exiting.')
+        else:
+            sys.exit(0)
     else:
         # addon not started
         if not getGlobalProperty('started'):
