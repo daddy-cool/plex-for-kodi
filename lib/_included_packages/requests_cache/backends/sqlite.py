@@ -40,6 +40,7 @@ class DbCache(BaseCache):
                 except OSError:
                     pass
         self.keys_map = DbDict(location + extension, 'urls', fast_save=fast_save)
+        self.other = DbPickleDict(location + extension, 'other', fast_save=fast_save)
 
     def vacuum(self):
         self.responses.vacuum()
