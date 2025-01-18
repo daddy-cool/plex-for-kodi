@@ -108,7 +108,7 @@ class BaseCache(object):
         for key in self.responses:
             try:
                 response, created_at = self.responses[key]
-            except KeyError:
+            except (KeyError, TypeError, ValueError):
                 continue
             if created_at < created_before:
                 keys_to_delete.add(key)
