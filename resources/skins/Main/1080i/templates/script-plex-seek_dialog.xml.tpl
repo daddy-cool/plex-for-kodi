@@ -404,7 +404,7 @@
                 <width>893</width>
                 <height>{{ vscale(50) }}</height>
                 <aligny>bottom</aligny>
-                <label>[COLOR FFE5A00D]Buffer:[/COLOR] $INFO[Player.CacheLevel]%</label>
+                <label>[COLOR FFE5A00D]Buffer:[/COLOR] $INFO[Player.CacheLevel]%$INFO[Window.Property(ppi.BufferMB), (of ~, MB]$INFO[Window.Property(ppi.ReadFactor),$COMMA Readfactor: ,x)]$INFO[Window.Property(ppi.AReadFactor),$COMMA Readfactor: ,)]</label>
                 <font>font14</font>
                 <shadowcolor>black</shadowcolor>
                 <visible>Player.HasVideo + String.IsEmpty(Window.Property(ppi.Buffered))</visible>
@@ -413,7 +413,7 @@
                 <width>893</width>
                 <height>{{ vscale(50) }}</height>
                 <aligny>bottom</aligny>
-                <label>[COLOR FFE5A00D]Buffer:[/COLOR] $INFO[Window.Property(ppi.Buffered)]% (% of Video cached)</label>
+                <label>[COLOR FFE5A00D]Buffer:[/COLOR] $INFO[Window.Property(ppi.Buffered)]% (% of Video cached)$INFO[Window.Property(ppi.BufferMB), (of ~, MB]$INFO[Window.Property(ppi.ReadFactor),$COMMA Readfactor:,x)]$INFO[Window.Property(ppi.AReadFactor),$COMMA Readfactor: ,)]</label>
                 <font>font14</font>
                 <shadowcolor>black</shadowcolor>
                 <visible>Player.HasVideo + !String.IsEmpty(Window.Property(ppi.Buffered))</visible>

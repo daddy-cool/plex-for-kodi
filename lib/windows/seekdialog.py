@@ -982,6 +982,7 @@ class SeekDialog(kodigui.BaseDialog, PlexSubtitleDownloadMixin):
             kodigui.BaseDialog.doClose(self)
 
     def showPPIDialog(self, real_ppi=False):
+        from lib.cache import kcm
         if self.getProperty('show.PPI'):
             if real_ppi:
                 self.setProperty('show.PPI', '')
@@ -1005,8 +1006,20 @@ class SeekDialog(kodigui.BaseDialog, PlexSubtitleDownloadMixin):
             except:
                 pass
 
-        while not self.player.started:
+        self.setProperty('ppi.BufferMB', str(kcm.memorySize))
+        if kcm.readFactor > 0:
+            self.setProperty('ppi.ReadFactor', str(kcm.readFactor))
+        else:
+            self.setProperty('ppi.AReadFactor', 'Adaptive')
+
+        tries = 0
+        while not self.player.started and tries < 50:
             util.MONITOR.waitForAbort(0.1)
+            tries += 1
+
+        if tries >= 50:
+            self.hidePPIDialog()
+            return
 
         info = None
         currentVideo = self.player.video
