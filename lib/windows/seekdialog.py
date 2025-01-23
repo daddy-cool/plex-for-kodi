@@ -2423,7 +2423,10 @@ class SeekDialog(kodigui.BaseDialog, PlexSubtitleDownloadMixin):
                 xbmc.executebuiltin('Dialog.Close(busydialog,1)')
 
             if not self.hasDialog and not self.playlistDialogVisible and self.osdVisible():
-                if time.time() > self.timeout:
+                t = time.time()
+                # with a customizable OSD hide timeout, OSD hide timeout might happen before autoSeekTimeout;
+                # in case we're still waiting for a seek, postpone OSD hiding
+                if t > self.timeout and (not self.autoSeekTimeout or self.autoSeekTimeout < self.timeout < t):
                     xbmc.executebuiltin('Dialog.Close(videoosd,true)')
                     xbmc.executebuiltin('Dialog.Close(seekbar,true)')
                     if not xbmc.getCondVisibility('Window.IsActive(videoosd) | Player.Rewinding | Player.Forwarding'):
