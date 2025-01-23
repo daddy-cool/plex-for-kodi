@@ -353,8 +353,9 @@ class SeekPlayerHandler(BasePlayerHandler):
         if not self.playlist or not self.playlist.setCurrent(pos):
             return False
 
+        self.triggerProgressEvent()
         self.seeking = self.SEEK_PLAYLIST
-        self.player.playVideoPlaylist(self.playlist, handler=self, resume=self.player.resume)
+        self.player.playVideoPlaylist(self.playlist, handler=self, resume=False)
 
         return True
 

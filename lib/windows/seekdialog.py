@@ -2458,13 +2458,16 @@ class SeekDialog(kodigui.BaseDialog, PlexSubtitleDownloadMixin):
 
     def showPlaylistDialog(self):
         if not self.playlistDialog:
-            self.playlistDialog = PlaylistDialog.create(show=False, handler=self.handler)
+            self.playlistDialog = PlaylistDialog.create(show=False, handler=self.handler, seek_dialog=self)
 
         self.playlistDialogVisible = True
         self.playlistDialog.doModal()
         self.resetTimeout()
         self.playlistDialogVisible = False
-        self.setFocusId(self.PLAYLIST_BUTTON_ID)
+        try:
+            self.setFocusId(self.PLAYLIST_BUTTON_ID)
+        except:
+            pass
 
     def osdVisible(self):
         return xbmc.getCondVisibility('Control.IsVisible(801)')
@@ -2513,6 +2516,7 @@ class PlaylistDialog(kodigui.BaseDialog, SpoilersMixin):
         kodigui.BaseDialog.__init__(self, *args, **kwargs)
         SpoilersMixin.__init__(self, *args, **kwargs)
         self.handler = kwargs.get('handler')
+        self.seek_dialog = kwargs.get('seek_dialog')
         self.playlist = self.handler.playlist
 
     def onFirstInit(self):
@@ -2527,6 +2531,12 @@ class PlaylistDialog(kodigui.BaseDialog, SpoilersMixin):
         self.updatePlayingItem()
         self.setFocusId(self.PLAYLIST_LIST_ID)
 
+    def doClose(self):
+        util.DEBUG_LOG('PlaylistDialog: closing')
+        self.handler.player.off('playlist.changed', self.playQueueCallback)
+        self.handler.player.off('session.ended', self.sessionEnded)
+        super(PlaylistDialog, self).doClose()
+
     def onClick(self, controlID):
         if controlID == self.PLAYLIST_LIST_ID:
             self.playlistListClicked()
@@ -2535,11 +2545,13 @@ class PlaylistDialog(kodigui.BaseDialog, SpoilersMixin):
         mli = self.playlistListControl.getSelectedItem()
         if not mli:
             return
+        self.seek_dialog.sendTimeline(state=self.handler.player.STATE_STOPPED)
         self.handler.playAt(mli.pos())
-        self.updatePlayingItem()
+        self.doClose()
+        #self.updatePlayingItem()
 
     def sessionEnded(self, **kwargs):
-        util.DEBUG_LOG('Video OSD: Session ended - closing')
+        util.DEBUG_LOG('PlaylistDialog: Session ended - closing')
         self.doClose()
 
     def createListItem(self, pi):
