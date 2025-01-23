@@ -2214,6 +2214,8 @@ class SeekDialog(kodigui.BaseDialog, PlexSubtitleDownloadMixin):
         self.handler.updateNowPlaying(state=state, t=t, overrideChecks=True)
         if ensureFinalTimelineEvent:
             self.handler.ignoreTimelines = True
+            # kill previous timeline data
+            plexapp.util.APP.nowplayingmanager.reset()
 
     def displayMarkers(self, cancelTimer=False, immediate=False, onlyReturnIntroMD=False, setSkipped=False,
                        offset=None):
