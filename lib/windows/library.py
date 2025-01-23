@@ -853,6 +853,8 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
         else:
             self.sortDesc = defSortByOption.get(choice, False)
 
+        if choice == "random":
+            self.section.clearCache()
         self.sort = choice
 
         self.librarySettings.setSetting('sort', self.sort)
