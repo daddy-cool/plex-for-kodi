@@ -130,7 +130,9 @@ SORT_KEYS = {
         'resolution': {'title': T(32361, 'By Resolution'), 'display': T(32362, 'Resolution'), 'defSortDesc': True},
         'duration': {'title': T(32363, 'By Duration'), 'display': T(32364, 'Duration'), 'defSortDesc': True},
         'unwatched': {'title': T(32367, 'By Unplayed'), 'display': T(32368, 'Unplayed'), 'defSortDesc': False},
-        'viewCount': {'title': T(32371, 'By Play Count'), 'display': T(32372, 'Play Count'), 'defSortDesc': True}
+        'viewCount': {'title': T(32371, 'By Play Count'), 'display': T(32372, 'Play Count'), 'defSortDesc': True},
+        'mediaBitrate': {'title': T(33731, 'By Bitrate'), 'display': T(33732, 'Bitrate'), 'defSortDesc': True},
+        'random': {'title': T(33730, 'Randomly'), 'display': T(33730, 'Randomly'), 'defSortDesc': True},
     },
     'show': {
         'titleSort': {'title': T(32357, 'By Title'), 'display': T(32358, 'Title'), 'defSortDesc': False},
@@ -147,11 +149,13 @@ SORT_KEYS = {
         'userRating': {'title': T(33103, 'By my Rating'), 'display': T(33104, 'My Rating'), 'defSortDesc': True},
         'contentRating': {'title': T(33105, 'By Content Rating'), 'display': T(33106, 'Content Rating'),
                           'defSortDesc': True},
+        'random': {'title': T(33730, 'Randomly'), 'display': T(33730, 'Randomly'), 'defSortDesc': True},
     },
     'artist': {
         'titleSort': {'title': T(32357, 'By Title'), 'display': T(32358, 'Title'), 'defSortDesc': False},
         'artist.titleSort': {'title': T(32463, 'By Artist'), 'display': T(32462, 'Artist'), 'defSortDesc': False},
         'lastViewedAt': {'title': T(32369, 'By Date Played'), 'display': T(32370, 'Date Played'), 'defSortDesc': False},
+        'random': {'title': T(33730, 'Randomly'), 'display': T(33730, 'Randomly'), 'defSortDesc': True},
     },
     'track': {
         'titleSort': {'title': T(32357, 'By Title'), 'display': T(32358, 'Title'), 'defSortDesc': False},
@@ -783,7 +787,7 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
 
         if self.section.TYPE == 'movie':
             searchTypes = ['titleSort', 'addedAt', 'originallyAvailableAt', 'lastViewedAt', 'rating', 'audienceRating',
-                           'userRating', 'contentRating', 'resolution', 'duration']
+                           'userRating', 'contentRating', 'resolution', 'duration', 'mediaBitrate', 'random']
             if ITEM_TYPE == 'collection':
                 searchTypes = ['titleSort', 'addedAt', 'contentRating']
 
@@ -796,10 +800,10 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
         elif self.section.TYPE == 'show':
             searchTypes = ['titleSort', 'year', 'originallyAvailableAt', 'rating', 'audienceRating', 'userRating',
                            'contentRating', 'unviewedLeafCount', 'episode.addedAt',
-                           'addedAt', 'lastViewedAt']
+                           'addedAt', 'lastViewedAt', 'random']
             if ITEM_TYPE == 'episode':
                 searchTypes = ['titleSort', 'show.titleSort', 'addedAt', 'originallyAvailableAt', 'lastViewedAt',
-                               'rating', 'audienceRating', 'userRating']
+                               'rating', 'audienceRating', 'userRating', 'mediaBitrate', 'random']
             elif ITEM_TYPE == 'collection':
                 searchTypes = ['titleSort', 'addedAt']
 
@@ -814,7 +818,8 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
         elif self.section.TYPE == 'artist':
             searchTypes = ['titleSort', 'addedAt', 'lastViewedAt', 'viewCount']
             if ITEM_TYPE == 'album':
-                searchTypes = ['titleSort', 'artist.titleSort', 'addedAt', 'lastViewedAt', 'viewCount', 'originallyAvailableAt', 'rating']
+                searchTypes = ['titleSort', 'artist.titleSort', 'addedAt', 'lastViewedAt', 'viewCount',
+                               'originallyAvailableAt', 'rating', 'random']
             elif ITEM_TYPE == 'collection':
                 searchTypes = ['titleSort', 'addedAt']
             elif ITEM_TYPE == 'track':
@@ -877,6 +882,8 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
         if force_refresh or self.showPanelControl.size() == 0:
             self.fillShows()
             return
+
+        # inline sorting is disabled; this code will never be reached
 
         if choice == 'addedAt':
             self.showPanelControl.sort(lambda i: i.dataSource.addedAt, reverse=self.sortDesc)

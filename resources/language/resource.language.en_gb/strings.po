@@ -2595,3 +2595,15 @@ msgstr ""
 msgctxt "#33729"
 msgid "Expire cached Plex data after (hours)"
 msgstr ""
+
+msgctxt "#33730"
+msgid "Randomly"
+msgstr ""
+
+msgctxt "#33731"
+msgid "By Bitrate"
+msgstr ""
+
+msgctxt "#33732"
+msgid "Bitrate"
+msgstr ""

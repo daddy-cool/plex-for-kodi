@@ -3178,3 +3178,15 @@ msgstr "Speichere die Plex-Server-Antworten für Items und Bibliothekansichten i
 msgctxt "#33729"
 msgid "Expire cached Plex data after (hours)"
 msgstr "Ablauf gecachter Plex-Daten (Stunden)"
+
+msgctxt "#33730"
+msgid "Randomly"
+msgstr "Zufällig"
+
+msgctxt "#33731"
+msgid "By Bitrate"
+msgstr "Nach Bitrate"
+
+msgctxt "#33732"
+msgid "Bitrate"
+msgstr "Bitrate"
