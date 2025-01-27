@@ -467,18 +467,26 @@ class SeekPlayerHandler(BasePlayerHandler):
 
         # check if embedded subtitle was set correctly
         if self.isDirectPlay and self.player.video and self.player.video.current_subtitle_is_embedded:
-            try:
-                playerID = kodijsonrpc.rpc.Player.GetActivePlayers()[0]["playerid"]
-                currIdx = kodijsonrpc.rpc.Player.GetProperties(playerid=playerID, properties=['currentsubtitle'])[
-                    'currentsubtitle']['index']
-                if currIdx != self.player.video._current_subtitle_idx + self.subtitleStreamOffset:
-                    util.LOG("Embedded Subtitle index was incorrect ({}), setting to: {}".
-                             format(currIdx, self.player.video._current_subtitle_idx + self.subtitleStreamOffset))
-                    self.dialog.setSubtitles()
-                else:
-                    util.DEBUG_LOG("Embedded subtitle was correctly set in Kodi")
-            except:
-                util.ERROR("Exception when trying to check for embedded subtitles")
+            got_player = False
+            tries = 0
+            while not got_player and tries < 20:
+                try:
+                    playerID = kodijsonrpc.rpc.Player.GetActivePlayers()[0]["playerid"]
+                    got_player = True
+                    currIdx = kodijsonrpc.rpc.Player.GetProperties(playerid=playerID, properties=['currentsubtitle'])[
+                        'currentsubtitle']['index']
+                    if currIdx != self.player.video._current_subtitle_idx + self.subtitleStreamOffset:
+                        util.LOG("Embedded Subtitle index was incorrect ({}), setting to: {}".
+                                 format(currIdx, self.player.video._current_subtitle_idx + self.subtitleStreamOffset))
+                        self.dialog.setSubtitles()
+                    else:
+                        util.DEBUG_LOG("Embedded subtitle was correctly set in Kodi")
+                except IndexError:
+                    util.DEBUG_LOG("Player not available yet, retrying ({}/{})".format(tries, 20))
+                    tries += 1
+                    util.MONITOR.waitForAbort(0.1)
+                except:
+                    util.ERROR("Exception when trying to check for embedded subtitles")
 
     def onPrePlayStarted(self):
         util.DEBUG_LOG('SeekHandler: onPrePlayStarted, DP: {}', self.isDirectPlay)
