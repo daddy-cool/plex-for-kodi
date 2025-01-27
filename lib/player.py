@@ -848,6 +848,7 @@ class SeekPlayerHandler(BasePlayerHandler):
     def onVideoWindowClosed(self):
         self.hideOSD()
         util.DEBUG_LOG('SeekHandler: onVideoWindowClosed - Seeking={0}', self.seeking)
+        self.player.trigger('videowindow.closed', session_id=self.sessionID, video=self.player.video)
         if not self.seeking:
             # send events as we might not have seen onPlayBackEnded and/or onPlayBackStopped in certain cases,
             # especially when postplay isn't wanted and we're at the end of a show
@@ -856,8 +857,6 @@ class SeekPlayerHandler(BasePlayerHandler):
             #    self.triggerProgressEvent()
             if self.player.isPlaying():
                 self.player.stopAndWait()
-
-            self.player.trigger('playback.stopped', session_id=self.sessionID, video=self.player.video)
 
             if not self.playlist or not self.playlist.hasNext():
                 if not self.shouldShowPostPlay():

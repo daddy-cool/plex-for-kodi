@@ -146,7 +146,7 @@ class VideoPlayerWindow(kodigui.ControlledWindow, windowutils.UtilMixin, Spoiler
 
     def onFirstInit(self):
         player.PLAYER.on('session.ended', self.sessionEnded)
-        player.PLAYER.on('playback.stopped', self.playbackStopped)
+        player.PLAYER.on('videowindow.closed', self.videoWindowClosed)
         player.PLAYER.on('av.started', self.playerPlaybackStarted)
         player.PLAYER.on('starting.video', self.onVideoStarting)
         player.PLAYER.on('started.video', self.onVideoStarted)
@@ -351,7 +351,7 @@ class VideoPlayerWindow(kodigui.ControlledWindow, windowutils.UtilMixin, Spoiler
         util.DEBUG_LOG('VideoPlayerWindow: Session ended - closing (ID: {0})', id(self))
         self.doClose()
 
-    def playbackStopped(self, session_id=None, video=None, **kwargs):
+    def videoWindowClosed(self, session_id=None, video=None, **kwargs):
         if session_id != id(self):
             return
 
@@ -734,7 +734,7 @@ def play(video=None, play_queue=None, resume=False, bgm=False, **kwargs):
         raise
     finally:
         player.PLAYER.off('session.ended', w.sessionEnded)
-        player.PLAYER.off('playback.stopped', w.playbackStopped)
+        player.PLAYER.off('videowindow.closed', w.videoWindowClosed)
         player.PLAYER.off('post.play', w.postPlay)
         player.PLAYER.off('av.started', w.playerPlaybackStarted)
         player.PLAYER.off('starting.video', w.onVideoStarting)
