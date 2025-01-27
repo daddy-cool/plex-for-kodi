@@ -34,6 +34,7 @@ class BasePlayerHandler(object):
         self.timelineType = None
         self.ignoreTimelines = False
         self.queuingNext = False
+        self.queuingSpecific = False
         self.playQueue = None
         self.sessionID = session_id
 
@@ -216,6 +217,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.skipPostPlay = False
         self.prePlayWitnessed = False
         self.queuingNext = False
+        self.queuingSpecific = False
         self.useAlternateSeek = util.isCoreELEC and util.getSetting('use_alternate_seek')
         self.useResumeFix = self.useAlternateSeek
         self.reset()
@@ -235,6 +237,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.stoppedManually = False
         self.prePlayWitnessed = False
         self.queuingNext = False
+        self.queuingSpecific = False
 
     def setup(self, duration, meta, offset, bif_url, title='', title2='', seeking=NO_SEEK, chapters=None):
         self.ended = False
@@ -564,15 +567,17 @@ class SeekPlayerHandler(BasePlayerHandler):
                 return
 
         if self.seeking not in (self.SEEK_IN_PROGRESS, self.SEEK_REWIND):
-            self.updateNowPlaying()
+            if not self.queuingSpecific:
+                self.updateNowPlaying()
             self.triggerProgressEvent()
 
-            # show post play if possible, if an item has been watched (90% by Plex standards)
-            if self.seeking != self.SEEK_PLAYLIST and self.duration:
-                playedFac = self.videoPlayedFac
-                util.DEBUG_LOG("Player - played-threshold: {}/{}", playedFac, self.playedThreshold)
-                if playedFac >= self.playedThreshold and self.next(on_end=True):
-                    return
+            if not self.queuingSpecific:
+                # show post play if possible, if an item has been watched (90% by Plex standards)
+                if self.seeking != self.SEEK_PLAYLIST and self.duration:
+                    playedFac = self.videoPlayedFac
+                    util.DEBUG_LOG("Player - played-threshold: {}/{}", playedFac, self.playedThreshold)
+                    if playedFac >= self.playedThreshold and self.next(on_end=True):
+                        return
 
         if (self.seeking not in (self.SEEK_IN_PROGRESS, self.SEEK_PLAYLIST) or
                 (self.seeking == self.SEEK_PLAYLIST and self.stoppedManually)):
@@ -876,8 +881,8 @@ class SeekPlayerHandler(BasePlayerHandler):
 
     def tick(self):
         if (self.seeking != self.SEEK_IN_PROGRESS and not self.ended and self.player.started and not self.seekOnStart
-                and not self.queuingNext and not self.stoppedManually and self.player.isPlayingVideo() and
-                self.player.playState != self.player.STATE_STOPPED):
+                and not self.queuingNext and not self.queuingSpecific and not self.stoppedManually and
+                self.player.isPlayingVideo() and self.player.playState != self.player.STATE_STOPPED):
             self.updateNowPlaying()
         else:
             util.DEBUG_LOG("Not ticking UpdateNowPlaying: {}, {}, {}, {}, {}, {}, {}, {}", self.seeking,
@@ -1543,6 +1548,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
 
         self.trigger('starting.video')
         self.handler.queuingNext = False
+        self.handler.queuingSpecific = False
         self.play(url, li)
 
     def playVideoPlaylist(self, playlist, resume=False, handler=None, session_id=None):

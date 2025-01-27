@@ -2551,6 +2551,8 @@ class PlaylistDialog(kodigui.BaseDialog, SpoilersMixin):
         if not mli:
             return
         self.seek_dialog.sendTimeline(state=self.handler.player.STATE_STOPPED)
+        self.seek_dialog._ignoreTick = True
+        self.handler.queueingSpecific = True
         self.handler.playAt(mli.pos())
         self.doClose()
         #self.updatePlayingItem()
