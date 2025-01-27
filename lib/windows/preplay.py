@@ -37,7 +37,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
     height = 1080
 
     THUMB_POSTER_DIM = util.scaleResolution(347, 518)
-    RELATED_DIM = util.scaleResolution(268, 397)
+    RELATED_DIM = util.scaleResolution(268, 402)
     EXTRA_DIM = util.scaleResolution(329, 185)
     ROLES_DIM = util.scaleResolution(334, 334)
     PREVIEW_DIM = util.scaleResolution(343, 193)

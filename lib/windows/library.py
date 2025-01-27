@@ -50,7 +50,7 @@ MOVE_SET = frozenset(
     )
 )
 
-THUMB_POSTER_DIM = util.scaleResolution(268, 397)
+THUMB_POSTER_DIM = util.scaleResolution(268, 402)
 THUMB_AR16X9_DIM = util.scaleResolution(619, 348)
 THUMB_SQUARE_DIM = util.scaleResolution(355, 355)
 ART_AR16X9_DIM = util.scaleResolution(630, 355)

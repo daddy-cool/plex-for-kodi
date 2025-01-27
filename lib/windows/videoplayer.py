@@ -91,7 +91,7 @@ class VideoPlayerWindow(kodigui.ControlledWindow, windowutils.UtilMixin, Spoiler
     NEXT_DIM = util.scaleResolution(537, 303)
     PREV_DIM = util.scaleResolution(462, 259)
     ONDECK_DIM = util.scaleResolution(329, 185)
-    RELATED_DIM = util.scaleResolution(268, 397)
+    RELATED_DIM = util.scaleResolution(268, 402)
     ROLES_DIM = util.scaleResolution(334, 334)
 
     OPTIONS_GROUP_ID = 200
