@@ -1551,7 +1551,9 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
                         if obj.TYPE == 'collection':
                             colArtDim = TYPE_KEYS.get('collection').get('art_dim', (256, 256))
                             mli.setProperty('art', obj.artCompositeURL(*colArtDim))
-                            mli.setThumbnailImage(obj.artCompositeURL(*thumbDim))
+                            mli.setThumbnailImage(obj.server.getImageTranscodeURL(
+                                obj.artCompositeURL(*tuple(2*dim for dim in thumbDim)), *thumbDim)
+                            )
                         else:
                             if obj.TYPE == 'photodirectory' and obj.composite:
                                 mli.setThumbnailImage(obj.composite.asTranscodedImageURL(*thumbDim))
