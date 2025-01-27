@@ -299,7 +299,7 @@ class VideoPlayerWindow(kodigui.ControlledWindow, windowutils.UtilMixin, Spoiler
             x, y = self.getRoleItemDDPosition()
 
             options = [{'role': r, 'display': r.reasonTitle} for r in sectionRoles]
-            choice = dropdown.showDropdown(options, (x, y), pos_is_bottom=True, close_direction='bottom')
+            choice = dropdown.showDropdown(options, (x, y), pos_is_bottom=True)
 
             if not choice:
                 return

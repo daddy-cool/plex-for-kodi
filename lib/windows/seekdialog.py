@@ -1342,7 +1342,7 @@ class SeekDialog(kodigui.BaseDialog, PlexSubtitleDownloadMixin):
             )
 
         # cheap and inaccurate approach to move the dropdown to the left based on how many buttons the user has hidden
-        choice = dropdown.showDropdown(options, (1360 - self.subtitleButtonLeft, 1060), close_direction='down', pos_is_bottom=True,
+        choice = dropdown.showDropdown(options, (1360 - self.subtitleButtonLeft, 1060), pos_is_bottom=True,
                                        close_on_playback_ended=True, select_index=selectIndex)
 
         if not choice:

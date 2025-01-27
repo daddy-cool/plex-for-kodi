@@ -793,7 +793,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             x, y = self.getRoleItemDDPosition()
 
             options = [{'role': r, 'display': r.reasonTitle} for r in sectionRoles]
-            choice = dropdown.showDropdown(options, (x, y), pos_is_bottom=False, close_direction='bottom')
+            choice = dropdown.showDropdown(options, (x, y), pos_is_bottom=False)
 
             if not choice:
                 return
