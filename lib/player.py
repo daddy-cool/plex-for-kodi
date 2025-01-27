@@ -640,7 +640,14 @@ class SeekPlayerHandler(BasePlayerHandler):
                 util.MONITOR.waitForAbort(0.1)
                 tries += 1
 
-            if self.player.getTime() * 1000 < withinSOS:
+            try:
+                p_time = self.player.getTime()
+            except RuntimeError:
+                # kodi isn't playing anything
+                util.LOG("SeekHandler: onPlayBackSeek: Called without playing player, exiting.")
+                return
+
+            if p_time * 1000 < withinSOS:
                 if self.useResumeFix and self.seekOnStart > 500:
                     self.waitingForSOS = True
                     # checking infoLabel Player.Seeking would be the better solution here, but we're dealing with stuff like
@@ -653,7 +660,7 @@ class SeekPlayerHandler(BasePlayerHandler):
 
                     util.DEBUG_LOG("OnPlayBackSeek: SeekOnStart: "
                                    "Expecting to be within 5 seconds of {}, currently at: {}", self.seekOnStart,
-                                   self.player.getTime())
+                                   p_time)
 
                     tries = 0
                     max_tries = int(5000 / util.addonSettings.coreelecResumeSeekWait)
