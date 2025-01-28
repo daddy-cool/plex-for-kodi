@@ -41,7 +41,7 @@ def forceMediaChoice(method):
         # set mediaChoice if we don't have any yet, or the one we have is incomplete and the new one isn't
         media = method_kwargs.get("media", None)
         partIndex = method_kwargs.get("partIndex", 0)
-        if not self.mediaChoice or not self.mediaChoice.media.hasStreams():
+        if not self.mediaChoice or not self.mediaChoice.media or not self.mediaChoice.media.hasStreams():
             if not media:
                 # if we don't have a chosen media yet, check whether the user has previously chosen one
                 pbs = util.INTERFACE.playbackManager(self)

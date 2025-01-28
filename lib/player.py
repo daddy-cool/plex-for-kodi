@@ -188,6 +188,18 @@ class BasePlayerHandler(object):
     def sessionEnded(self):
         self.player.sessionID = None
 
+    def prev(self):
+        return
+
+    def next(self):
+        return
+
+    def playAt(self, pos):
+        return
+
+    def hideOSD(self, **kwargs):
+        return
+
 
 class SeekPlayerHandler(BasePlayerHandler):
     NO_SEEK = 0
@@ -251,7 +263,6 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.title2 = title2
         self.chapters = chapters or []
         self.playedThreshold = plexapp.util.INTERFACE.getPlayedThresholdValue()
-        self.ignoreTimelines = False
         self.stoppedManually = False
         self.inBingeMode = False
         self.skipPostPlay = False
@@ -358,6 +369,7 @@ class SeekPlayerHandler(BasePlayerHandler):
 
         self.triggerProgressEvent()
         self.seeking = self.SEEK_PLAYLIST
+        self.dialog.prepareNewPlayback(queuingSpecific=True, ignoreTick=True, ignoreInput=True)
         self.player.playVideoPlaylist(self.playlist, handler=self, resume=False)
 
         return True
@@ -380,7 +392,7 @@ class SeekPlayerHandler(BasePlayerHandler):
             if delete:
                 d = self.dialog
                 self.dialog = None
-                d.doClose()
+                d.doClose(delete=delete)
                 del d
                 util.garbageCollect()
 
@@ -468,11 +480,13 @@ class SeekPlayerHandler(BasePlayerHandler):
         if self.dialog:
             self.dialog.onAVStarted()
 
+        self.ignoreTimelines = False
+
         # check if embedded subtitle was set correctly
         if self.isDirectPlay and self.player.video and self.player.video.current_subtitle_is_embedded:
             got_player = False
             tries = 0
-            while not got_player and tries < 20:
+            while not got_player and tries < 50:
                 try:
                     playerID = kodijsonrpc.rpc.Player.GetActivePlayers()[0]["playerid"]
                     got_player = True
@@ -485,11 +499,12 @@ class SeekPlayerHandler(BasePlayerHandler):
                     else:
                         util.DEBUG_LOG("Embedded subtitle was correctly set in Kodi")
                 except IndexError:
-                    util.DEBUG_LOG("Player not available yet, retrying ({}/{})".format(tries, 20))
+                    util.DEBUG_LOG("Player not available yet, retrying ({}/{})".format(tries, 50))
                     tries += 1
                     util.MONITOR.waitForAbort(0.1)
                 except:
                     util.ERROR("Exception when trying to check for embedded subtitles")
+                    break
 
     def onPrePlayStarted(self):
         util.DEBUG_LOG('SeekHandler: onPrePlayStarted, DP: {}', self.isDirectPlay)
@@ -559,12 +574,13 @@ class SeekPlayerHandler(BasePlayerHandler):
         if self.dialog:
             self.dialog.onPlayBackStopped()
 
-        if self.queuingNext:
-            if self.isDirectPlay and self.playlist and self.playlist.hasNext():
+        if self.queuingNext or self.queuingSpecific:
+            if self.isDirectPlay and self.playlist and (self.playlist.hasNext() or self.queuingSpecific):
                 self.hideOSD(delete=True)
             # fixme: the on_end value is a hack here, we should rename or use a different parameter
-            if self.next(on_end=not self.skipPostPlay):
-                return
+            if self.queuingNext:
+                if self.next(on_end=not self.skipPostPlay):
+                    return
 
         if self.seeking not in (self.SEEK_IN_PROGRESS, self.SEEK_REWIND):
             if not self.queuingSpecific:
@@ -884,6 +900,9 @@ class SeekPlayerHandler(BasePlayerHandler):
 
     def onVideoOSD(self):
         # xbmc.executebuiltin('Dialog.Close(seekbar,true)')  # Doesn't work :)
+        util.DEBUG_LOG('SeekHandler: onVideoOSD - Seeking={0}', self.seeking)
+        if self.queuingSpecific or self.queuingNext:
+            return
         self.showOSD()
 
     def tick(self):
@@ -1208,6 +1227,8 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
         self.handler = AudioPlayerHandler(self)
         self.isExternal = False
 
+        self.on('action', self.playerAction)
+
     def init(self):
         self._closed = False
         self._nextItem = None
@@ -1240,6 +1261,8 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
 
     def close(self, shutdown=False):
         self._closed = True
+        if shutdown:
+            self.off('action', self.playerAction)
 
     def reset(self):
         self.video = None
@@ -1263,6 +1286,30 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
             if not xbmc.getCondVisibility('Player.Paused'):
                 util.DEBUG_LOG('Player - Control:  Pausing')
                 xbmc.executebuiltin('PlayerControl(Play)')
+
+    def playerAction(self, action, **kwargs):
+        """
+        Signal receiver for specific player actions (called by SeekDialog for example)
+        @param action: "next", "prev", "playAt"
+        @param kwargs: "pos"=playlist index; in case of action == "playAt"
+        @return:
+        """
+        if not self.handler:
+            util.DEBUG_LOG("Player: Can't handle action without handler")
+            return
+
+        util.DEBUG_LOG('Player - Action: {} ({})', action, str(kwargs))
+
+        self.handler.hideOSD()
+
+        if action == "next":
+            self.handler.next()
+
+        elif action == "prev":
+            self.handler.prev()
+
+        elif action == "playAt":
+            self.handler.playAt(kwargs['pos'])
 
     @property
     def playState(self):
@@ -1568,9 +1615,9 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
             #self.handler.queuingNext = True
             #self.handler.seekOnStart = 0
             #self.handler.baseOffset = 0
-            if self.handler.dialog:
-                self.handler.dialog.doClose()
-            self.handler.dialog = None
+            #if self.handler.dialog:
+            #    self.handler.dialog.doClose(delete=True)
+            #self.handler.dialog = None
             self.playerObject = None
             self.currentTime = 0
         else:
@@ -1880,9 +1927,10 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
             util.DEBUG_LOG('Player: Stopping and waiting...')
             self.stop()
             if not util.MONITOR.abortRequested():
-                while not util.MONITOR.waitForAbort(0.05) and self.isPlaying():
+                while not util.MONITOR.waitForAbort(0.1) and self.isPlaying():
                     if util.MONITOR.abortRequested():
                         break
+            util.MONITOR.waitForAbort(0.2)
             util.DEBUG_LOG('Player: Stopping and waiting...Done')
 
     def monitor(self):
@@ -1939,20 +1987,25 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
         ct = 0
         util.DEBUG_LOG("VideoMonitor: Initializing...")
         while self.isPlayingVideo() and not util.MONITOR.abortRequested() and not self._closed:
-            if self.handler and self.handler.queuingNext:
+            if self.handler and (self.handler.queuingNext or self.handler.queuingSpecific):
                 # when waiting for the next item to be fully initialized, don't set self.currentTime, otherwise
                 # onPlaybackStarted could push an invalid trueTime
                 util.DEBUG_LOG("VideoMonitor: Waiting for next item to queue...")
-                while (self.handler and self.handler.queuingNext and not util.MONITOR.abortRequested()
-                       and not self._closed):
+                while (self.handler and (self.handler.queuingNext or self.handler.queuingSpecific)
+                       and not util.MONITOR.abortRequested() and not self._closed):
                     util.MONITOR.waitForAbort(0.1)
 
                 util.DEBUG_LOG("VideoMonitor: Started")
 
-            try:
-                self.currentTime = self.getTime()
-            except RuntimeError:
-                break
+            p_time = None
+            t_tries = 0
+            while not p_time and not util.MONITOR.abortRequested() and t_tries < 50:
+                try:
+                    self.currentTime = p_time = self.getTime()
+                except RuntimeError:
+                    util.DEBUG_LOG("VideoMonitor: Waiting for player readiness...")
+                    t_tries += 1
+                    util.MONITOR.waitForAbort(0.1)
 
             util.MONITOR.waitForAbort(0.1)
             if xbmc.getCondVisibility('Window.IsActive(videoosd)'):
