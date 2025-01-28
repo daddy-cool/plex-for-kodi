@@ -693,7 +693,10 @@ class SeekPlayerHandler(BasePlayerHandler):
                     else:
                         util.DEBUG_LOG("OnPlayBackSeek: Seeked on start to: {0}", self.seekOnStart)
                     self.waitingForSOS = False
-            self.dialog.offset = self.seekOnStart
+
+            # should not be necessary due to other recent changes to dialog persistence, but it doesn't hurt, either
+            if self.dialog:
+                self.dialog.offset = self.seekOnStart
             self.seekOnStart = 0
 
         self.updateOffset()
