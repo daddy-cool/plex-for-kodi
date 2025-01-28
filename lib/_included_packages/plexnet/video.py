@@ -469,6 +469,21 @@ class CachableItemsMixin(object):
     def cachable(self):
         return 'items' in util.INTERFACE.getPreference('cache_requests')
 
+    def clearChildCaches(self):
+        # clear caches of this season and its items
+        if not self.cachable:
+            return
+        cks = []
+        urls = []
+        for e in self.episodes():
+            cks_, urls_ = e.clearCache(return_urls=True)
+            cks += cks_
+            urls += urls_
+
+        cks = list(set(cks))
+        urls = list(set(urls))
+        self._clearCache(cks, urls)
+
 
 class PlayableVideo(CachableItemsMixin, Video, media.RelatedMixin):
     __slots__ = ("extras", "guids", "chapters")
@@ -740,17 +755,7 @@ class Show(CachableItemsMixin, Video, media.RelatedMixin, SectionOnDeckMixin):
         return self._genres
 
     def clearCache(self, **kwargs):
-        # clear caches of all seasons and items
-        cks = []
-        urls = []
-        for e in self.episodes():
-            cks_, urls_= e.clearCache(return_urls=True)
-            cks += cks_
-            urls += urls_
-
-        cks = list(set(cks))
-        urls = list(set(urls))
-        self._clearCache(cks, urls)
+        self.clearChildCaches()
 
 
 @plexobjects.registerLibType
@@ -798,6 +803,9 @@ class Season(CachableItemsMixin, Video):
 
     def unwatched(self):
         return self.episodes(watched=False)
+
+    def clearCache(self, **kwargs):
+        self.clearChildCaches()
 
 
 @plexobjects.registerLibType
