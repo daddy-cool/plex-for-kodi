@@ -2351,9 +2351,12 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                 for idx, mli in enumerate(control):
                     if mli.dataSource and mli.dataSource.ratingKey and str(mli.dataSource.ratingKey) == rk:
                         if cur_pos != idx:
-                            util.DEBUG_LOG("Hub {}: Reselect: Found {} in list, reselecting", identifier, rk)
+                            util.DEBUG_LOG("Hub {}: Reselect: Found {} in list ({} vs. {}), reselecting",
+                                           identifier, rk, idx, pos)
                             control.selectItem(idx)
                             rk_found = True
+                            pos = idx
+                            break
                         else:
                             return
                 if rk_found:
