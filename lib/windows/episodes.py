@@ -333,7 +333,10 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         if not self.tasks:
             self.tasks = backgroundthread.Tasks()
 
-        vp = VIDEO_PROGRESS.get(self.show_.ratingKey, {}).get(self.season.ratingKey, {})
+        vp = None
+        if self.show_.ratingKey in VIDEO_PROGRESS:
+            # access progress data for current show only
+            vp = copy.deepcopy(VIDEO_PROGRESS[self.show_.ratingKey]).get(self.season.ratingKey, {})
 
         if (self.manuallySelected and not VIDEO_PROGRESS) or self.cameFrom == "info":
             if self.cameFrom == "info":
