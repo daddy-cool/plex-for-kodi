@@ -369,7 +369,7 @@ class SeekPlayerHandler(BasePlayerHandler):
 
         self.triggerProgressEvent()
         self.seeking = self.SEEK_PLAYLIST
-        self.dialog.prepareNewPlayback(queuingSpecific=True, ignoreTick=True, ignoreInput=True)
+        self.dialog.prepareNewPlayback(queuing_specific=True, ignore_tick=True, ignore_input=True)
         self.player.playVideoPlaylist(self.playlist, handler=self, resume=False)
 
         return True
