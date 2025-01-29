@@ -340,14 +340,14 @@ class SeekPlayerHandler(BasePlayerHandler):
             if hasNext:
                 self.seeking = self.SEEK_PLAYLIST
 
+        self.triggerProgressEvent()
+
         if on_end:
             if self.showPostPlay():
                 return True
 
         if not self.playlist or self.stoppedManually or (self.playlist and not hasNext):
             return False
-
-        self.triggerProgressEvent()
 
         self.player.playVideoPlaylist(self.playlist, handler=self, resume=False)
 
