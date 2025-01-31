@@ -21,6 +21,7 @@ from lib.util import T
 from . import busy
 from . import dropdown
 from . import kodigui
+from . import windowutils
 from . import playersettings
 from . import optionsdialog
 from .mixins import SpoilersMixin, PlexSubtitleDownloadMixin
@@ -89,7 +90,7 @@ MARKER_CHAPTER_OVERLAP_THRES = 30000  # 30 seconds
 MARKER_END_JUMP_OFF = 1000
 
 
-class SeekDialog(kodigui.BaseDialog, PlexSubtitleDownloadMixin):
+class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownloadMixin):
     """
     fixme: This is a convoluted mess.
     """
@@ -554,6 +555,10 @@ class SeekDialog(kodigui.BaseDialog, PlexSubtitleDownloadMixin):
             self.selectedOffset = self.trueOffset()
 
         self.updateProgress()
+
+    def closeWithCommand(self, command):
+        self.exitCommand = command
+        self.stop()
 
     def onAction(self, action):
         if xbmc.getCondVisibility('Window.IsActive(selectdialog)'):

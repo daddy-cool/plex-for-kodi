@@ -958,11 +958,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                         return
 
                     if controlID == self.SECTION_LIST_ID and self.sectionList.control.getSelectedPosition() > 0:
-                        self.sectionList.setSelectedItemByPos(0)
-                        # set lastSection here already, otherwise tick() might interfere
-                        # fixme: Might still happen in a race condition, check later
-                        self.lastSection = home_section
-                        self.showHubs(home_section)
+                        self.goHome()
                         return
 
                     if util.addonSettings.fastBack and not optionsFocused and offSections \
@@ -1059,6 +1055,16 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
         if player.PLAYER.bgmPlaying:
             player.PLAYER.stopAndWait()
+
+    def goHome(self, **kwargs):
+        self.setProperty('hub.focus', '')
+        self.setFocusId(self.SECTION_LIST_ID)
+        self.sectionList.setSelectedItemByPos(0)
+        # set lastSection here already, otherwise tick() might interfere
+        # fixme: Might still happen in a race condition, check later
+        self.lastSection = home_section
+        self.showHubs(home_section)
+        return
 
     def confirmExit(self):
         lBtnExit = T(32336, 'Exit')
