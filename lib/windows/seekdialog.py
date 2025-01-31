@@ -475,7 +475,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         """
         this is called by our handler and occurs earlier than onFirstInit.
         """
-        util.DEBUG_LOG("SeekDialog: setup, keepMarkerDef={}", keepMarkerDef)
+        util.DEBUG_LOG("SeekDialog: setup, keepMarkerDef={}, offset={}", keepMarkerDef, offset)
         self._duration = duration
         self.title = title
         self.title2 = title2
@@ -2156,7 +2156,16 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         if not self.handler.player.playerObject:
             return
 
-        self.timeKeeperTime = self.trueOffset()#int(self.handler.player.getTime() * 1000)
+        if not self.handler.player.isExternal:
+            self.timeKeeperTime = self.trueOffset()#int(self.handler.player.getTime() * 1000)
+        else:
+            # special case for external players - we don't know the actual progress, but we can make an educated guess
+            # for the start point
+            if not self.timeKeeperTime:
+                self.timeKeeperTime = self.baseOffset or self.handler.seekOnStart
+                if self.timeKeeperTime is None:
+                    self.timeKeeperTime = 0
+
         if not self.timeKeeper:
             self.timeKeeper = plexapp.util.RepeatingCounterTimer(1.0, self.onTimeKeeperCallback)
         self.onTimeKeeperCallback(tick=False)
@@ -2175,21 +2184,29 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         """
         called by playbackTimer periodically, sets playback time/ends in UI
         """
-        # we might be a little early on slower systems
-        if not self.started or not self.handler.player.playerObject:
-            return
+        force_tick = self.handler.player.isExternal
 
-        if self.stopPlaybackOnIdle:
-            if self.idleTime and time.time() - self.idleTime >= self.stopPlaybackOnIdle:
-                util.LOG("Player has been idle for {}s, stopping.", int(time.time() - self.idleTime))
-                self.handler.player.stopAndWait()
+        # we might be a little early on slower systems
+        if not force_tick:
+            if not self.started or not self.handler.player.playerObject:
                 return
 
-            if not self.idleTime and xbmc.getCondVisibility('Player.Paused'):
-                self.idleTime = time.time()
+            if self.stopPlaybackOnIdle:
+                if self.idleTime and time.time() - self.idleTime >= self.stopPlaybackOnIdle:
+                    util.LOG("Player has been idle for {}s, stopping.", int(time.time() - self.idleTime))
+                    self.handler.player.stopAndWait()
+                    return
 
-        if tick and xbmc.getCondVisibility('Player.HasVideo + Player.Playing'):
+                if not self.idleTime and xbmc.getCondVisibility('Player.Paused'):
+                    self.idleTime = time.time()
+
+        # force_tick is enabled when we're using an external player. In this case we simply count the time spent while
+        # the external player is open and report that to the PMS
+        if tick and (xbmc.getCondVisibility('Player.HasVideo + Player.Playing') or force_tick):
             self.timeKeeperTime += 1000
+
+        if force_tick:
+            return
 
         # Update buffer state in PPI if open and old Kodi version
         if util.KODI_BUILD_NUMBER < 2090821 and self.getProperty('show.PPI'):
@@ -2399,6 +2416,9 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         """
         Called ~1/s; can be wildly inaccurate.
         """
+
+        if self.handler and self.handler.player and self.handler.player.isExternal:
+            return
 
         # we might be called with an offset for seekOnStart even before we're initialized (onFirstInit)
         # in that case, skip all functionality and just seekOnStart
