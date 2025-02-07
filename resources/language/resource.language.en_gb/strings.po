@@ -1967,7 +1967,7 @@ msgid "Maximum intro offset to consider"
 msgstr ""
 
 msgctxt "#33038"
-msgid "When encountering an intro marker with a start time offset greater than this, ignore it (default: 600s/10m)"
+msgid "When encountering an intro marker with a start time offset greater than this, ignore it (default: 1400s/23m)"
 msgstr ""
 
 msgctxt "#33039"
