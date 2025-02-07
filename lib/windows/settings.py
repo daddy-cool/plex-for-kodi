@@ -421,7 +421,6 @@ class KeySetting(BasicSetting):
             ak = actions.ActionKey(int(code))
             return ak
 
-
 class Settings(object):
     SETTINGS = {
         'main': (
@@ -450,6 +449,12 @@ class Settings(object):
                         "oid certain pitfalls, Default: 90 %"
                     )
                 ),
+                BoolSetting('use_alternate_seek2', T(33667, 'Use alternate seek'), util.altSeekRecommended).description(
+                    T(33668, 'ATTENTION: Only enable this if you have reproducible audio issues after '
+                             'seeking/resuming.\n\nUse an alternative seek method in videos, which can help in '
+                             'problematic scenarios; brings its own issues/quirks. Disabled by default (enabled by '
+                             'default for CoreELEC and LG WebOS)'
+                )),
                 BoolSetting(
                     'assume_resume', T(33711, 'Always resume media'), True
                 ).description(
@@ -709,10 +714,6 @@ class Settings(object):
                     T(33046, '')),
                 BoolSetting('no_osd_time_spoilers', T(33004, ''), False, backport_from="no_spoilers").description(
                     T(33005, '')),
-                BoolSetting('use_alternate_seek', T(33667, 'CoreELEC: Use alternate seek'), True).description(
-                    T(33668, 'Enables an alternate method to seek on CoreELEC due to a seemingly '
-                             'buggy implementation. Use this if you have audio issues after seeking/resuming.'
-                      )) if util.isCoreELEC else None,
                 MultiUAOptionsSetting(
                     'player_show_buttons', T(33057, 'Show buttons'),
                     ['subtitle_downloads', 'skip_intro', 'skip_credits'],
@@ -950,7 +951,7 @@ class Settings(object):
                 OptionsSetting(
                     'action_on_wake',
                     T(33070, 'Action on Wake event'),
-                    util.isCoreELEC and 'wait_5' or 'wait_1',
+                    util.altSeekRecommended and 'wait_5' or 'wait_1',
                     [('none', T(32702, 'Nothing')), ('restart', T(33071, 'Restart PM4K'))]
                     + [('wait_{}'.format(s), T(33072, '').format(s)) for s in [1, 2, 3] + list(range(5, 65, 5))]
                 ).description(T(33075, '')),

@@ -210,6 +210,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.resumeSeekBehindPause = util.getSetting('resume_seek_behind_pause')
         self.resumeSeekBehindAfter = util.getSetting('resume_seek_behind_after') / 1000.0
         self.resumeSeekBehindOnlyDP = util.getSetting('resume_seek_behind_onlydp')
+        self.useAlternateSeek = util.getSetting('use_alternate_seek2')
         self.pausedAt = None
         self.isDirectPlay = True
         self.isTranscoded = False
@@ -1548,7 +1549,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                     # On CoreELEC changing the audio stream causes the audio to stutter or delay
                     # so this small seek helps sync things back up.  But we also need to pause the
                     # video for a short time if it's playing or the seek doesn't work
-                    if util.isCoreELEC and changed.audio:
+                    if self.useAlternateSeek and changed.audio:
                         if not xbmc.getCondVisibility('Player.Paused'):
                             self.videoPausedForAudioStreamChange = True
                             self.handler.player.control('pause')
@@ -2123,7 +2124,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         util.DEBUG_LOG("SeekDialog: OnPlaybackPaused")
 
         # Need to resume the video when changing streams on CoreELEC
-        if util.isCoreELEC and self.videoPausedForAudioStreamChange:
+        if self.useAlternateSeek and self.videoPausedForAudioStreamChange:
             self.videoPausedForAudioStreamChange = False
             self.handler.player.control('play')
             return

@@ -1156,7 +1156,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             self.showHubs(self.lastSection, force=True, update=True)
 
     def onWake(self, *args, **kwargs):
-        wakeAction = util.getSetting('action_on_wake', util.isCoreELEC and 'wait_5' or 'wait_1')
+        wakeAction = util.getSetting('action_on_wake', util.platformFlavor == 'CoreELEC' and 'wait_5' or 'wait_1')
         if wakeAction == "restart":
             self._ignoreReInit = True
             self._restarting = True

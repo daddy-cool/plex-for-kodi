@@ -2932,12 +2932,12 @@ msgid "Audio codecs you can't play back. Disables Direct Play for such media ite
 msgstr "Audio-Codecs, die Du nicht wiedergeben kannst. Deaktiviert Direktes Abspielen für betroffene Mediendateien, aktiviert Direktes Streamen, wenn möglich, transkodiert den Audio-Stream zu einem kompatiblen Format."
 
 msgctxt "#33667"
-msgid "CoreELEC: Use alternate seek"
-msgstr "CoreELEC: Alternatives Spulen"
+msgid "Use alternate seek"
+msgstr "Alternatives Spulen"
 
 msgctxt "#33668"
-msgid "Enables an alternate method to seek on CoreELEC due to a seemingly buggy implementation. Use this if you have audio issues after seeking/resuming."
-msgstr "Aktiviert eine alternative Methode zum Spulen auf CoreELEC-Clients, wegen einer fehleranfälligen Implementation. Das kann benutzt werden, sollten beim Spulen/Fortsetzen Audio-Probleme auftreten."
+msgid "ATTENTION: Only enable this if you have reproducible audio issues after seeking/resuming.\n\nUse an alternative seek method in videos, which can help in problematic scenarios; brings its own issues/quirks. Disabled by default (enabled by default for CoreELEC and LG WebOS)"
+msgstr "ACHTUNG: Ausschließlich verwenden, wenn reproduzierbare Audio-Probleme beim Spulen/Fortsetzen auftreten.\n\nVerwende eine alternative Methode zum Spulen beim Video-Abspielen, die in bestimmten problematischen Szenarios helfen kann. Kann selbst Probleme verursachen. Standardm. deaktiviert (standardm. aktiviert bei CoreELEC und LG WebOS)"
 
 msgctxt "#33669"
 msgid "Really sign out?"

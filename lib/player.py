@@ -231,7 +231,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.prePlayWitnessed = False
         self.queuingNext = False
         self.queuingSpecific = False
-        self.useAlternateSeek = util.isCoreELEC and util.getSetting('use_alternate_seek')
+        self.useAlternateSeek = util.getSetting('use_alternate_seek2')
         self.useResumeFix = self.useAlternateSeek
         self.isMapped = False
         self.reset()
