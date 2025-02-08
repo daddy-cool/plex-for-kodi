@@ -100,6 +100,8 @@ NEEDS_SCALING = round(CURRENT_AR, 2) < round(1920 / 1080, 2)
 
 HOME_BUTTON_MAPPED = None
 
+HUB_ITEM_STATES = {}
+
 
 def homeButtonMapped(*args, **kwargs):
     global HOME_BUTTON_MAPPED
