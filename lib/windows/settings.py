@@ -543,6 +543,14 @@ class Settings(object):
                     T(33666, "Audio codecs you can't play back. Disables Direct Play for such media items, "
                              "enables Direct Stream if possible, transcodes audio stream to compatible format.")
                 ),
+                OptionsSetting(
+                    'audio_transcode_codec', T(33733, 'Transcode target codec'),
+                    "default",
+                    [("default", T(32030, 'Auto'))] + list(sorted([(a, "{} ({})".format(b, a)) for a, b in plexnet.util.AUDIO_CODECS_TC_VERB.items()]))
+                ).description(
+                    T(33734, "Sets the target codec when transcoding/direct streaming. Overridden when "
+                             "\"Transcode audio to AC3\" is set.")
+                ),
                 BoolSetting('audio_hires', T(33079, ''),
                             True).description(
                     T(33080, '')

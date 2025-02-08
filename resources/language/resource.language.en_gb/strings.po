@@ -2607,3 +2607,11 @@ msgstr ""
 msgctxt "#33732"
 msgid "Bitrate"
 msgstr ""
+
+msgctxt "#33733"
+msgid "Transcode target codec"
+msgstr ""
+
+msgctxt "#33734"
+msgid "Sets the target codec when transcoding/direct streaming. Overridden when \"Transcode audio to AC3\" is set."
+msgstr ""
