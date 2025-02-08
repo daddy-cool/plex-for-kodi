@@ -178,7 +178,7 @@ class PlexInterface(plexapp.AppInterface):
         try:
             urls = s.cache.other["stored_urls"]
             success = s.cache.other["last_shutdown_successful"] == True
-        except KeyError:
+        except (KeyError, ValueError, UnicodeDecodeError):
             success = False
 
         if not success:
