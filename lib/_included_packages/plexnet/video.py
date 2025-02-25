@@ -171,7 +171,7 @@ class Video(media.MediaItem, AudioCodecMixin):
 
                             sel_stream = possible_alt
                     if (not self.manually_selected_sub_stream or self.manually_selected_sub_stream != sel_stream.id) and \
-                        deselect_subtitles and str(selas.languageCode) in deselect_subtitles and \
+                        deselect_subtitles and selas and str(selas.languageCode) in deselect_subtitles and \
                           not stream_forced:
                         util.DEBUG_LOG("Not selecting {} subtitle stream because audio is {}",
                                        sel_stream.languageCode, selas.languageCode)
@@ -184,7 +184,7 @@ class Video(media.MediaItem, AudioCodecMixin):
                     return sel_stream
             if fallback:
                 stream = self.subtitleStreams[0]
-                if deselect_subtitles and str(selas.languageCode) in deselect_subtitles and not stream.forced.asBool():
+                if deselect_subtitles and selas and str(selas.languageCode) in deselect_subtitles and not stream.forced.asBool():
                     return
                 if self._current_subtitle_idx != stream.typeIndex:
                     self._current_subtitle_idx = stream.typeIndex
