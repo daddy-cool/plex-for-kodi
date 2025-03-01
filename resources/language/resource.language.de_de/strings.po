@@ -3198,3 +3198,11 @@ msgstr "Transkodieren Ziel-Codec"
 msgctxt "#33734"
 msgid "Sets the target codec when transcoding/direct streaming. Overridden when \"Transcode audio to AC3\" is set."
 msgstr "Setzt den Ziel-Codec beim Transkodieren/Direkt Streamen. Wird überschrieben wenn \"Transkodiere Ton zu AC3\" aktiv ist."
+
+msgctxt "#33735"
+msgid "Always auto-start"
+msgstr "Immer automatisch starten"
+
+msgctxt "#33736"
+msgid "By default PM4K won't auto-start when the current window isn't a Home-derived window (e.g.: Settings). Enable this if you always want to auto-start PM4K regardless of the current window. Can also improve start-up time."
+msgstr "PM4K startet nicht, solange das aktuelle Fenster kein Home-bezogenes Fenster ist (z. B.: Einstellungen). Aktivieren, wenn PM4K immer automatisch gestartet werden soll, egal, welches Fenster aktuell aktiv ist. Kann die Auto-Start-Zeit verbessern."

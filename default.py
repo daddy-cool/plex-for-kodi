@@ -21,10 +21,12 @@ logger.setLevel(logging.DEBUG)
 
 
 from_kiosk = False
+kiosk_always = False
 boot_delay = False
 argvlen = len(sys.argv)
 if argvlen > 1:
-    from_kiosk = bool(int(sys.argv[1]))
+    from_kiosk = int(sys.argv[1]) > 0
+    kiosk_always = int(sys.argv[1]) > 1
     if argvlen > 2:
         boot_delay = int(sys.argv[2])
         if argvlen > 3:
@@ -73,6 +75,9 @@ try:
                     if waited < boot_delay:
                         log('Main: script.plexmod: Forced start before auto-start delay ({:.1f}/{} s).',
                             waited, boot_delay)
+                        skip_ensure_home = True
+
+                    if kiosk_always:
                         skip_ensure_home = True
 
                     waited = 0

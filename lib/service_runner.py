@@ -29,8 +29,9 @@ def main(restarting_service=False):
 
     if ku.ADDON.getSetting('kiosk.mode') == 'true' and not service_started:
         ku.xbmc.log('script.plexmod: Starting from service (Kiosk Mode)', ku.xbmc.LOGINFO)
+        kiosk = 2 if ku.ADDON.getSetting('kiosk.always') == 'true' else 1
         delay = ku.ADDON.getSetting('kiosk.delay') or "0"
-        ku.xbmc.executebuiltin('RunScript(script.plexmod,1{})'.format(",{}".format(delay) if delay != "0" else ""))
+        ku.xbmc.executebuiltin('RunScript(script.plexmod,{}{})'.format(kiosk, ",{}".format(delay) if delay != "0" else ""))
 
     if not ku.FROM_KODI_REPOSITORY and ku.ADDON.getSetting('auto_update_check') != "false":
         while not MONITOR.abortRequested():

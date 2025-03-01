@@ -419,8 +419,6 @@ class SeekPlayerHandler(BasePlayerHandler):
                 if self.seekAbsolute(offset):
                     return
 
-        self.updateNowPlaying(state=self.player.STATE_PAUSED)  # To for update after seek
-
         self.seeking = self.SEEK_IN_PROGRESS
 
         if self.player.playState == self.player.STATE_PAUSED:
@@ -453,7 +451,6 @@ class SeekPlayerHandler(BasePlayerHandler):
             except RuntimeError:  # Not playing a file
                 util.DEBUG_LOG("SeekAbsolute: runtime error")
                 return False
-            self.updateNowPlaying(state=self.player.STATE_PAUSED)  # To for update after seek
 
             # Some devices seem to have an issue with the self.player.seekTime function where after the seek the video
             # will be playing, but the audio won't for a few seconds(I've seen up to 15 seconds).  Using this alternate

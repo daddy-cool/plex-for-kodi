@@ -2615,3 +2615,11 @@ msgstr ""
 msgctxt "#33734"
 msgid "Sets the target codec when transcoding/direct streaming. Overridden when \"Transcode audio to AC3\" is set."
 msgstr ""
+
+msgctxt "#33735"
+msgid "Always auto-start"
+msgstr ""
+
+msgctxt "#33736"
+msgid "By default PM4K won't auto-start when the current window isn't a Home-derived window (e.g.: Settings). Enable this if you always want to auto-start PM4K regardless of the current window. Can also improve start-up time."
+msgstr ""
