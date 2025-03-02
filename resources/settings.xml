@@ -20,7 +20,7 @@
                 </setting>
                 <setting id="kiosk.always" type="boolean" label="33735" help="33736">
                     <level>0</level>
-                    <default>false</default>
+                    <default>true</default>
                     <control type="toggle"/>
                 </setting>
                 <setting id="subtitle_use_extended_title" type="boolean" label="32950" help="32951">
