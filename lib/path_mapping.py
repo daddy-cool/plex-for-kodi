@@ -52,7 +52,7 @@ class PathMappingManager(object):
     def mapping(self):
         return self.PATH_MAP and getSetting("path_mapping", True)
 
-    def getMappedPathFor(self, path, server):
+    def getMappedPathFor(self, path, server, return_rep=False):
         if self.mapping:
             match = ("", "")
 
@@ -63,6 +63,15 @@ class PathMappingManager(object):
 
             if all(match):
                 map_path, pms_path = match
+
+                if return_rep:
+                    sep = norm_sep(map_path)
+
+                    # replace match and normalize path separator to separator style of map_path
+                    url = path.replace(pms_path, map_path, 1).replace(sep == "/" and "\\" or "/", sep)
+
+                    # fixme: this is dirty.
+                    return url, pms_path, sep
                 return map_path, pms_path
         return None, None
 

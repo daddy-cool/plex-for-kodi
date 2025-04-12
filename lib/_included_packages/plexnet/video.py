@@ -687,7 +687,7 @@ class Movie(PlayableVideo):
 
 @plexobjects.registerLibType
 class Show(CachableItemsMixin, Video, media.RelatedMixin, SectionOnDeckMixin):
-    __slots__ = ("_genres", "guids", "onDeck")
+    __slots__ = ("_genres", "guids", "onDeck", "locations")
     TYPE = 'show'
 
     def _setData(self, data):
@@ -700,6 +700,7 @@ class Show(CachableItemsMixin, Video, media.RelatedMixin, SectionOnDeckMixin):
             self.extras = PlexVideoItemList(data.find('Extras'), initpath=self.initpath, server=self.server, container=self)
             self.onDeck = PlexVideoItemList(data.find('OnDeck'), initpath=self.initpath, server=self.server,
                                             container=self)
+            self.locations = plexobjects.PlexItemList(data, media.Location, media.Location.TYPE, server=self.server)
 
     @property
     def unViewedLeafCount(self):

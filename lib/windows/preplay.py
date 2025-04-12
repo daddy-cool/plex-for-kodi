@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import os
+
 from kodi_six import xbmc
 from kodi_six import xbmcgui
 from plexnet import plexplayer, media, util as pnUtil, plexapp
@@ -18,7 +20,7 @@ from . import playersettings
 from . import search
 from . import videoplayer
 from . import windowutils
-from .mixins import RatingsMixin, PlaybackBtnMixin
+from .mixins import RatingsMixin, PlaybackBtnMixin, ThemeMusicMixin
 
 VIDEO_RELOAD_KW = dict(includeExtras=1, includeExtrasCount=10, includeChapters=1, includeReviews=1)
 
@@ -28,7 +30,7 @@ class RelatedPaginator(pagination.BaseRelatedPaginator):
         return self.parentWindow.video.getRelated(offset=offset, limit=amount)
 
 
-class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixin, PlaybackBtnMixin):
+class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixin, PlaybackBtnMixin, ThemeMusicMixin):
     xmlFile = 'script-plex-pre_play.xml'
     path = util.ADDON.getAddonInfo('path')
     theme = 'Main'
@@ -91,6 +93,10 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.setup()
         self.initialized = True
 
+        if not util.getSetting("slow_connection") and not self.openedWithAutoPlay:
+            locations = [os.path.dirname(s.part.file) for s in self.video.videoStreams]
+            self.playThemeMusic(None, self.video.ratingKey, locations, self.video.server)
+
     def doAutoPlay(self):
         # First reload the video to get all the other info
         self.video.reload(checkFiles=1, **VIDEO_RELOAD_KW)
@@ -100,6 +106,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
     @busy.dialog()
     def onReInit(self):
         PlaybackBtnMixin.onReInit(self)
+        self.useBGM = False
         self.initialized = False
         if util.getSetting("slow_connection"):
             self.progressImageControl.setWidth(1)

@@ -2,7 +2,6 @@ from __future__ import absolute_import
 
 import requests.exceptions
 import copy
-import threading
 from kodi_six import xbmc
 from kodi_six import xbmcgui
 from collections import OrderedDict
@@ -26,7 +25,7 @@ from . import playersettings
 from . import search
 from . import videoplayer
 from . import windowutils
-from .mixins import SeasonsMixin, RatingsMixin, SpoilersMixin, PlaybackBtnMixin
+from .mixins import SeasonsMixin, RatingsMixin, SpoilersMixin, PlaybackBtnMixin, ThemeMusicMixin
 
 VIDEO_RELOAD_KW = dict(includeExtras=1, includeExtrasCount=10, includeChapters=1)
 
@@ -191,7 +190,7 @@ class RedirectToEpisode(Exception):
 VIDEO_PROGRESS = OrderedDict()
 
 class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, RatingsMixin, SpoilersMixin,
-                     PlaybackBtnMixin, playbacksettings.PlaybackSettingsMixin):
+                     PlaybackBtnMixin, ThemeMusicMixin, playbacksettings.PlaybackSettingsMixin):
     xmlFile = 'script-plex-episodes.xml'
     path = util.ADDON.getAddonInfo('path')
     theme = 'Main'
@@ -316,13 +315,8 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         if self.show_ and self.show_.theme and not util.getSetting("slow_connection") and \
                 (not self.cameFrom or self.cameFrom not in (self.show_.ratingKey, "postplay")) and \
                 not self.openedWithAutoPlay:
-            volume = self.show_.settings.getThemeMusicValue()
-            if volume > 0:
-                t = threading.Thread(target=player.PLAYER.playBackgroundMusic,
-                                     args=(self.show_.theme.asURL(True), volume, self.show_.ratingKey),
-                                     name="bgm")
-                t.start()
-                self.useBGM = True
+            self.playThemeMusic(self.show_.theme.asURL(True), self.show_.ratingKey,
+                                [loc.get("path") for loc in self.show_.locations], self.show_.server)
 
         self.openedWithAutoPlay = False
 

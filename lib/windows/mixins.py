@@ -1,12 +1,17 @@
 # coding=utf-8
 
 import math
+import os
+import threading
 from six import ensure_str
 from plexnet import util as pnUtil
+from kodi_six import xbmcvfs
 
 from lib import util
+from lib import player
 from lib.data_cache import dcm
 from lib.util import T
+from lib.path_mapping import pmm
 from lib.genres import GENRES_TV_BY_SYN
 from . import busy
 from . import kodigui
@@ -259,6 +264,31 @@ class PlaybackBtnMixin(object):
 
     def onReInit(self):
         self.playBtnClicked = False
+
+
+class ThemeMusicMixin(object):
+    def playThemeMusic(self, theme_url, identifier, locations, server):
+        volume = pnUtil.INTERFACE.getThemeMusicValue()
+        if pmm.mapping:
+            theme_found = False
+            for loc in locations:
+                path, pms_path, sep = pmm.getMappedPathFor(loc, server, return_rep=True)
+                for codec in pnUtil.AUDIO_CODECS_TC:
+                    final_path = os.path.join(path, "theme.{}".format(codec)).replace(sep == "/" and "\\" or "/", sep)
+                    if path and xbmcvfs.exists(final_path):
+                        theme_url = final_path
+                        theme_found = True
+                        util.DEBUG_LOG("ThemeMusicMixin: Using {} as theme music", theme_url)
+                        break
+                if theme_found:
+                    break
+
+        if theme_url:
+            t = threading.Thread(target=player.PLAYER.playBackgroundMusic,
+                                 args=(theme_url, volume, identifier),
+                                 name="bgm")
+            t.start()
+            self.useBGM = True
 
 
 PLEX_LEGACY_LANGUAGE_MAP = {
