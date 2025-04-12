@@ -312,10 +312,11 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
     def onFirstInit(self):
         self._onFirstInit()
 
-        if self.show_ and self.show_.theme and not util.getSetting("slow_connection") and \
+        if self.show_ and not util.getSetting("slow_connection") and \
                 (not self.cameFrom or self.cameFrom not in (self.show_.ratingKey, "postplay")) and \
                 not self.openedWithAutoPlay:
-            self.playThemeMusic(self.show_.theme.asURL(True), self.show_.ratingKey,
+            theme_url = self.show_.theme and self.show_.theme.asURL(True) or None
+            self.playThemeMusic(theme_url, self.show_.ratingKey,
                                 [loc.get("path") for loc in self.show_.locations], self.show_.server)
 
         self.openedWithAutoPlay = False
