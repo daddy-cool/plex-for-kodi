@@ -269,6 +269,9 @@ class PlaybackBtnMixin(object):
 class ThemeMusicMixin(object):
     def playThemeMusic(self, theme_url, identifier, locations, server):
         volume = pnUtil.INTERFACE.getThemeMusicValue()
+        if not volume:
+            return
+
         if pmm.mapping:
             theme_found = False
             for loc in locations:
