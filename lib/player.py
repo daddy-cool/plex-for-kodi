@@ -1137,10 +1137,11 @@ class AudioPlayerHandler(BasePlayerHandler):
 
 
 class BGMPlayerHandler(BasePlayerHandler):
-    def __init__(self, player, rating_key):
+    def __init__(self, player, init_data):
         BasePlayerHandler.__init__(self, player)
         self.timelineType = 'music'
-        self.currentlyPlaying = rating_key
+        self.initData = init_data
+        self.currentlyPlaying = init_data[2]
         util.setGlobalProperty('track.ID', '')
 
         self.oldVolume = util.rpc.Application.GetProperties(properties=["volume"])["volume"]
@@ -1187,6 +1188,9 @@ class BGMPlayerHandler(BasePlayerHandler):
 
     def onPlayBackEnded(self):
         self.onPlayBackStopped()
+
+        if util.getSetting('theme_music_loop'):
+            self.player.playBackgroundMusic(*self.initData)
 
     def onPlayBackFailed(self):
         self.onPlayBackStopped()
@@ -1384,7 +1388,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
 
         self.started = False
         self.bgmStarting = True
-        self.handler = BGMPlayerHandler(self, rating_key)
+        self.handler = BGMPlayerHandler(self, [source, volume, rating_key])
 
         # store current volume if it's different from the BGM volume
         if volume < curVol:

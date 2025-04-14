@@ -2623,3 +2623,7 @@ msgstr ""
 msgctxt "#33736"
 msgid "By default PM4K won't auto-start when the current window isn't a Home-derived window (e.g.: Settings). Enable this if you always want to auto-start PM4K regardless of the current window. Can also improve start-up time."
 msgstr ""
+
+msgctxt "#33737"
+msgid "Loop theme music"
+msgstr ""

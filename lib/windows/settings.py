@@ -442,6 +442,9 @@ class Settings(object):
                     'search_use_kodi_kbd', T(32955, 'Use Kodi keyboard for searching'), False
                 ),
                 ThemeMusicSetting('theme_music', T(32480, 'Theme music'), 5),
+                BoolSetting(
+                    'theme_music_loop', T(33737, 'Loop theme music'), True
+                ),
                 PlayedThresholdSetting('played_threshold', T(33501, 'Video played threshold'), 1).description(
                     T(
                         33502,
