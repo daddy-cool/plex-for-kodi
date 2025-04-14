@@ -276,15 +276,16 @@ class ThemeMusicMixin(object):
             theme_found = False
             for loc in locations:
                 path, pms_path, sep = pmm.getMappedPathFor(loc, server, return_rep=True)
-                for codec in pnUtil.AUDIO_CODECS_TC:
-                    final_path = os.path.join(path, "theme.{}".format(codec)).replace(sep == "/" and "\\" or "/", sep)
-                    if path and xbmcvfs.exists(final_path):
-                        theme_url = final_path
-                        theme_found = True
-                        util.DEBUG_LOG("ThemeMusicMixin: Using {} as theme music", theme_url)
+                if path and pms_path:
+                    for codec in pnUtil.AUDIO_CODECS_TC:
+                        final_path = os.path.join(path, "theme.{}".format(codec)).replace(sep == "/" and "\\" or "/", sep)
+                        if path and xbmcvfs.exists(final_path):
+                            theme_url = final_path
+                            theme_found = True
+                            util.DEBUG_LOG("ThemeMusicMixin: Using {} as theme music", theme_url)
+                            break
+                    if theme_found:
                         break
-                if theme_found:
-                    break
 
         if theme_url:
             t = threading.Thread(target=player.PLAYER.playBackgroundMusic,

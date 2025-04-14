@@ -157,7 +157,7 @@ class LibrarySection(plexobjects.PlexObject):
         if not self.locations:
             return None, None
 
-        return pmm.getMappedPathFor(loc or self.locations[0], self.server)
+        return pmm.getMappedPathFor(loc or self.locations[0], self.server)[:-1]
 
     def deleteMapping(self, target):
         pmm.deletePathMapping(target, server=self.getServer())

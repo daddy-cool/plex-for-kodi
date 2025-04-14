@@ -72,8 +72,8 @@ class PathMappingManager(object):
 
                     # fixme: this is dirty.
                     return url, pms_path, sep
-                return map_path, pms_path
-        return None, None
+                return map_path, pms_path, None
+        return None, None, None
 
     def deletePathMapping(self, target, server=None, save=True):
         server = server or plexnet.util.SERVERMANAGER.selectedServer
