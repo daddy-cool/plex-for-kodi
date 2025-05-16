@@ -1090,6 +1090,7 @@ class AudioPlayerHandler(BasePlayerHandler):
         self.updateNowPlaying(state='playing')
 
     def onPlayBackStarted(self):
+        util.DEBUG_LOG('AudioPlayerHandler: onPlayBackStarted')
         self.player.lastPlayWasBGM = False
         self.updatePlayQueue(delay=True)
         self.extractTrackInfo()
@@ -1097,9 +1098,11 @@ class AudioPlayerHandler(BasePlayerHandler):
         self.updateNowPlaying(state='playing')
 
     def onAVStarted(self):
+        util.DEBUG_LOG('AudioPlayerHandler: onAVStarted')
         self.player.trigger('started.audio')
 
     def onAVChange(self):
+        util.DEBUG_LOG('AudioPlayerHandler: onAVChange')
         self.player.trigger('changed.audio')
 
     def onPlayBackResumed(self):

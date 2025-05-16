@@ -120,14 +120,17 @@ class CurrentPlaylistWindow(kodigui.ControlledWindow, windowutils.UtilMixin):
             self.seekButtonClicked()
         elif controlID == self.SHUFFLE_BUTTON_ID:
             self.fillPlaylist()
+            self.selectPlayingItem()
         elif controlID == self.SHUFFLE_REMOTE_BUTTON_ID:
             player.PLAYER.handler.playQueue.setShuffle()
         elif controlID == self.REPEAT_BUTTON_ID:
             self.repeatButtonClicked()
         elif controlID == self.SKIP_PREV_BUTTON_ID:
             self.skipPrevButtonClicked()
+            self.selectPlayingItem()
         elif controlID == self.SKIP_NEXT_BUTTON_ID:
             self.skipNextButtonClicked()
+            self.selectPlayingItem()
         elif controlID == self.OPTIONS_BUTTON_ID:
             self.optionsButtonClicked()
         elif controlID == self.STOP_BUTTON_ID:
