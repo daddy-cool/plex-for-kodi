@@ -828,7 +828,7 @@ class SeekPlayerHandler(BasePlayerHandler):
 
     def setAudioTrack(self):
         self.player.lastPlayWasBGM = False
-        if self.isDirectPlay:
+        if self.isDirectPlay and self.player.video:
             track = self.player.video.selectedAudioStream()
             if track:
                 # only try finding the current audio stream when the BG music isn't playing and wasn't the last
@@ -1189,7 +1189,7 @@ class BGMPlayerHandler(BasePlayerHandler):
     def onPlayBackEnded(self):
         self.onPlayBackStopped()
 
-        if util.getSetting('theme_music_loop'):
+        if util.getSetting('theme_music_loop') and not self.player.dontRequeueBGM:
             self.player.playBackgroundMusic(*self.initData)
 
     def onPlayBackFailed(self):
@@ -1245,6 +1245,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
     def init(self):
         self._closed = False
         self._nextItem = None
+        self._ignorePlaybackFailure = False
         self.started = False
         self.bgmPlaying = False
         self.bgmStarting = False
@@ -1261,6 +1262,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
         self.thread = None
         self.ignoreStopEvents = False
         self.isExternal = False
+        self.dontRequeueBGM = False
         if xbmc.getCondVisibility('Player.HasMedia') and self.isPlayingAudio() and not self.bgmPlaying:
             self.started = True
         self.resume = False
@@ -1284,6 +1286,8 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
         self.playerObject = None
         self.pauseAfterPlaybackStarted = False
         self.ignoreStopEvents = False
+        self._ignorePlaybackFailure = False
+        self.dontRequeueBGM = False
         #self.handler = AudioPlayerHandler(self)
         self.currentTime = 0
 
@@ -1884,7 +1888,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
         if not self.handler:
             return
 
-        if self.handler.onPlayBackFailed():
+        if self.handler.onPlayBackFailed() and not self._ignorePlaybackFailure:
             self.ignoreStopEvents = True
             util.showNotification('Playback Error!')
             self.stopAndWait()
@@ -1897,7 +1901,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
         if not self.handler:
             return
 
-        if self.handler.onPlayBackFailed():
+        if self.handler.onPlayBackFailed() and not self._ignorePlaybackFailure:
             util.showNotification(util.T(32448, 'Playback Failed!'))
             self.stopAndWait()
             self.close()

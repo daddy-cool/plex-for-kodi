@@ -401,6 +401,11 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         except RuntimeError:
             util.ERROR(hide_tb=True)
             self.started = False
+        except AttributeError:
+            self.started = False
+            # early exit probably during dialog setup
+            self.handler.player._ignorePlaybackFailure = True
+            self.stop()
 
     def _onFirstInit(self):
         util.DEBUG_LOG("SeekDialog: onFirstInit")
@@ -437,7 +442,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.setBoolProperty('nav.shuffle', showShuffle)
         navPlaylist = util.getSetting('video_show_playlist')
         self.setBoolProperty('nav.playlist', (navPlaylist == "eponly" and
-                                              (self.player.video.type == 'episode' or self.handler.playlist)) or
+                                              ((self.player.video and self.player.video.type == 'episode') or (self.handler and self.handler.playlist))) or
                              navPlaylist == "always")
 
         if not self.getProperty('nav.playlist'):
@@ -445,7 +450,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
 
         navPrevNext = util.getSetting('video_show_prevnext')
         self.setBoolProperty('nav.prevnext', (navPrevNext == "eponly" and
-                                              (self.player.video.type == 'episode' or self.handler.playlist)) or
+                                              ((self.player.video and self.player.video.type == 'episode') or (self.handler and self.handler.playlist))) or
                              navPrevNext == "always")
 
         if showQuickSubs:
@@ -1903,7 +1908,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                                selected position depending on the direction of the seek
         :return: None
         """
-        if not self.initialized:
+        if not all((self.initialized, self.handler.player, self.handler.player.playerObject)):
             return
 
         offset = offset if offset is not None else \
