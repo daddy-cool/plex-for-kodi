@@ -76,6 +76,18 @@
                     </dependencies>
                     <control type="list" format="string"/>
                 </setting>
+                <setting id="playlist_max_size" type="integer" label="33738" help="33739">
+                    <level>0</level>
+                    <default>500</default>
+                    <constraints>
+                        <minimum>100</minimum>
+                        <step>50</step>
+                        <maximum>10000</maximum>
+                    </constraints>
+                    <control type="slider" format="integer">
+                        <popup>false</popup>
+                    </control>
+                </setting>
                 <setting id="hubs_round_robin" type="boolean" label="33043">
                     <level>0</level>
                     <default>false</default>

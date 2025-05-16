@@ -68,6 +68,7 @@ class AddonSettings(object):
         ("background_resolution_scale_perc", 100),
         ("osd_hide_delay", 4.0),
         ("requests_cache_expiry", 168),
+        ("playlist_max_size", 500),
     )
 
     def __init__(self):

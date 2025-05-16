@@ -3214,3 +3214,11 @@ msgstr "PM4K startet nicht, solange das aktuelle Fenster kein Home-bezogenes Fen
 msgctxt "#33737"
 msgid "Loop theme music"
 msgstr "Titelmusik-Dauerschleife"
+
+msgctxt "#33738"
+msgid "Max playlist size"
+msgstr "Max. Playlist Größe"
+
+msgctxt "#33739"
+msgid "How many items to load into a Kodi playlist before chunking them remotely using Plex PlayQueues (default: 500); Reduce on memory issues/crashes."
+msgstr "Wie groß soll eine Playlist maximal sein, bevor diese durch eine gestückelte Plex-seitige PlayQueue ersetzt wird? (Standard: 500); Bei Speicherproblemen/Abstürzen reduzieren."

@@ -2627,3 +2627,11 @@ msgstr ""
 msgctxt "#33737"
 msgid "Loop theme music"
 msgstr ""
+
+msgctxt "#33738"
+msgid "Max playlist size"
+msgstr ""
+
+msgctxt "#33739"
+msgid "How many items to load into a Kodi playlist before chunking them remotely using Plex PlayQueues (default: 500); Reduce on memory issues/crashes."
+msgstr ""
