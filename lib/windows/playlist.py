@@ -20,7 +20,7 @@ from . import videoplayer
 from . import windowutils
 
 PLAYLIST_PAGE_SIZE = 500
-PLAYLIST_INITIAL_SIZE = 100
+PLAYLIST_INITIAL_SIZE = 1000
 
 
 class ChunkRequestTask(backgroundthread.Task):
