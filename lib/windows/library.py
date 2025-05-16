@@ -1253,7 +1253,7 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
                                                        {"value": plexobjects.PlexValue(2)})["value"].asInt()
 
             jl_type = type_
-            if collection_mode == 2:
+            if collection_mode == 2 and not (self.filter or self.filterUnwatched):
                 jl_type = getQueryItemType(self.section, fallback_to_section_type=True, force_include_collections=True)
 
             jumpList = self.section.jumpList(filter_=self.getFilterOpts(), sort=self.getSortOpts(), unwatched=self.filterUnwatched, type_=jl_type)
