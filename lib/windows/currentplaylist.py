@@ -238,12 +238,14 @@ class CurrentPlaylistWindow(kodigui.ControlledWindow, windowutils.UtilMixin):
 
         self.fillPlaylist()
 
-        for ni in self.playlistListControl:
+        # due to Kodi playlist limitations and necessary swappery, we might've got the current item twice in the list;
+        # select the latest one
+        for ni in reversed(self.playlistListControl):
             if ni.dataSource['comment'].split(':', 1)[0] == plexID:
                 self.playlistListControl.selectItem(ni.pos())
                 break
 
-        xbmc.sleep(100)
+        util.MONITOR.waitForAbort(0.25)
 
         newViewPos = self.playlistListControl.getViewPosition()
         if viewPos != newViewPos:

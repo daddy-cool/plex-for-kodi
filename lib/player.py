@@ -1006,7 +1006,7 @@ class AudioPlayerHandler(BasePlayerHandler):
             citem = kodijsonrpc.rpc.Player.GetItem(playerid=0, properties=['comment'])['item']
             plexID = citem['comment'].split(':', 1)[0]
         except:
-            util.ERROR()
+            #util.ERROR()
             return
 
         current = plist.getposition()
@@ -1042,7 +1042,7 @@ class AudioPlayerHandler(BasePlayerHandler):
                     })
 
             # Now swap the track to the correct position. This seems to be the only way to update the kodi playlist position to the current track's new position
-            if swap is not None and swap != current:
+            if swap is not None:
                 kodijsonrpc.rpc.Playlist.Swap(playlistid=xbmc.PLAYLIST_MUSIC, position1=0, position2=swap + 1)
                 try:
                     kodijsonrpc.rpc.Playlist.Remove(playlistid=xbmc.PLAYLIST_MUSIC, position=0)
