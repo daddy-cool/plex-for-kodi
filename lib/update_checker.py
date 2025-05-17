@@ -169,13 +169,13 @@ def update_loop():
                                         kw = {'defaultbutton': xbmcgui.DLG_YESNO_YES_BTN}
                                     do_start = xbmcgui.Dialog().yesno(
                                         T(33681, 'Service updated')
-                                        if "service" in major_changes else
+                                        if "service" in major_changes or "updater" in major_changes else
                                         T(33687, 'Translation updated'),
                                         (T(33682, 'The update {} has had changes to the updater itself. In '
                                                   'order for the updated updater service to work, a Kodi restart is '
                                                   'necessary. The addon will work normally, though. Do you still '
                                                   'want to run the addon?')
-                                         if "service" in major_changes else
+                                         if "service" in major_changes or "updater" in major_changes else
                                          T(33688, 'The currently in-use translation has been updated. In '
                                                   'order to load the new translation, a Kodi restart is necessary. '
                                                   'The addon will still run properly, but you might see badly or '
