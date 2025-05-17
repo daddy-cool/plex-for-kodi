@@ -100,6 +100,7 @@ def update_loop():
                         # notify user in main app and wait for response
                         setGlobalProperty('update_is_downgrade', updater.is_downgrade and '1' or '', wait=True)
                         setGlobalProperty('update_available', update_version, wait=True)
+                        setGlobalProperty('update_changelog', updater.remote_changelog, wait=True)
 
                         try:
                             resp = getGlobalProperty('update_response', consume=True, wait=True)

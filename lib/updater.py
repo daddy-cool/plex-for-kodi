@@ -17,6 +17,8 @@ from .kodijsonrpc import rpc
 VERSION_RE = re.compile(r'<addon id="script\.plexmod".*version="([A-Za-z0-9.+:~-]+)".*?<requires>',
                         re.MULTILINE | re.DOTALL | re.S)
 
+NEWS_RE = re.compile(r'<news>(.*?)</news>', re.MULTILINE | re.DOTALL | re.S)
+
 TEMP_PATH = translatePath("special://temp/")
 
 try:
@@ -77,6 +79,7 @@ class Updater(object):
     mode = "beta"
     branch = None
     remote_version = None
+    remote_changelog = None
     is_downgrade = False
     headers = {
         'User-Agent': xbmc.getUserAgent()
@@ -124,6 +127,9 @@ class Updater(object):
             vc = version_compare(new_version, current_version)
             if allow_downgrade and vc < 0:
                 self.is_downgrade = True
+            changelog = NEWS_RE.findall(r.text)
+            if changelog:
+                self.remote_changelog = changelog[0].strip()
             return new_version if vc > 0 or (allow_downgrade and vc != 0) else False
 
         raise UpdateCheckFailed('Update check failed: No data returned')

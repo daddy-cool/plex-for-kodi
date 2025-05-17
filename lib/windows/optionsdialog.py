@@ -76,9 +76,14 @@ class OptionsDialog(kodigui.BaseDialog):
             self.doClose()
 
 
+class BigOptionsDialog(OptionsDialog):
+    xmlFile = 'script-plex-options_dialog_big.xml'
+
+
 def show(header, info, button0=None, button1=None, button2=None, action_callback=None, dialog_props=None, select=0,
-         delay_buttons=None):
-    w = OptionsDialog.open(header=header, info=info, button0=button0, button1=button1, button2=button2, select=select,
+         delay_buttons=None, big=False):
+    cls = big and BigOptionsDialog or OptionsDialog
+    w = cls.open(header=header, info=info, button0=button0, button1=button1, button2=button2, select=select,
                            action_callback=action_callback, dialog_props=dialog_props, delay_buttons=delay_buttons)
     choice = w.buttonChoice
     del w

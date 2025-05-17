@@ -2357,7 +2357,7 @@ msgid "Update available"
 msgstr ""
 
 msgctxt "#33671"
-msgid "Current: {current_version}\nNew: {new_version}"
+msgid "Current: {current_version}\nNew: {new_version}\n\nChangelog:\n{changelog}"
 msgstr ""
 
 msgctxt "#33672"

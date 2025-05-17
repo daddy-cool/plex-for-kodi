@@ -2948,8 +2948,8 @@ msgid "Update available"
 msgstr "Update verfügbar"
 
 msgctxt "#33671"
-msgid "Current: {current_version}\nNew: {new_version}"
-msgstr "Aktuell: {current_version}\Neu: {new_version}"
+msgid "Current: {current_version}\nNew: {new_version}\n\nChangelog:\n{changelog}"
+msgstr "Aktuell: {current_version}\Neu: {new_version}\n\nÄnderungen:\n{changelog}"
 
 msgctxt "#33672"
 msgid "Check for updates"

@@ -746,13 +746,14 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             is_downgrade = bool(util.getGlobalProperty('update_is_downgrade', consume=True))
             button = optionsdialog.show(
                 T(33670, 'Update available'),
-                T(33671, 'Current: {current_version}\nNew: {new_version}').format(
+                T(33671, 'Current: {current_version}\nNew: {new_version}\n\nChangelog:\n{changelog}').format(
                     current_version=util.ADDON.getAddonInfo('version'),
                     new_version=util.getGlobalProperty('update_available'),
+                    changelog=util.getGlobalProperty('update_changelog'),
                 ),
                 T(33683, 'Exit, download and install'),
                 T(33684, 'Later') if not is_downgrade else T(32329, 'No'),
-                delay_buttons=1.8
+                delay_buttons=1.8, big=True
             )
             if button == 0:
                 resp = "commence"
