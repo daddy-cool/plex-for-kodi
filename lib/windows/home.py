@@ -815,7 +815,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             pass
 
         self.unhookSignals()
-        self.storeLastBG()
+        if not (self.closeOption == "switch" or
+                (isinstance(self.closeOption, dict) and self.closeOption.get('fast_switch'))):
+            self.storeLastBG()
 
     def storeLastBG(self):
         if util.addonSettings.dynamicBackgrounds:
@@ -2611,6 +2613,12 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         else:
             option = force_option
 
+        def kill_background():
+            util.DEBUG_LOG("Killing last background image")
+            util.setSetting("last_bg_url", "")
+            kodigui.LAST_BG_URL = None
+            self.windowSetBackground(None)
+
         self.setFocusId(self.USER_BUTTON_ID)
 
         if option == 'settings':
@@ -2633,9 +2641,11 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             if button != 1:
                 return
             self.closeOption = option
+            kill_background()
             self.doClose()
         else:
             self.closeOption = option
+            kill_background()
             self.doClose()
 
     def showAudioPlayer(self):
