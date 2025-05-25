@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-beta12"
+       version="0.8.0-beta12.1"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -33,14 +33,7 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Core/Player: Harden against early exit (NAV_BACK/PREVIOUS_MENU/STOP) actions during video playback start, which could cause the plugin to crash or not properly shut down
-- Core/Player/BGM: Hopefully fix playback error when repeating theme music is enabled under certain conditions (hitting play right when theme music restarts)
-- Library: Hide collections when any filter applied (same behaviour as Plex Web)
-- Music/CurrentPlayList: Try fixing bad positioning in playqueue callback on large playlists
-- Music/CurrentPlaylist: Correctly select the currently playing item after shuffling a full playlist and after skip next/prev track
-- Playlists: Make PLAYLIST_INITIAL_SIZE adjustable by addonSetting
-- AddonSettings: Add setting for maximum playlist size before chunking it (default: 500); reduce on memory/stability issues
-- Updater/Service: Show changelog for updates
+- Home/Core: Don't retain background image when switching home users
         </news>
         <assets>
             <icon>icon2.png</icon>
