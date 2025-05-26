@@ -1247,7 +1247,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         showTitle = self.show_ and self.show_.title or ''
 
         self.setBoolProperty('current_item.loaded', False)
-        self.updateBackgroundFrom(self.show_ or self.season.show())
+        self.updateBackgroundFrom(self.season or self.show_)
         self.setProperty('season.thumb', (self.season or self.show_).thumb.asTranscodedImageURL(*self.POSTER_DIM))
         self.setProperty('show.title', showTitle)
         self.setProperty('season.title', (self.season or self.show_).title)
