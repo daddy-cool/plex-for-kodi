@@ -433,7 +433,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
     def onFirstInit(self):
         # set last BG image if possible
         if util.addonSettings.dynamicBackgrounds:
-            bgUrl = util.getSetting("last_bg_url")
+            bgUrl = util.getSetting("last_bg_url.{}".format(plexapp.ACCOUNT.ID))
             if bgUrl:
                 self.windowSetBackground(bgUrl)
 
@@ -821,7 +821,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
     def storeLastBG(self):
         if util.addonSettings.dynamicBackgrounds:
-            oldbg = util.getSetting("last_bg_url", '')
+            oldbg = util.getSetting("last_bg_url.{}".format(plexapp.ACCOUNT.ID), '')
             # store BG url of first hub, first item, as this is most likely to be the one we're focusing on the
             # next start
             try:
@@ -841,9 +841,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
                             bg = util.backgroundFromArt(ds.art, width=self.width, height=self.height)
                             if bg:
-                                util.DEBUG_LOG('Storing BG for {0}, "{1}"'.format(self.hubControls[index].dataSource,
-                                                                                  ds.defaultTitle))
-                                util.setSetting("last_bg_url", bg)
+                                util.DEBUG_LOG('Storing BG for {0}, "{1}", acc {2}'.format(self.hubControls[index].dataSource,
+                                                                                  ds.defaultTitle, plexapp.ACCOUNT.ID))
+                                util.setSetting("last_bg_url.{}".format(plexapp.ACCOUNT.ID), bg)
                                 return
             except:
                 util.LOG("Couldn't store last background")
@@ -2615,7 +2615,6 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
         def kill_background():
             util.DEBUG_LOG("Killing last background image")
-            util.setSetting("last_bg_url", "")
             kodigui.LAST_BG_URL = None
             self.windowSetBackground(None)
 
