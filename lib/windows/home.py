@@ -815,8 +815,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             pass
 
         self.unhookSignals()
-        if not (self.closeOption == "switch" or
-                (isinstance(self.closeOption, dict) and self.closeOption.get('fast_switch'))):
+        if (self.closeOption != "switch" and
+                (not isinstance(self.closeOption, dict) or (isinstance(self.closeOption, dict) and not self.closeOption.get('fast_switch')))):
             self.storeLastBG()
 
     def storeLastBG(self):
@@ -1856,6 +1856,10 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
     def sectionHubsCallback(self, section, hubs, reselect_pos_dict=None):
         with self.lock:
             update = bool(self.sectionHubs.get(section.key))
+            # sort hubs by hubmap index
+            hubs.sort(key=lambda hub: self.HUBMAP.get(hub.getCleanHubIdentifier(is_home=section.key is None),
+                                                    {"index": 999})["index"])
+
             self.sectionHubs[section.key] = hubs
             if self.lastSection == section:
                 self.showHubs(section, update=update, reselect_pos_dict=reselect_pos_dict)
