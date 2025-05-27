@@ -857,6 +857,8 @@ class Episode(PlayableVideo, SectionOnDeckMixin):
 
     @property
     def defaultThumb(self):
+        if self.settings.getPreference("hub_season_thumbnails", True):
+            return self.parentThumb or self.grandparentThumb or self.thumb
         return self.grandparentThumb or self.parentThumb or self.thumb
 
     @property

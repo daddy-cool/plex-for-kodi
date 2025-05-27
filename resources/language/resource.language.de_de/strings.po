@@ -3222,3 +3222,11 @@ msgstr "Max. Playlist Größe"
 msgctxt "#33739"
 msgid "How many items to load into a Kodi playlist before chunking them remotely using Plex PlayQueues (default: 500); Reduce on memory issues/crashes."
 msgstr "Wie groß soll eine Playlist maximal sein, bevor diese durch eine gestückelte Plex-seitige PlayQueue ersetzt wird? (Standard: 500); Bei Speicherproblemen/Abstürzen reduzieren."
+
+msgctxt "#33740"
+msgid "Home: Episodes season thumbnails"
+msgstr "Start: Staffelposter verwenden"
+
+msgctxt "#33741"
+msgid "Use season thumbnails/posters when displaying episodes in hubs instead of the TV show's."
+msgstr "Staffel-Thumbnails/Poster für Episoden in Hubs anstatt die der TV Serie verwenden."

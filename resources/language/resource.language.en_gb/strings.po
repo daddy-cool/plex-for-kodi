@@ -2635,3 +2635,11 @@ msgstr ""
 msgctxt "#33739"
 msgid "How many items to load into a Kodi playlist before chunking them remotely using Plex PlayQueues (default: 500); Reduce on memory issues/crashes."
 msgstr ""
+
+msgctxt "#33740"
+msgid "Home: Episodes season thumbnails"
+msgstr ""
+
+msgctxt "#33741"
+msgid "Use season thumbnails/posters when displaying episodes in hubs instead of the TV show's."
+msgstr ""

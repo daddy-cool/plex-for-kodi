@@ -702,6 +702,12 @@ class Settings(object):
                              "watching etc., show a confirmation dialog.")
                 ),
                 BoolSetting(
+                    'hub_season_thumbnails', T(33740, 'Home: Episodes season thumbnails'), True
+                ).description(
+                    T(33741, "Use season thumbnails/posters when displaying episodes in hubs instead of "
+                             "the TV show's.")
+                ),
+                BoolSetting(
                     'hubs_round_robin', T(33043, ''), False
                 ).description(
                     T(33044, "").format(util.addonSettings.hubsRrMax)
