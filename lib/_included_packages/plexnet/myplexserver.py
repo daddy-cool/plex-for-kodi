@@ -1,4 +1,6 @@
 from __future__ import absolute_import
+import functools
+
 from . import plexapp
 from . import plexconnection
 from . import plexserver
@@ -50,6 +52,9 @@ class PlexDiscoverServer(MyPlexServer):
                                              None, skipLocalCheck=True)
         self.connections.append(conn)
         self.activeConnection = conn
+
+        # inject our plextv timeout
+        #self.session.request = functools.partial(self.session.request, timeout=plexserver.util.PLEXTV_TIMEOUT)
 
     def getImageTranscodeURL(self, path, width, height, **extraOpts):
         if not path:

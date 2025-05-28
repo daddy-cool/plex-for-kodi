@@ -1967,6 +1967,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             if section == playlists_section:
                 mli.setProperty('is.playlists', '1')
                 mli.setThumbnailImage('script.plex/home/type/playlists.png')
+            elif section == watchlist_section:
+                mli.setThumbnailImage('script.plex/home/type/watchlist.png')
             if pmm.mapping and show_pm_indicator:
                 mli.setBoolProperty('is.mapped', section.isMapped)
             items.append(mli)
