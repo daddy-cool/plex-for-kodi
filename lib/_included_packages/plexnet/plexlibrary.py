@@ -90,6 +90,10 @@ class LibrarySection(plexobjects.PlexObject):
     ALLOWED_SORT = ()
     BOOLEAN_FILTERS = ('unwatched', 'duplicate')
 
+    DEFAULT_URL_ARGS = None
+    DEFAULT_SORT = 'titleSort'
+    DEFAULT_SORT_DESC = False
+
     isLibraryPQ = True
 
     def __init__(self, data, initpath=None, server=None, container=None):
@@ -222,6 +226,8 @@ class LibrarySection(plexobjects.PlexObject):
     def items(self, path, start, size, filter_, sort, unwatched, type_, tag_fallback):
 
         args = {}
+        if self.DEFAULT_URL_ARGS:
+            args.update(self.DEFAULT_URL_ARGS)
 
         if size is not None:
             args['X-Plex-Container-Start'] = start
@@ -445,6 +451,41 @@ class ShowSection(LibrarySection):
 
     def searchEpisodes(self, **kwargs):
         return self.search(libtype='episode', **kwargs)
+
+
+class WatchlistSection(LibrarySection):
+    ALLOWED_FILTERS = (
+        'year', 'decade', 'genre', 'released'
+    )
+    ALLOWED_SORT = (
+        'watchlistedAt', 'firstAvailableAt', 'titleSort', 'rating', 'audienceRating',
+    )
+    DEFAULT_SORT = 'watchlistedAt'
+    DEFAULT_SORT_DESC = True
+
+    TYPE = 'watchlist'
+    ID = 'watchlist'
+
+    cachable = False
+
+    DEFAULT_URL_ARGS = {
+        "includeAdvanced": 1,
+        "includeMeta": 1
+    }
+
+    def __init__(self, data, initpath=None, server=None, container=None):
+        self.locations = []
+        self._settings = {}
+        key = '/library/sections/watchlist'
+        data = server.query(key+"/all", offset=0, limit=0, type=99, **self.DEFAULT_URL_ARGS) # type: ignore
+        self.type = "mixed"
+        super(LibrarySection, self).__init__(data, initpath=initpath, server=server, container=self)
+        self.key = key
+        self.server = server
+
+    def has_data(self):
+        return self.totalSize > 0
+
 
 
 class MusicSection(LibrarySection):
@@ -768,12 +809,14 @@ SECTION_TYPES = {
     MovieSection.TYPE: MovieSection,
     ShowSection.TYPE: ShowSection,
     MusicSection.TYPE: MusicSection,
-    PhotoSection.TYPE: PhotoSection
+    PhotoSection.TYPE: PhotoSection,
+    WatchlistSection.TYPE: WatchlistSection,
 }
 
 SECTION_IDS = {
     MovieSection.ID: MovieSection,
     ShowSection.ID: ShowSection,
     MusicSection.ID: MusicSection,
-    PhotoSection.ID: PhotoSection
+    PhotoSection.ID: PhotoSection,
+    WatchlistSection.ID: WatchlistSection,
 }

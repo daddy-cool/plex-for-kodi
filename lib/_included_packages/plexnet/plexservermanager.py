@@ -83,6 +83,10 @@ class PlexServerManager(signalsmixin.SignalsMixin):
         else:
             return self.serversByUuid[uuid]
 
+    def getDiscoverServer(self):
+        from . import myplexserver
+        return myplexserver.PlexDiscoverServer()
+
     def getServers(self):
         servers = []
         for uuid in list(self.serversByUuid.keys()):

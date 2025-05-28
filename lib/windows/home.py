@@ -175,14 +175,7 @@ class HomeSection(object):
 
 home_section = HomeSection()
 
-
-class WatchListSection(object):
-    key = 'watchlist'
-    type = 'watchlist'
-    title = T(34000, 'Watchlist')
-
-
-watchlist_section = WatchListSection()
+watchlist_section = None
 
 
 class PlaylistsSection(object):
@@ -1374,7 +1367,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         else:
             options = []
 
-            if plexapp.ACCOUNT.isAdmin and section != playlists_section:
+            if plexapp.ACCOUNT.isAdmin and section not in (watchlist_section, playlists_section):
                 options = [{'key': 'refresh', 'display': T(33082, "Scan Library Files")},
                            {'key': 'emptyTrash', 'display': T(33083, "Empty Trash")},
                            {'key': 'analyze', 'display': T(33084, "Analyze")},
@@ -1909,6 +1902,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         self.updateHubCallback(hub, items, reselect_pos=reselect_pos)
 
     def showSections(self, focus_section=None):
+        global watchlist_section
         self.sectionHubs = {}
         items = []
 
@@ -1920,11 +1914,14 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         sections = []
 
         # https://discover.provider.plex.tv/library/sections/watchlist/all?includeAdvanced=1&includeMeta=1
-        if not plexapp.ACCOUNT.isOffline and "watchlist" not in self.librarySettings \
-                or ("playlists" in self.librarySettings and self.librarySettings["watchlist"].get("show", True)):
-            util.DEBUG_LOG("BEBEBEBE")
+        if not plexapp.ACCOUNT.isOffline and ("watchlist" not in self.librarySettings
+                or ("watchlist" in self.librarySettings and self.librarySettings["watchlist"].get("show", True))):
             # get watchlist
-            sections.append(watchlist_section)
+            from plexnet import plexlibrary
+            wl = watchlist_section = plexlibrary.WatchlistSection(None, server=plexapp.SERVERMANAGER.getDiscoverServer())
+            if wl.has_data():
+                wl.title = T(34000, 'Watchlist')
+                sections.append(wl)
 
         if "playlists" not in self.librarySettings \
                 or ("playlists" in self.librarySettings and self.librarySettings["playlists"].get("show", True)):
@@ -2483,7 +2480,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
         section = item.dataSource
 
-        if section.type in ('show', 'movie', 'artist', 'photo'):
+        if section.type in ('show', 'movie', 'artist', 'photo', 'mixed'):
             self.processCommand(opener.sectionClicked(section))
         elif section.type in ('playlists',):
             self.processCommand(opener.handleOpen(playlists.PlaylistsWindow))

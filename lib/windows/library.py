@@ -169,7 +169,16 @@ SORT_KEYS = {
                                   'defSortDesc': True}
     },
     'photodirectory': {},
-    'collection': {}
+    'collection': {},
+    'watchlist': {
+        'watchlistedAt': {'title': T(32351, 'By Date Added'), 'display': T(32352, 'Date Added'), 'defSortDesc': True},
+        'titleSort': {'title': T(32357, 'By Title'), 'display': T(32358, 'Title'), 'defSortDesc': False},
+        'originallyAvailableAt': {'title': T(32353, 'By Release Date'), 'display': T(32354, 'Release Date'),
+                                          'defSortDesc': True},
+        'rating': {'title': T(33107, 'By Critic Rating'), 'display': T(33108, ' Critic Rating'), 'defSortDesc': True},
+        'audienceRating': {'title': T(33101, 'By Audience Rating'), 'display': T(33102, 'Audience Rating'),
+                           'defSortDesc': True},
+    }
 }
 
 ITEM_TYPE = None
@@ -405,8 +414,8 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
         PlaybackBtnMixin.reset(self)
         util.setGlobalProperty('sort', '')
         self.filterUnwatched = self.librarySettings.getSetting('filter.unwatched', False)
-        self.sort = self.librarySettings.getSetting('sort', 'titleSort')
-        self.sortDesc = self.librarySettings.getSetting('sort.desc', False)
+        self.sort = self.librarySettings.getSetting('sort', self.section.DEFAULT_SORT)
+        self.sortDesc = self.librarySettings.getSetting('sort.desc', self.section.DEFAULT_SORT_DESC)
 
         self.alreadyFetchedChunkList = set()
         self.finalChunkPosition = 0
@@ -1225,7 +1234,8 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
 
         tasks = []
 
-        if self.sort != 'titleSort' or ITEM_TYPE in ('folder', 'episode') or self.subDir or self.section.TYPE == "collection":
+        if self.sort != 'titleSort' or ITEM_TYPE in ('folder', 'episode') or self.subDir \
+            or self.section.TYPE in ("collection", "watchlist"):
             if ITEM_TYPE == 'folder':
                 sectionAll = self.section.folder(0, 0, self.subDir)
             else:

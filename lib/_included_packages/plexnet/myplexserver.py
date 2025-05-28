@@ -4,6 +4,7 @@ from . import plexconnection
 from . import plexserver
 from . import plexresource
 from . import plexservermanager
+from . import compat
 
 
 class MyPlexServer(plexserver.PlexServer):
@@ -35,3 +36,31 @@ class MyPlexServer(plexserver.PlexServer):
                     return url
 
         return plexserver.PlexServer.buildUrl(self, path, includeToken)
+
+
+class PlexDiscoverServer(MyPlexServer):
+    TYPE = 'PLEXDISCOVERSERVER'
+
+    def __init__(self):
+        MyPlexServer.__init__(self)
+        self.uuid = 'plexdiscover'
+        self.name = 'discover.plex.tv'
+        conn = plexconnection.PlexConnection(plexresource.ResourceConnection.SOURCE_MYPLEX,
+                                             "https://discover.provider.plex.tv", False,
+                                             None, skipLocalCheck=True)
+        self.connections.append(conn)
+        self.activeConnection = conn
+
+    def getImageTranscodeURL(self, path, width, height, **extraOpts):
+        if not path:
+            return ''
+
+        eOpts = {"scale": 1}
+        eOpts.update(extraOpts)
+        imageUrl = path
+
+        params = ("&width=%s&height=%s" % (width, height)) + ''.join(["&%s=%s" % (key, eOpts[key]) for key in eOpts])
+
+        path = "/photo?url=" + compat.quote_plus(imageUrl) + params
+
+        return "https://images.plex.tv{}".format(path)
