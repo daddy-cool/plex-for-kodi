@@ -176,6 +176,15 @@ class HomeSection(object):
 home_section = HomeSection()
 
 
+class WatchListSection(object):
+    key = 'watchlist'
+    type = 'watchlist'
+    title = T(34000, 'Watchlist')
+
+
+watchlist_section = WatchListSection()
+
+
 class PlaylistsSection(object):
     key = 'playlists'
     type = 'playlists'
@@ -1909,6 +1918,13 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         items.append(homemli)
 
         sections = []
+
+        # https://discover.provider.plex.tv/library/sections/watchlist/all?includeAdvanced=1&includeMeta=1
+        if not plexapp.ACCOUNT.isOffline and "watchlist" not in self.librarySettings \
+                or ("playlists" in self.librarySettings and self.librarySettings["watchlist"].get("show", True)):
+            util.DEBUG_LOG("BEBEBEBE")
+            # get watchlist
+            sections.append(watchlist_section)
 
         if "playlists" not in self.librarySettings \
                 or ("playlists" in self.librarySettings and self.librarySettings["playlists"].get("show", True)):
