@@ -239,6 +239,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         self.reset(kwargs.get('episode'), kwargs.get('season'), kwargs.get('show'))
         self.parentList = kwargs.get('parentList')
         self.cameFrom = kwargs.get('came_from')
+        self.fromWatchlist = kwargs.get('from_watchlist')
         self.tasks = backgroundthread.Tasks()
 
     def reset(self, episode, season=None, show=None):
@@ -410,11 +411,12 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         self.initialized = True
 
     def selectPlayButton(self):
-        selected = self.episodeListControl.getSelectedItem()
-        if selected:
-            set_focus = self.getPlayButtonID(selected, base=not self.currentItemLoaded
-                                             and self.PLAY_BUTTON_DISABLED_ID or None)
-            self.setCondFocusId(set_focus)
+        if not self.fromWatchlist:
+            selected = self.episodeListControl.getSelectedItem()
+            if selected:
+                set_focus = self.getPlayButtonID(selected, base=not self.currentItemLoaded
+                                                 and self.PLAY_BUTTON_DISABLED_ID or None)
+                self.setCondFocusId(set_focus)
 
     @busy.dialog()
     def setup(self):
@@ -736,6 +738,8 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         elif controlID == self.SEARCH_BUTTON_ID:
             self.searchButtonClicked()
         elif controlID == self.SEASONS_LIST_ID:
+            if self.fromWatchlist:
+                return
             mli = self.seasonsListControl.getSelectedItem()
             if not mli:
                 return
@@ -745,6 +749,8 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             else:
                 self.setCondFocusId(self.EPISODE_LIST_ID)
         elif controlID == self.ROLES_LIST_ID:
+            if self.fromWatchlist:
+                return
             self.roleClicked()
         elif controlID == self.EXTRA_LIST_ID:
             self.openItem(self.extraListControl)
@@ -783,6 +789,9 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         self.processCommand(opener.open(item, came_from=came_from))
 
     def roleClicked(self):
+        if self.fromWatchlist:
+            return
+
         mli = self.rolesListControl.getSelectedItem()
         if not mli:
             return
@@ -1245,7 +1254,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
 
     def updateProperties(self):
         showTitle = self.show_ and self.show_.title or ''
-
+        self.setBoolProperty('disable_playback', self.fromWatchlist)
         self.setBoolProperty('current_item.loaded', False)
         self.updateBackgroundFrom(self.season or self.show_)
         self.setProperty('season.thumb', (self.season or self.show_).thumb.asTranscodedImageURL(*self.POSTER_DIM))
@@ -1355,16 +1364,17 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         self.populateRatings(video, mli, hide_ratings=self.hideSpoilers(video) and self.noRatings)
 
     def setPostReloadItemInfo(self, video, mli):
-        self.setItemAudioAndSubtitleInfo(video, mli)
-        mli.setProperty('unwatched', not video.isWatched and '1' or '')
-        mli.setProperty('watched', video.isFullyWatched and '1' or '')
-        mli.setProperty('video.res', video.resolutionString())
-        mli.setProperty('audio.codec', video.audioCodecString())
-        mli.setProperty('video.codec', video.videoCodecString())
-        mli.setProperty('audio.channels', video.audioChannelsString(metadata.apiTranslate))
-        mli.setProperty('video.rendering', video.videoCodecRendering)
-        mli.setBoolProperty('unavailable', not video.available())
-        mli.setBoolProperty('media.multiple', len(list(filter(lambda x: x.isAccessible(), video.media()))) > 1)
+        if not self.fromWatchlist:
+            self.setItemAudioAndSubtitleInfo(video, mli)
+            mli.setProperty('unwatched', not video.isWatched and '1' or '')
+            mli.setProperty('watched', video.isFullyWatched and '1' or '')
+            mli.setProperty('video.res', video.resolutionString())
+            mli.setProperty('audio.codec', video.audioCodecString())
+            mli.setProperty('video.codec', video.videoCodecString())
+            mli.setProperty('audio.channels', video.audioChannelsString(metadata.apiTranslate))
+            mli.setProperty('video.rendering', video.videoCodecRendering)
+            mli.setBoolProperty('unavailable', not video.available())
+            mli.setBoolProperty('media.multiple', len(list(filter(lambda x: x.isAccessible(), video.media()))) > 1)
 
         directors = u' / '.join([d.tag for d in video.directors()][:2])
         directorsLabel = len(video.directors) > 1 and T(32401, u'DIRECTORS').upper() or T(32383,

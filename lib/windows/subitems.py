@@ -72,6 +72,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
         self.mediaItem = kwargs.get('media_item')
         self.parentList = kwargs.get('parent_list')
         self.cameFrom = kwargs.get('came_from')
+        self.fromWatchlist = kwargs.get('from_watchlist')
         self.mediaItems = None
         self.exitCommand = None
         self.lastFocusID = None
@@ -95,7 +96,8 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
         self.setup()
         self.initialized = True
 
-        self.setFocusId(self.PLAY_BUTTON_ID)
+
+        self.setFocusId(self.fromWatchlist and self.INFO_BUTTON_ID or self.PLAY_BUTTON_ID)
 
     def onInit(self, *args, **kwargs):
         super(ShowWindow, self).onInit(*args, **kwargs)
@@ -133,6 +135,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
         self.setProperty('duration', util.durationToText(self.mediaItem.fixedDuration()))
         self.setProperty('info', '')
         self.setProperty('date', self.mediaItem.year)
+        self.setBoolProperty('disable_playback', self.fromWatchlist)
         if not self.mediaItem.isWatched:
             self.setProperty('unwatched.count', str(self.mediaItem.unViewedLeafCount) or '')
             self.setBoolProperty('unwatched.count.large', self.mediaItem.unViewedLeafCount > 999)
@@ -247,7 +250,8 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
         elif controlID == self.RELATED_LIST_ID:
             self.openItem(self.relatedListControl)
         elif controlID == self.ROLES_LIST_ID:
-            self.roleClicked()
+            if not self.fromWatchlist:
+                self.roleClicked()
         elif controlID == self.INFO_BUTTON_ID:
             self.infoButtonClicked()
         elif controlID == self.PLAY_BUTTON_ID:
@@ -357,7 +361,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
                 return
             item = mli.dataSource
 
-        self.processCommand(opener.open(item))
+        self.processCommand(opener.open(item, from_watchlist=self.fromWatchlist))
 
     def subItemListClicked(self):
         mli = self.subItemListControl.getSelectedItem()
@@ -368,7 +372,8 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
 
         w = None
         if self.mediaItem.type == 'show':
-            w = episodes.EpisodesWindow.open(season=mli.dataSource, show=self.mediaItem, parent_list=self.subItemListControl)
+            w = episodes.EpisodesWindow.open(season=mli.dataSource, show=self.mediaItem,
+                                             parent_list=self.subItemListControl, from_watchlist=self.fromWatchlist)
             update = True
         elif self.mediaItem.type == 'artist':
             w = tracks.AlbumWindow.open(album=mli.dataSource, parent_list=self.subItemListControl)

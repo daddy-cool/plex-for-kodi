@@ -17,7 +17,6 @@ from lib import util
 from lib.path_mapping import pmm
 from lib.plex_hosts import pdm
 from lib.util import T
-from plexnet.plexlibrary import WatchlistSection
 from . import busy
 from . import dropdown
 from . import kodigui
@@ -1811,6 +1810,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         self.tasks = [t for t in self.tasks if t]
 
     def sectionChanged(self, force=False):
+        if self._shuttingDown:
+            return
+
         self.sectionChangeTimeout = time.time() + 0.5
 
         # wait 2s at max if we're currently awaiting any hubs to reload
@@ -1833,6 +1835,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             self.sectionChangeThread.start()
 
     def _sectionChanged(self, immediate=False):
+        if self._shuttingDown:
+            return
+
         if not immediate:
             if not self.sectionChangeTimeout:
                 return
@@ -2035,7 +2040,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         if not plexapp.SERVERMANAGER.selectedServer.hasHubs():
             return
 
-        if section.key is False:
+        if section.key is False or section == watchlist_section:
             return
 
         hubs = self.sectionHubs.get(section.key)

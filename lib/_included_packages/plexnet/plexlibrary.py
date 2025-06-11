@@ -262,7 +262,7 @@ class LibrarySection(plexobjects.PlexObject):
         if args:
             path += util.joinArgs(args, '?' not in path)
 
-        return plexobjects.listItems(self.server, path, tag_fallback=tag_fallback, cachable=self.cachable,
+        return plexobjects.listItems(self.server, path, tag_fallback=tag_fallback, not_cachable=not self.cachable,
                                      cache_ref=self.cacheRef)
 
     def jumpList(self, filter_=None, sort=None, unwatched=False, type_=None):

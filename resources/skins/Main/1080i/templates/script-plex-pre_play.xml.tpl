@@ -37,11 +37,11 @@
 
             {% with attr = theme.pre_play.buttons & template = "includes/themed_button.xml.tpl" %}
                 {% include template with name="info" & id=304 %}
-                {% include template with name="play" & id=302 & visible="String.IsEmpty(Window.Property(unavailable))" %}
+                {% include template with name="play" & id=302 & visible="String.IsEmpty(Window.Property(unavailable)) & String.IsEmpty(Window.Property(disable_playback))" %}
                 {% include template with name="trailer" & id=303 & visible="!String.IsEmpty(Window.Property(trailer.button))" %}
                 {% include template with name="media" & id=307 & visible="!String.IsEmpty(Window.Property(media.multiple))" %}
-                {% include template with name="settings" & id=305 %}
-                {% include template with name="more" & id=306 %}
+                {% include template with name="settings" & id=305 & visible="String.IsEmpty(Window.Property(disable_playback))" %}
+                {% include template with name="more" & id=306 & visible="String.IsEmpty(Window.Property(disable_playback))" %}
             {% endwith %}
 
         </control>

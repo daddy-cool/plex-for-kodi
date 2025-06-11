@@ -69,6 +69,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         PlaybackBtnMixin.__init__(self)
         self.video = kwargs.get('video')
         self.parentList = kwargs.get('parent_list')
+        self.fromWatchlist = kwargs.get('from_watchlist')
         self.videos = None
         self.exitCommand = None
         self.trailer = None
@@ -193,6 +194,8 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         elif controlID == self.RELATED_LIST_ID:
             self.openItem(self.relatedListControl)
         elif controlID == self.ROLES_LIST_ID:
+            if self.fromWatchlist:
+                return
             self.roleClicked()
         elif controlID == self.PLAY_BUTTON_ID:
             self.playVideo()
@@ -525,11 +528,12 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.processCommand(opener.open(item))
 
     def focusPlayButton(self):
+        relevant_id = self.fromWatchlist and self.INFO_BUTTON_ID or self.PLAY_BUTTON_ID
         try:
-            if not self.getFocusId() == self.PLAY_BUTTON_ID:
-                self.setFocusId(self.PLAY_BUTTON_ID)
+            if not self.getFocusId() == relevant_id:
+                self.setFocusId(relevant_id)
         except (SystemError, RuntimeError):
-            self.setFocusId(self.PLAY_BUTTON_ID)
+            self.setFocusId(relevant_id)
 
     @busy.dialog()
     def setup(self):
@@ -564,6 +568,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.setProperty('summary', self.video.summary.strip().replace('\t', ' '))
         self.setProperty('unwatched', not self.video.isWatched and '1' or '')
         self.setBoolProperty('watched', self.video.isFullyWatched)
+        self.setBoolProperty('disable_playback', self.fromWatchlist)
 
         directors = u' / '.join([d.tag for d in self.video.directors()][:3])
         directorsLabel = len(self.video.directors) > 1 and T(32401, u'DIRECTORS').upper() or T(32383, u'DIRECTOR').upper()
@@ -604,20 +609,21 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
 
         self.populateRatings(self.video, self)
 
-        self.setAudioAndSubtitleInfo()
+        if not self.fromWatchlist:
+            self.setAudioAndSubtitleInfo()
 
-        self.setProperty('unavailable', all(not v.isAccessible() for v in self.video.media()) and '1' or '')
+            self.setProperty('unavailable', all(not v.isAccessible() for v in self.video.media()) and '1' or '')
 
-        if self.video.viewOffset.asInt():
-            width = self.video.viewOffset.asInt() and (1 + int((self.video.viewOffset.asInt() / self.video.duration.asFloat()) * self.width)) or 1
-            self.progressImageControl.setWidth(width)
-        else:
-            self.progressImageControl.setWidth(1)
+            if self.video.viewOffset.asInt():
+                width = self.video.viewOffset.asInt() and (1 + int((self.video.viewOffset.asInt() / self.video.duration.asFloat()) * self.width)) or 1
+                self.progressImageControl.setWidth(width)
+            else:
+                self.progressImageControl.setWidth(1)
 
-        if self.video.viewOffset.asInt():
-            self.setProperty('remainingTime', T(33615, "{time} left").format(time=self.video.remainingTimeString))
-        else:
-            self.setProperty('remainingTime', '')
+            if self.video.viewOffset.asInt():
+                self.setProperty('remainingTime', T(33615, "{time} left").format(time=self.video.remainingTimeString))
+            else:
+                self.setProperty('remainingTime', '')
 
     def setAudioAndSubtitleInfo(self):
         sas = self.video.selectedAudioStream()

@@ -345,7 +345,7 @@ class RelatedMixin(object):
         path = '/library/metadata/%s/similar' % self.ratingKey
         try:
             return plexobjects.listItems(self.server, path, offset=offset, limit=limit, params={"count": _max},
-                                         cachable=self.cachable, cache_ref=self.cacheRef)
+                                         cachable=self.cachable, cache_ref=self.cacheRef, not_cachable=self._not_cachable)
         except exceptions.BadRequest:
             util.DEBUG_LOG("Invalid related items response returned for {}", self)
             return None

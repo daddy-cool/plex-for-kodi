@@ -484,7 +484,7 @@ class SectionOnDeckMixin(object):
 class CachableItemsMixin(object):
     @property
     def cachable(self):
-        return 'items' in util.INTERFACE.getPreference('cache_requests')
+        return 'items' in util.INTERFACE.getPreference('cache_requests') and not self._not_cachable
 
     def clearChildCaches(self, return_urls=False):
         # clear caches of this season and its items
@@ -737,7 +737,8 @@ class Show(CachableItemsMixin, Video, media.RelatedMixin, SectionOnDeckMixin):
 
     def seasons(self):
         path = self.key
-        return plexobjects.listItems(self.server, path, Season.TYPE, cachable=self.cachable, cache_ref=self.cacheRef)
+        return plexobjects.listItems(self.server, path, Season.TYPE, cachable=self.cachable, cache_ref=self.cacheRef,
+                                     not_cachable=self._not_cachable)
 
     def season(self, title):
         path = self.key
@@ -746,7 +747,7 @@ class Show(CachableItemsMixin, Video, media.RelatedMixin, SectionOnDeckMixin):
     def episodes(self, watched=None, offset=None, limit=None):
         leavesKey = '/library/metadata/%s/allLeaves' % self.ratingKey
         return plexobjects.listItems(self.server, leavesKey, watched=watched, offset=offset, limit=limit,
-                                     cachable=self.cachable, cache_ref=self.cacheRef)
+                                     cachable=self.cachable, cache_ref=self.cacheRef, not_cachable=self._not_cachable)
 
     def episode(self, title):
         path = '/library/metadata/%s/allLeaves' % self.ratingKey
@@ -813,7 +814,7 @@ class Season(CachableItemsMixin, Video):
     def episodes(self, watched=None, offset=None, limit=None):
         path = self.key
         return plexobjects.listItems(self.server, path, watched=watched, offset=offset, limit=limit,
-                                     cachable=self.cachable, cache_ref=self.cacheRef)
+                                     cachable=self.cachable, cache_ref=self.cacheRef, not_cachable=self._not_cachable)
 
     def episode(self, title):
         path = self.key
@@ -823,7 +824,8 @@ class Season(CachableItemsMixin, Video):
         return self.episodes()
 
     def show(self):
-        return plexobjects.listItems(self.server, self.parentKey, cachable=self.cachable, cache_ref=self.cacheRef)[0]
+        return plexobjects.listItems(self.server, self.parentKey, cachable=self.cachable, cache_ref=self.cacheRef,
+                                     not_cachable=self._not_cachable)[0]
 
     def watched(self):
         return self.episodes(watched=True)
@@ -915,7 +917,8 @@ class Episode(PlayableVideo, SectionOnDeckMixin):
         skipParent = self.get('skipParent').asBool()
         key = self.parentKey if not skipParent else self.grandparentKey
         if not self._season:
-            items = plexobjects.listItems(self.server, key, cachable=self.cachable, cache_ref=self.cacheRef)
+            items = plexobjects.listItems(self.server, key, cachable=self.cachable, cache_ref=self.cacheRef,
+                                          not_cachable=self._not_cachable)
 
             if items:
                 self._season = items[0]
@@ -924,7 +927,7 @@ class Episode(PlayableVideo, SectionOnDeckMixin):
     def show(self):
         if not self._show:
             self._show = plexobjects.listItems(self.server, self.grandparentKey, cachable=self.cachable,
-                                               cache_ref=self.cacheRef)[0]
+                                               cache_ref=self.cacheRef, not_cachable=self._not_cachable)[0]
         return self._show
 
     @property

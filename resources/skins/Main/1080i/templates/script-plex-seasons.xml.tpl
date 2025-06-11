@@ -37,9 +37,9 @@
 
             {% with attr = theme.seasons.buttons & template = "includes/themed_button.xml.tpl" & hitrect = None %} {# fixme: should hitrect be None? #}
                 {% include template with name="info" & id=301 %}
-                {% include template with name="play" & id=302 %}
-                {% include template with name="shuffle" & id=303 %}
-                {% include template with name="more" & id=304 %}
+                {% include template with name="play" & id=302 & visible="String.IsEmpty(Window.Property(disable_playback))" %}
+                {% include template with name="shuffle" & id=303 & visible="String.IsEmpty(Window.Property(disable_playback))" %}
+                {% include template with name="more" & id=304 & visible="String.IsEmpty(Window.Property(disable_playback))" %}
             {% endwith %}
 
         </control>
