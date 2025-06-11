@@ -1330,6 +1330,14 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                                     }
                                    )
                     had_section = True
+
+            # hack for an inexistant watchlist due to it being hidden
+            if not self.librarySettings.get("/library/sections/watchlist", {}).get("show", True):
+                options.append({'key': 'show',
+                                'section_id': "/library/sections/watchlist",
+                                'display': T(33029, "Show library: {}").format(T(34000, 'Watchlist'))
+                                })
+
             if self.hubSettings:
                 had_hidden_hub = False
                 hidden_hubs_opts = []
@@ -1390,7 +1398,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             options.append({'key': 'move', 'display': T(33039, "Move")})
             options.append(dropdown.SEPARATOR)
 
-            if 'libraries' in util.getSetting('cache_requests'):
+            if 'libraries' in util.getSetting('cache_requests') and section != watchlist_section:
                 options.append({'key': 'section_cache_reset', 'display': T(33721, "Clear library cache (not items)")})
                 options.append(dropdown.SEPARATOR)
 
@@ -1924,8 +1932,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         sections = []
 
         # https://discover.provider.plex.tv/library/sections/watchlist/all?includeAdvanced=1&includeMeta=1
-        if not plexapp.ACCOUNT.isOffline and ("watchlist" not in self.librarySettings
-                or ("watchlist" in self.librarySettings and self.librarySettings["watchlist"].get("show", True))):
+        if not plexapp.ACCOUNT.isOffline and ("/library/sections/watchlist" not in self.librarySettings
+                or ("/library/sections/watchlist" in self.librarySettings and self.librarySettings["/library/sections/watchlist"].get("show", True))):
             # get watchlist
             from plexnet import plexlibrary
             wl = watchlist_section = plexlibrary.WatchlistSection(None, server=plexapp.SERVERMANAGER.getDiscoverServer())
