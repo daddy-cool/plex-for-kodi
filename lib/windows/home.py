@@ -17,6 +17,7 @@ from lib import util
 from lib.path_mapping import pmm
 from lib.plex_hosts import pdm
 from lib.util import T
+from plexnet.plexlibrary import WatchlistSection
 from . import busy
 from . import dropdown
 from . import kodigui
@@ -1853,6 +1854,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
             util.DEBUG_LOG('Section changed ({0}): {1}', section.key, repr(section.title))
             self.lastSection = section
+            if section == watchlist_section:
+                self.sectionClicked()
+                return
             self.showHubs(section)
 
         # timing issue
