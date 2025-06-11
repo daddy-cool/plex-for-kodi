@@ -426,6 +426,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         self.wantedSections = None
         self.movingSection = False
         self._initialMovingSectionPos = None
+        self.block_section_change = False
         self.go_root = False
         windowutils.HOME = self
 
@@ -873,7 +874,11 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                     return
 
                 if action == xbmcgui.ACTION_CONTEXT_MENU:
-                    show_section = self.sectionMenu()
+                    try:
+                        self.block_section_change = True
+                        show_section = self.sectionMenu()
+                    finally:
+                        self.block_section_change = False
                     if not show_section:
                         return
                     else:
@@ -1861,12 +1866,16 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
     def _sectionReallyChanged(self, section):
         with self.lock:
+            while self.block_section_change:
+                util.MONITOR.waitForAbort(0.1)
+
             self.setProperty('hub.focus', '')
             if util.addonSettings.dynamicBackgrounds:
                 self.backgroundSet = False
 
             util.DEBUG_LOG('Section changed ({0}): {1}', section.key, repr(section.title))
             self.lastSection = section
+
             if section == watchlist_section:
                 self.sectionChangeTimeout = None
                 self.sectionClicked()
