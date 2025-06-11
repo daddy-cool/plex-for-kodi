@@ -234,7 +234,11 @@ class LibrarySection(plexobjects.PlexObject):
             args['X-Plex-Container-Size'] = size
 
         if filter_:
-            args[filter_[0]] = filter_[1]
+            # filter might've been returned with a full path (e.g. watchlist)
+            if filter_[1].startswith('/'):
+                path = filter_[1]
+            else:
+                args[filter_[0]] = filter_[1]
         else:
             args['includeCollections'] = 1
 
@@ -327,7 +331,12 @@ class LibrarySection(plexobjects.PlexObject):
             args[category] = self._cleanSearchFilter(subcategory, value)
         if libtype is not None:
             args['type'] = plexobjects.searchType(libtype)
-        query = '/library/sections/%s/%s%s' % (self.key, category, util.joinArgs(args))
+
+        if self.key.startswith('/'):
+            base = '{0}/'.format(self.key)
+        else:
+            base = '/library/sections/{0}/'.format(self.key)
+        query = '{0}{1}{2}'.format(base, category, util.joinArgs(args))
 
         return plexobjects.listItems(self.server, query, bytag=True)
 
@@ -463,7 +472,7 @@ class WatchlistSection(LibrarySection):
     DEFAULT_SORT = 'watchlistedAt'
     DEFAULT_SORT_DESC = True
 
-    TYPE = 'watchlist'
+    TYPE = 'movies_shows'
     ID = 'watchlist'
 
     cachable = False

@@ -16,7 +16,8 @@ SEARCHTYPES = {
     'artist': 8,
     'album': 9,
     'track': 10,
-    'collection': 18
+    'collection': 18,
+    'movies_shows': 99,
 }
 
 LIBRARY_TYPES = {}
@@ -667,9 +668,6 @@ def listItems(server, path, libtype=None, watched=None, bytag=False, data=None, 
 
 
 def searchType(libtype):
-    searchtypesstrs = [str(k) for k in SEARCHTYPES.keys()]
-    if libtype in SEARCHTYPES + searchtypesstrs:
-        return libtype
     stype = SEARCHTYPES.get(libtype.lower())
     if not stype:
         raise exceptions.NotFound('Unknown libtype: %s' % libtype)

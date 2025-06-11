@@ -2647,3 +2647,11 @@ msgstr ""
 msgctxt "#34000"
 msgid "Watchlist"
 msgstr ""
+
+msgctxt "#34001"
+msgid "Released"
+msgstr ""
+
+msgctxt "#34002"
+msgid "Movies & Shows"
+msgstr ""

@@ -3230,3 +3230,15 @@ msgstr "Start: Staffelposter verwenden"
 msgctxt "#33741"
 msgid "Use season thumbnails/posters when displaying episodes in hubs instead of the TV show's."
 msgstr "Staffel-Thumbnails/Poster für Episoden in Hubs anstatt die der TV Serie verwenden."
+
+msgctxt "#34000"
+msgid "Watchlist"
+msgstr "Merkliste"
+
+msgctxt "#34001"
+msgid "Released"
+msgstr "Veröffentlicht"
+
+msgctxt "#34002"
+msgid "Movies & Shows"
+msgstr "Filme & Serien"

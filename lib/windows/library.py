@@ -111,6 +111,8 @@ TYPE_PLURAL = {
     'collection': T(32490, 'Collections'),
     'folder': T(32491, 'Folders'),
     'track': T(33644, 'Tracks'),
+    # watchlist
+    'movies_shows': T(34002, "Movies & Shows"),
 }
 
 SORT_KEYS = {
@@ -170,10 +172,11 @@ SORT_KEYS = {
     },
     'photodirectory': {},
     'collection': {},
-    'watchlist': {
+    # watchlist
+    'movies_shows': {
         'watchlistedAt': {'title': T(32351, 'By Date Added'), 'display': T(32352, 'Date Added'), 'defSortDesc': True},
         'titleSort': {'title': T(32357, 'By Title'), 'display': T(32358, 'Title'), 'defSortDesc': False},
-        'originallyAvailableAt': {'title': T(32353, 'By Release Date'), 'display': T(32354, 'Release Date'),
+        'firstAvailableAt': {'title': T(32353, 'By Release Date'), 'display': T(32354, 'Release Date'),
                                           'defSortDesc': True},
         'rating': {'title': T(33107, 'By Critic Rating'), 'display': T(33108, ' Critic Rating'), 'defSortDesc': True},
         'audienceRating': {'title': T(33101, 'By Audience Rating'), 'display': T(33102, 'Audience Rating'),
@@ -742,6 +745,9 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
         elif self.section.TYPE == 'artist':
             for t in ('artist', 'album', 'collection', 'track'):
                 options.append({'type': t, 'display': TYPE_PLURAL.get(t, t)})
+        elif self.section.TYPE == 'movies_shows':
+            for t in ('movies_shows', 'movie', 'show'):
+                options.append({'type': t, 'display': TYPE_PLURAL.get(t, t)})
         else:
             return
 
@@ -844,6 +850,14 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
             searchTypes = ['titleSort', 'addedAt', 'originallyAvailableAt', 'rating']
             for stype in searchTypes:
                 option = SORT_KEYS['photo'].get(stype, SORT_KEYS['movie'].get(stype)).copy()
+                option['type'] = stype
+                option['indicator'] = self.sort == stype and ind or ''
+                defSortByOption[stype] = option.get('defSortDesc')
+                options.append(option)
+        elif self.section.TYPE == 'movies_shows':
+            searchTypes = self.section.ALLOWED_SORT
+            for stype in searchTypes:
+                option = SORT_KEYS['movies_shows'].get(stype, SORT_KEYS['movie'].get(stype)).copy()
                 option['type'] = stype
                 option['indicator'] = self.sort == stype and ind or ''
                 defSortByOption[stype] = option.get('defSortDesc')
@@ -951,7 +965,9 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
             'year', 'decade', 'genre', 'contentRating', 'collection', 'director', 'actor', 'country', 'studio', 'resolution', 'label',
             'make', 'model', 'aperture', 'exposure', 'iso', 'lens'
         ):
-            options = [{'val': o.key, 'display': o.title, 'indicator': o.key == subKey and check or ''} for o in self.section.listChoices(option['type'])]
+            options = [{'val': o.key, 'display': o.title, 'indicator': o.key == subKey and check or ''} for o in
+                       self.section.listChoices(option['type'],
+                                                libtype=self.librarySettings.getItemType() or self.section.TYPE)]
             if not options:
                 options = [{'val': None, 'display': T(32375, 'No filters available'), 'ignore': True}]
 
@@ -990,6 +1006,8 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
             'studio': {'type': 'studio', 'display': T(32386, 'Studio'), 'indicator': self.hasFilter('studio') and check or ''},
             'resolution': {'type': 'resolution', 'display': T(32362, 'Resolution'), 'indicator': self.hasFilter('resolution') and check or ''},
             'label': {'type': 'label', 'display': T(32387, 'Labels'), 'indicator': self.hasFilter('label') and check or ''},
+            'released': {'type': 'released', 'display': T(34001, 'Released'),
+                      'indicator': self.hasFilter('released') and check or ''},
 
             'make': {'type': 'make', 'display': T(32388, 'Camera Make'), 'indicator': self.hasFilter('make') and check or ''},
             'model': {'type': 'model', 'display': T(32389, 'Camera Model'), 'indicator': self.hasFilter('model') and check or ''},
@@ -1020,6 +1038,9 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
                 options.append(optionsMap[k])
         elif self.section.TYPE == 'photo':
             for k in ('year', 'make', 'model', 'aperture', 'exposure', 'iso', 'lens', 'label'):
+                options.append(optionsMap[k])
+        elif self.section.TYPE == 'movies_shows':
+            for k in self.section.ALLOWED_FILTERS:
                 options.append(optionsMap[k])
 
         result = dropdown.showDropdown(options, (980, 106), with_indicator=True, suboption_callback=self.subOptionCallback)
@@ -1154,6 +1175,8 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
             self.setProperty('screen.title', T(32349, 'photos').upper())
         elif self.section.TYPE == 'collection':
             self.setProperty('screen.title', T(32382, 'COLLECTION').upper())
+        elif self.section.TYPE == 'movies_shows':
+            self.setProperty('screen.title', T(34000, 'Watchlist').upper())
         else:
             self.setProperty('screen.title', self.section.TYPE == 'show' and T(32393, 'TV SHOWS').upper() or T(32348, 'movies').upper())
 
@@ -1201,7 +1224,9 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
             util.DEBUG_LOG('Filter missing sub-filter data')
             return None
 
-        return (self.filter['type'], six.moves.urllib.parse.unquote_plus(self.filter['sub']['val']))
+        if isinstance(self.filter['sub']['val'], six.string_types) and self.filter['sub']['val'].startswith("/"):
+            return self.filter['type'], self.filter['sub']['val']
+        return self.filter['type'], six.moves.urllib.parse.unquote_plus(self.filter['sub']['val'])
 
     def getSortOpts(self):
         if not self.sort:
@@ -1235,7 +1260,7 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
         tasks = []
 
         if self.sort != 'titleSort' or ITEM_TYPE in ('folder', 'episode') or self.subDir \
-            or self.section.TYPE in ("collection", "watchlist"):
+            or self.section.TYPE in ("collection", "movies_shows"):
             if ITEM_TYPE == 'folder':
                 sectionAll = self.section.folder(0, 0, self.subDir)
             else:
