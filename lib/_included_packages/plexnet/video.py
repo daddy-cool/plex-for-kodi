@@ -51,7 +51,10 @@ def forceMediaChoice(method):
                             media = m
                             break
                 if not media:
-                    media = self.media()[0]
+                    try:
+                        media = self.media()[0]
+                    except (TypeError, IndexError):
+                        pass
 
             if not self.mediaChoice or media.hasStreams():
                 self.setMediaChoice(media=media, partIndex=partIndex)
@@ -192,7 +195,11 @@ class Video(media.MediaItem, AudioCodecMixin):
         return None
 
     def setMediaChoice(self, media=None, partIndex=0):
-        media = media or self.media()[0]
+        try:
+            media = media or self.media()[0]
+        except (TypeError, IndexError):
+            return
+
         self.mediaChoice = mediachoice.MediaChoice(media, partIndex=partIndex)
 
     @forceMediaChoice
@@ -380,6 +387,8 @@ class Video(media.MediaItem, AudioCodecMixin):
 
     @forceMediaChoice
     def resolutionString(self):
+        if not self.mediaChoice:
+            return ''
         res = self.mediaChoice.media.videoResolution
         if not res:
             return ''
@@ -391,17 +400,23 @@ class Video(media.MediaItem, AudioCodecMixin):
 
     @forceMediaChoice
     def audioCodecString(self):
+        if not self.mediaChoice:
+            return ''
         codec = (self.mediaChoice.media.audioCodec or '').lower()
 
         return self.translateAudioCodec(codec).upper()
 
     @forceMediaChoice
     def videoCodecString(self):
+        if not self.mediaChoice:
+            return ''
         return (self.mediaChoice.media.videoCodec or '').upper()
 
     @property
     @forceMediaChoice
     def videoCodecRendering(self):
+        if not self.mediaChoice:
+            return ''
         stream = self.mediaChoice.videoStream
 
         if not stream:
@@ -411,6 +426,8 @@ class Video(media.MediaItem, AudioCodecMixin):
 
     @forceMediaChoice
     def audioChannelsString(self, translate_func=util.dummyTranslate):
+        if not self.mediaChoice:
+            return ''
         channels = self.mediaChoice.media.audioChannels.asInt()
 
         if channels == 1:
