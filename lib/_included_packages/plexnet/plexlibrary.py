@@ -474,7 +474,7 @@ class WatchlistSection(LibrarySection):
 
     TYPE = 'movies_shows'
     ID = 'watchlist'
-    key = '/library/sections/watchlist'
+    _key = '/library/sections/watchlist'
 
     cachable = False
 
@@ -489,12 +489,18 @@ class WatchlistSection(LibrarySection):
         data = server.query(self.key+"/all", offset=0, limit=0, type=99, **self.DEFAULT_URL_ARGS) # type: ignore
         self.type = "mixed"
         super(LibrarySection, self).__init__(data, initpath=initpath, server=server, container=self)
-        # our static key gets overridden by LibrarySection.__init__, restore it
-        self.key = WatchlistSection.key
         self.server = server
 
     def has_data(self):
         return self.totalSize > 0
+
+    @property
+    def key(self):
+        return self._key
+
+    @key.setter
+    def key(self, value):
+        return
 
 
 
