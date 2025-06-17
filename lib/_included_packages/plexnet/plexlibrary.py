@@ -492,7 +492,7 @@ class WatchlistSection(LibrarySection):
         self.server = server
 
     def has_data(self):
-        return self.totalSize > 0
+        return self.totalSize and self.totalSize > 0
 
     @property
     def key(self):
