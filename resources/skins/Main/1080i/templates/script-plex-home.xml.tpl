@@ -133,7 +133,7 @@
         <height>{{ vscale(200) }}</height>
         <control type="fixedlist" id="101">
             <animation effect="slide" end="-110,0" time="200" tween="sine" easing="inout" condition="Integer.IsGreater(Container(101).Position,3)">Conditional</animation>
-            <animation effect="slide" end="-110,0" time="200" tween="sine" easing="inout" condition="Integer.IsGreater(Container(101).Position,4)">Conditional</animation>-->
+            <animation effect="slide" end="-110,0" time="200" tween="sine" easing="inout" condition="Integer.IsGreater(Container(101).Position,4)">Conditional</animation>
             <posx>-300</posx>
             <posy>0</posy>
             <width>2430</width>
