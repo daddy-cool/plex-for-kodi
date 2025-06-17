@@ -612,7 +612,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
                 self.hadUserInteraction = True
 
             if action == xbmcgui.ACTION_MOVE_UP and controlID in (self.EPISODE_LIST_ID, self.SEASONS_LIST_ID):
-                self.updateBackgroundFrom((self.show_ or self.season.show()))
+                self.updateBackgroundFrom((self.season or self.show_ or self.season.show()))
 
             if controlID == self.SEASONS_LIST_ID and action in (xbmcgui.ACTION_MOVE_LEFT, xbmcgui.ACTION_MOVE_RIGHT):
                 self.manuallySelectedSeason = True
