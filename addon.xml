@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-beta12.2"
+       version="0.8.0-beta12.3"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -33,12 +33,9 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Home/Hubs: Use season thumbnail for episodes if possible
-Settings: Add setting to enable season thumbnails/posters for episodes in hubs (default: On)
-- Episodes: Use season art as background if available
-- Home: Fix wrong background loaded in certain circumstances after boot or section change (sort hubs by index internally to fetch the first correct background of the first visible item)
-- Home/Core: Store last background per user/account
-- README: Add powered by Jetbrains
+- Episodes: Use correct background when going up from related shows back to the episode list
+- Core: Fix hang on exit in certain Linux environments
+- Home: Fix round robining (if it is enabled in addonSettings)
         </news>
         <assets>
             <icon>icon2.png</icon>
