@@ -45,12 +45,20 @@ if util.addonSettings.debugRequests:
 
 
 def waitForThreads():
-    util.DEBUG_LOG('Main: Checking for any remaining threads')
+    util.DEBUG_LOG('Main: Checking for any remaining threads (current: {})'.format(threading.currentThread().name))
     while len(threading.enumerate()) > 1:
+        alive_threads = [t.name for t in list(threading.enumerate()) if t.is_alive()]
+        alive_threads_out = ", ".join(alive_threads)
+        active_thread_count = len(threading.enumerate())
+
+        # With certain linux instances we might have two threads, while Dummy is the one we're on.
+        if active_thread_count == 2 and "Dummy" in alive_threads_out and "MainThread" in alive_threads_out:
+            break
+
         for t in threading.enumerate():
             if t != threading.currentThread():
                 if t.is_alive():
-                    util.DEBUG_LOG('Main: Waiting on: {0}...', t.name)
+                    util.DEBUG_LOG('Main: Waiting on: {0}... (alive: {1})', t.name, alive_threads_out)
                     if isinstance(t, _Timer):
                         t.cancel()
 
@@ -58,6 +66,7 @@ def waitForThreads():
                         t.join(.25)
                     except:
                         util.ERROR()
+        util.MONITOR.waitForAbort(0.05)
 
 
 @atexit.register
