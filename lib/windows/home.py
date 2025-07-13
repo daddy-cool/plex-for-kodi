@@ -161,6 +161,7 @@ class ExtendHubTask(backgroundthread.Task):
             util.ERROR("No data - disconnected?", notify=True, time_ms=5000)
         except:
             util.DEBUG_LOG('Something went wrong when extending hub: {0}', repr(self.hub.hubIdentifier))
+            util.ERROR()
 
 
 class HomeSection(object):
@@ -1751,10 +1752,17 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                         self.updateBackgroundFrom(control[0].dataSource)
                         return
                 elif (action == xbmcgui.ACTION_MOVE_LEFT and mlipos == 0
-                      and (controlID, mlipos) == self._lastSelectedItem):
+                      and ((controlID, mlipos) == self._lastSelectedItem)):
                     if not control.dataSource.more.asInt():
                         last_item_index = len(control) - 1
                         control.selectItem(last_item_index)
+                        while control.getSelectedPos() != last_item_index:
+                            util.MONITOR.waitForAbort(0.1)
+
+                        if not control[last_item_index].dataSource:
+                            last_item_index -= 1
+                            control.selectItem(last_item_index)
+                            
                         self._lastSelectedItem = (controlID, last_item_index)
                         self.updateBackgroundFrom(control[last_item_index].dataSource)
                     else:
@@ -2273,7 +2281,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         use_reselect_pos = False
         if reselect_pos is not None:
             rk, pos = reselect_pos
-            use_reselect_pos = True if rk is not None else (reselect_pos > 0 or reselect_pos == -1)
+            use_reselect_pos = True if rk is not None else (pos > 0 or pos == -1)
 
             if pos == 0 and not use_reselect_pos:
                 # we might want to force the first position, check the hubs position
