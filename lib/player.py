@@ -831,22 +831,21 @@ class SeekPlayerHandler(BasePlayerHandler):
         if self.isDirectPlay and self.player.video:
             track = self.player.video.selectedAudioStream()
             if track:
-                # only try finding the current audio stream when the BG music isn't playing and wasn't the last
-                # thing played, because currentaudiostream doesn't populate for audio-only items; in that case,
-                # always select the proper audio stream
-                if not self.player.lastPlayWasBGM:
+                currIdx = None
+                tries = 0
+                while currIdx != track.typeIndex and tries < 20:
                     try:
                         playerID = kodijsonrpc.rpc.Player.GetActivePlayers()[0]["playerid"]
-                        currIdx = kodijsonrpc.rpc.Player.GetProperties(playerid=playerID, properties=['currentaudiostream'])['currentaudiostream']['index']
-                        if currIdx == track.typeIndex:
-                            util.DEBUG_LOG('Audio track is correct index: {0}', track.typeIndex)
-                            return
+                        currIdx = \
+                        kodijsonrpc.rpc.Player.GetProperties(playerid=playerID, properties=['currentaudiostream'])[
+                            'currentaudiostream']['index']
                     except:
-                        util.ERROR()
+                        pass
+                    util.DEBUG_LOG('Switching audio track - index: {0} (try: {1})', track.typeIndex, tries + 1)
+                    self.player.setAudioStream(track.typeIndex)
+                    util.MONITOR.waitForAbort(0.1)
+                    tries += 1
 
-                util.MONITOR.waitForAbort(0.1)
-                util.DEBUG_LOG('Switching audio track - index: {0}', track.typeIndex)
-                self.player.setAudioStream(track.typeIndex)
 
     def updateOffset(self):
         try:
