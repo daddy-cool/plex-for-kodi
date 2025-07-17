@@ -20,7 +20,7 @@ from . import playersettings
 from . import search
 from . import videoplayer
 from . import windowutils
-from .mixins import RatingsMixin, PlaybackBtnMixin, ThemeMusicMixin
+from .mixins import RatingsMixin, PlaybackBtnMixin, ThemeMusicMixin, WatchlistUtilsMixin
 
 VIDEO_RELOAD_KW = dict(includeExtras=1, includeExtrasCount=10, includeChapters=1, includeReviews=1)
 
@@ -30,7 +30,8 @@ class RelatedPaginator(pagination.BaseRelatedPaginator):
         return self.parentWindow.video.getRelated(offset=offset, limit=amount)
 
 
-class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixin, PlaybackBtnMixin, ThemeMusicMixin):
+class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixin, PlaybackBtnMixin, ThemeMusicMixin,
+                    WatchlistUtilsMixin):
     xmlFile = 'script-plex-pre_play.xml'
     path = util.ADDON.getAddonInfo('path')
     theme = 'Main'
@@ -67,9 +68,10 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
     def __init__(self, *args, **kwargs):
         kodigui.ControlledWindow.__init__(self, *args, **kwargs)
         PlaybackBtnMixin.__init__(self)
+        WatchlistUtilsMixin.__init__(self)
         self.video = kwargs.get('video')
         self.parentList = kwargs.get('parent_list')
-        self.fromWatchlist = kwargs.get('from_watchlist')
+        self.fromWatchlist = kwargs.get('from_watchlist', False)
         self.videos = None
         self.exitCommand = None
         self.trailer = None
@@ -551,6 +553,11 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
                                                      parent_window=self)
         except ValueError:
             raise util.NoDataException
+
+        if self.fromWatchlist:
+            self.watchlistItemAvailable(self.video)
+        else:
+            self.checkIsWatchlisted(self.video)
 
         self.setInfo()
         self.setBoolProperty("initialized", True)

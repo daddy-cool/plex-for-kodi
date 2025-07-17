@@ -95,6 +95,10 @@ class PlexServerManager(signalsmixin.SignalsMixin):
 
         return servers
 
+    @property
+    def connectedServers(self):
+        return filter(lambda s: s.activeConnection, self.getServers())
+
     def hasPendingRequests(self):
         for server in self.getServers():
             if server.pendingReachabilityRequests:

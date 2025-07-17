@@ -3,12 +3,14 @@
 import math
 import os
 import threading
+import requests
 from six import ensure_str
 from plexnet import util as pnUtil
 from kodi_six import xbmcvfs
 
 from lib import util
 from lib import player
+from lib import backgroundthread
 from lib.data_cache import dcm
 from lib.util import T
 from lib.path_mapping import pmm
@@ -383,3 +385,125 @@ class PlexSubtitleDownloadMixin(object):
         else:
             util.showNotification(util.T(33696, "No Subtitles found."),
                                   time_ms=1500, header=util.T(32396, "Subtitles"))
+
+
+class WatchlistCheckBaseTask(backgroundthread.Task):
+    def setup(self, server, guid, callback):
+        self.server = server
+        self.guid = guid
+        self.callback = callback
+        return self
+
+
+class AvailabilityCheckTask(WatchlistCheckBaseTask):
+    def run(self):
+        if self.isCanceled():
+            return
+
+        try:
+            if self.isCanceled():
+                return
+            res = self.server.query("/library/all", guid=self.guid)
+            self.callback(self.server.name if res and res.get("size", 0) else None)
+        except:
+            util.ERROR()
+
+class IsWatchlistedTask(WatchlistCheckBaseTask):
+    def run(self):
+        if self.isCanceled():
+            return
+
+        try:
+            if self.isCanceled():
+                return
+            res = self.server.query("/library/metadata/{}/userState".format(self.guid))
+            is_wl = False
+
+            # some etree foo to find the watchlisted state
+            if res and res.get("size", 0):
+                for child in res:
+                    if child.tag == "UserState":
+                        if child.get("watchlistedAt", None):
+                            is_wl = True
+                        break
+            self.callback(is_wl)
+        except:
+            util.ERROR()
+
+
+def wl_wrap(f):
+    def wrapper(cls, item, *args, **kwargs):
+        if not item.guid:
+            return
+
+        # if watchlist not wanted, return
+
+        return f(cls, item, *args, **kwargs)
+    return wrapper
+
+
+class WatchlistUtilsMixin(object):
+    def __init__(self, *args, **kwargs):
+        super(WatchlistUtilsMixin, self).__init__()
+        self.wl_availability = []
+        self.is_watchlisted = False
+
+    def GUIDToRatingKey(self, guid):
+        return guid.rsplit("/")[-1]
+
+    @wl_wrap
+    def watchlistItemAvailable(self, item):
+        """
+        Is a watchlisted item available on any of the user's Plex servers?
+        :param item:
+        :return:
+        """
+
+        self.is_watchlisted = True
+        self.setBoolProperty("is_watchlisted", True)
+
+        def wl_av_callback(server_name):
+            if not server_name:
+                return
+            self.wl_availability.append(server_name)
+            self.setProperty("wl_availability", ",".join(self.wl_availability))
+            self.setProperty("wl_availability_count", str(len(self.wl_availability)))
+            util.DEBUG_LOG("Watchlist availability: {}", server_name)
+
+        for server in pnUtil.SERVERMANAGER.connectedServers:
+            task = AvailabilityCheckTask().setup(server, item.guid, wl_av_callback)
+            backgroundthread.BGThreader.addTask(task)
+
+    @wl_wrap
+    def checkIsWatchlisted(self, item):
+        """
+        Is an item on the user's watch list?
+        :param item:
+        :return:
+        """
+
+        def callback(state):
+            self.is_watchlisted = state
+            self.setBoolProperty("is_watchlisted", state)
+            util.DEBUG_LOG("Watchlist state for item {}: {}", item.ratingKey, state)
+
+        wl_rk = self.GUIDToRatingKey(item.guid)
+        task = IsWatchlistedTask().setup(pnUtil.SERVERMANAGER.getDiscoverServer(), wl_rk, callback)
+        backgroundthread.BGThreader.addTask(task)
+
+    def _modifyWatchlist(self, item, method="addToWatchlist"):
+        server = pnUtil.SERVERMANAGER.getDiscoverServer()
+        res = server.query("/actions/{}".format(method), ratingKey=self.GUIDToRatingKey(item.guid), method="put")
+
+        if res:
+            util.DEBUG_LOG("Watchlist action {} for {} succeeded", method, item.ratingKey)
+            return
+        util.DEBUG_LOG("Watchlist action {} for {} failed", method, item.ratingKey)
+
+    @wl_wrap
+    def addToWatchlist(self, item):
+        self._modifyWatchlist(item)
+
+    @wl_wrap
+    def removeFromWatchlist(self, item):
+        self._modifyWatchlist(item, method="removeFromWatchlist")
