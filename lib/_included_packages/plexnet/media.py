@@ -325,11 +325,12 @@ class Review(MediaTag):
 
 class RelatedMixin(object):
     _relatedCount = None
+    related_source = "similar"
 
     @property
     def relatedCount(self):
         if self._relatedCount is None:
-            related = self.getRelated(0, 0)
+            related = self.getRelated(0, 0 if self.related_source == "similar" else 36)
             if related is not None:
                 self._relatedCount = related.totalSize
             else:
@@ -342,7 +343,7 @@ class RelatedMixin(object):
         return self.getRelated(0, 8)
 
     def getRelated(self, offset=None, limit=None, _max=36):
-        path = '/library/metadata/%s/similar' % self.ratingKey
+        path = '/library/metadata/{}/{}'.format(self.ratingKey, self.related_source)
         try:
             return plexobjects.listItems(self.server, path, offset=offset, limit=limit, params={"count": _max},
                                          cachable=self.cachable, cache_ref=self.cacheRef, not_cachable=self._not_cachable)

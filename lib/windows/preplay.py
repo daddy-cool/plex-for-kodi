@@ -527,7 +527,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
                 return
             item = mli.dataSource
 
-        self.processCommand(opener.open(item))
+        self.processCommand(opener.open(item, from_watchlist=self.fromWatchlist))
 
     def focusPlayButton(self):
         relevant_id = self.fromWatchlist and self.INFO_BUTTON_ID or self.PLAY_BUTTON_ID
@@ -547,6 +547,9 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         elif self.video.type == 'movie':
             self.setProperty('preview.no', '1')
 
+        if self.fromWatchlist:
+            # fixme, multiple? choice?
+            self.video.related_source = "studio"
         self.video.reload(checkFiles=1, **VIDEO_RELOAD_KW)
         try:
             self.relatedPaginator = RelatedPaginator(self.relatedListControl, leaf_count=int(self.video.relatedCount),
