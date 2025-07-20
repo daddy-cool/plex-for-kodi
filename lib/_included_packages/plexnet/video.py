@@ -612,6 +612,13 @@ class PlayableVideo(CachableItemsMixin, Video, media.RelatedMixin):
             hubs[hub.hubIdentifier] = hub
         return hubs
 
+    def fetchExternalExtras(self):
+        query = '{}/extras'.format(self.key)
+        data = self.server.query(query)
+        container = plexobjects.PlexContainer(data, initpath=query, server=self.server, address=query)
+        items = plexobjects.PlexItemList(data, Clip, "Video", server=self.server, container=container)
+        self.extras = list(items)
+
     @property
     def in_progress(self):
         return bool(self.get('viewOffset').asInt())

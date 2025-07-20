@@ -530,12 +530,11 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.processCommand(opener.open(item, from_watchlist=self.fromWatchlist))
 
     def focusPlayButton(self):
-        relevant_id = self.fromWatchlist and self.INFO_BUTTON_ID or self.PLAY_BUTTON_ID
         try:
-            if not self.getFocusId() == relevant_id:
-                self.setFocusId(relevant_id)
+            if not self.getFocusId() == self.PLAY_BUTTON_ID:
+                self.setFocusId(self.PLAY_BUTTON_ID)
         except (SystemError, RuntimeError):
-            self.setFocusId(relevant_id)
+            self.setFocusId(self.PLAY_BUTTON_ID)
 
     @busy.dialog()
     def setup(self):
@@ -549,7 +548,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
 
         if self.fromWatchlist:
             # fixme, multiple? choice?
-            self.video.related_source = "studio"
+            self.video.related_source = "more-from-credits"
         self.video.reload(checkFiles=1, **VIDEO_RELOAD_KW)
         try:
             self.relatedPaginator = RelatedPaginator(self.relatedListControl, leaf_count=int(self.video.relatedCount),
@@ -673,10 +672,14 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         idx = 0
 
         if not self.video.extras:
-            self.extraListControl.reset()
-            return False
+            if self.fromWatchlist:
+                self.video.fetchExternalExtras()
 
-        for extra in self.video.extras():
+            if not self.video.extras:
+                self.extraListControl.reset()
+                return False
+
+        for extra in self.video.extras:
             if not self.trailer and extra.extraType.asInt() == media.METADATA_RELATED_TRAILER:
                 self.trailer = extra
                 self.setProperty('trailer.button', '1')
