@@ -128,7 +128,10 @@ class Checks(object):
         return self.isChannelItem() or self.isMyPlexItem() or self.isVevoItem() or self.isIvaItem()
 
     def isMyPlexItem(self):
-        return self.container.server.TYPE == 'MYPLEXSERVER' or self.container.identifier == 'com.plexapp.plugins.myplex'
+        try:
+            return self.container.server.TYPE == 'MYPLEXSERVER' or self.container.identifier == 'com.plexapp.plugins.myplex'
+        except AttributeError:
+            return
 
     def isChannelItem(self):
         identifier = self.getIdentifier() or "com.plexapp.plugins.library"
@@ -445,7 +448,13 @@ class PlexObject(Checks):
         if path is None:
             return None
         else:
-            return self.container._getAbsolutePath(path)
+            try:
+                return self.container._getAbsolutePath(path)
+            except AttributeError:
+                try:
+                    return self._getAbsolutePath(path)
+                except AttributeError:
+                    raise
 
     def _getAbsolutePath(self, path):
         if path.startswith('/'):

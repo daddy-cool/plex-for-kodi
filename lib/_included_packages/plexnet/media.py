@@ -32,7 +32,11 @@ class MediaItem(plexobjects.PlexObject):
         identifier = self.get('identifier') or None
 
         if identifier is None:
-            identifier = self.container.identifier
+            try:
+                identifier = self.container.identifier
+            except AttributeError:
+                util.DEBUG_LOG("Couldn't get media identifier for {}", self)
+                pass
 
         # HACK
         # PMS doesn't return an identifier for playlist items. If we haven't found
