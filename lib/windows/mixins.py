@@ -7,7 +7,9 @@ import requests
 from six import ensure_str
 from plexnet import util as pnUtil
 from kodi_six import xbmcvfs
+from kodi_six import xbmc
 
+from collections import OrderedDict
 from lib import util
 from lib import player
 from lib import backgroundthread
@@ -404,7 +406,16 @@ class AvailabilityCheckTask(WatchlistCheckBaseTask):
             if self.isCanceled():
                 return
             res = self.server.query("/library/all", guid=self.guid)
-            self.callback(self.server.name if res and res.get("size", 0) else None)
+            if res and res.get("size", 0):
+                # find ratingKey
+                for child in res:
+                    if child.tag in ("Directory", "Video"):
+                        rk = child.get("ratingKey")
+                        if rk:
+                            self.callback(self.server.name, rating_key=rk)
+                            break
+            else:
+                self.callback(None)
         except:
             util.ERROR()
 
@@ -443,9 +454,16 @@ def wl_wrap(f):
 
 
 class WatchlistUtilsMixin(object):
+    WL_BTN_WAIT = 2302
+    WL_BTN_MULTIPLE = 2303
+    WL_BTN_SINGLE = 2304
+    WL_BTN_UPCOMING = 2305
+
+    WL_RELEVANT_BTNS = (302, WL_BTN_WAIT, WL_BTN_MULTIPLE, WL_BTN_SINGLE, WL_BTN_UPCOMING)
+
     def __init__(self, *args, **kwargs):
         super(WatchlistUtilsMixin, self).__init__()
-        self.wl_availability = []
+        self.wl_availability = OrderedDict()
         self.is_watchlisted = False
 
     def GUIDToRatingKey(self, guid):
@@ -461,14 +479,45 @@ class WatchlistUtilsMixin(object):
 
         self.is_watchlisted = True
         self.setBoolProperty("is_watchlisted", True)
+        self.setBoolProperty("wl_availability_checking", True)
+        self.wl_checking_servers = len(list(pnUtil.SERVERMANAGER.connectedServers))
+        self.wl_play_button_id = self.WL_BTN_WAIT
 
-        def wl_av_callback(server_name):
-            if not server_name:
-                return
-            self.wl_availability.append(server_name)
+        def wl_set_btn():
+            if not self.lastFocusID or self.lastFocusID in self.WL_RELEVANT_BTNS:
+                change_to = None
+                if self.wl_checking_servers:
+                    change_to = self.WL_BTN_WAIT
+                elif len(self.wl_availability) > 1:
+                    change_to = self.WL_BTN_MULTIPLE
+                elif self.wl_availability:
+                    change_to = self.WL_BTN_SINGLE
+                elif not self.wl_availability:
+                    change_to = self.WL_BTN_UPCOMING
+
+                if change_to and self.wl_play_button_id != change_to:
+                    self.wl_play_button_id = change_to
+                    # wait for visibility
+                    tries = 0
+                    while not xbmc.getCondVisibility('Control.IsVisible({0})'.format(self.wl_play_button_id)) and tries < 20:
+                        util.MONITOR.waitForAbort(0.1)
+                        tries += 1
+                    self.focusPlayButton(extended=True)
+
+        self.focusPlayButton(extended=True)
+        wl_set_btn()
+
+        def wl_av_callback(server_name, rating_key=None):
+            if server_name:
+                self.wl_availability[server_name] = rating_key
+                util.DEBUG_LOG("Watchlist availability: {}: {}", server_name, rating_key)
+
+            self.wl_checking_servers -= 1
+            if self.wl_checking_servers == 0:
+                self.setBoolProperty("wl_availability_checking", False)
             self.setProperty("wl_availability", ",".join(self.wl_availability))
-            self.setProperty("wl_availability_count", str(len(self.wl_availability)))
-            util.DEBUG_LOG("Watchlist availability: {}", server_name)
+            self.setBoolProperty("wl_availability_multiple", len(self.wl_availability) > 1)
+            wl_set_btn()
 
         for server in pnUtil.SERVERMANAGER.connectedServers:
             task = AvailabilityCheckTask().setup(server, item.guid, wl_av_callback)

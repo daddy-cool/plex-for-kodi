@@ -63,6 +63,8 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
     OPTIONS_BUTTON_ID = 306
     MEDIA_BUTTON_ID = 307
 
+    POSSIBLE_PLAY_BUTTON_IDS = [302, 2302, 2303, 2304, 2305]
+
     PLAYER_STATUS_BUTTON_ID = 204
 
     def __init__(self, *args, **kwargs):
@@ -201,6 +203,12 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             self.roleClicked()
         elif controlID == self.PLAY_BUTTON_ID:
             self.playVideo()
+        elif self.fromWatchlist and self.wl_availability:
+            if len(self.wl_availability) > 1:
+                # choose
+                pass
+            else:
+                self.openItem(item=list(self.wl_availability.items())[0][1], inherit_from_watchlist=False)
         elif controlID == self.PLAYER_STATUS_BUTTON_ID:
             self.showAudioPlayer()
         elif controlID == self.INFO_BUTTON_ID:
@@ -520,16 +528,19 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.processCommand(videoplayer.play(video=self.video, resume=resume))
         return True
 
-    def openItem(self, control=None, item=None):
+    def openItem(self, control=None, item=None, inherit_from_watchlist=True):
         if not item:
             mli = control.getSelectedItem()
             if not mli:
                 return
             item = mli.dataSource
 
-        self.processCommand(opener.open(item, from_watchlist=self.fromWatchlist))
+        self.processCommand(opener.open(item, from_watchlist=self.fromWatchlist if inherit_from_watchlist else False))
 
-    def focusPlayButton(self):
+    def focusPlayButton(self, extended=False):
+        if extended:
+            self.setFocusId(self.wl_play_button_id)
+            return
         try:
             if not self.getFocusId() == self.PLAY_BUTTON_ID:
                 self.setFocusId(self.PLAY_BUTTON_ID)
