@@ -24,7 +24,9 @@ def open(obj, **kwargs):
         key = obj
         if not obj.startswith('/'):
             key = '/library/metadata/{0}'.format(obj)
-        return open(plexapp.SERVERMANAGER.selectedServer.getObject(key), **kwargs)
+
+        server = kwargs.pop("server", None) or plexapp.SERVERMANAGER.selectedServer
+        return open(server.getObject(key), **kwargs)
     elif obj.TYPE == 'episode':
         return episodeClicked(obj, **kwargs)
     elif obj.TYPE == 'movie':

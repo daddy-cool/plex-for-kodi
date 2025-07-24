@@ -209,9 +209,24 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
                 # choose
                 pass
             else:
-                rk = list(self.wl_availability.items())[0][1].get("rating_key", None)
+                item_meta = list(self.wl_availability.items())[0][1]
+                rk = item_meta.get("rating_key", None)
                 if rk:
-                    self.openItem(item=rk, inherit_from_watchlist=False)
+                    server_differs = item_meta["server"].uuid != plexapp.SERVERMANAGER.selectedServer.uuid
+                    orig_srv = plexapp.SERVERMANAGER.selectedServer
+
+                    try:
+                        if server_differs:
+                            # fire event to temporarily change server
+                            util.LOG("Temporarily changing server source to: {}", item_meta["server"].name)
+                            plexapp.util.APP.trigger('change:tempServer', server=item_meta["server"])
+
+                        self.openItem(item=rk, inherit_from_watchlist=False, server=item_meta["server"])
+                    finally:
+                        if server_differs:
+                            util.LOG("Reverting to server source: {}", orig_srv.name)
+                            plexapp.util.APP.trigger('change:tempServer', server=orig_srv)
+
                     self.checkIsWatchlisted(self.video)
         elif controlID in self.WL_BTN_STATE_BTNS:
             is_watchlisted = self.toggleWatchlist(self.video)
@@ -535,14 +550,15 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.processCommand(videoplayer.play(video=self.video, resume=resume))
         return True
 
-    def openItem(self, control=None, item=None, inherit_from_watchlist=True):
+    def openItem(self, control=None, item=None, inherit_from_watchlist=True, server=None):
         if not item:
             mli = control.getSelectedItem()
             if not mli:
                 return
             item = mli.dataSource
 
-        self.processCommand(opener.open(item, from_watchlist=self.fromWatchlist if inherit_from_watchlist else False))
+        self.processCommand(opener.open(item, from_watchlist=self.fromWatchlist if inherit_from_watchlist else False,
+                                        server=server))
 
     def focusPlayButton(self, extended=False):
         if extended:

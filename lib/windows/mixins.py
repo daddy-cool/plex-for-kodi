@@ -415,7 +415,7 @@ class AvailabilityCheckTask(WatchlistCheckBaseTask):
             res = self.server.query("/library/all", guid=self.guid, type=plexobjects.searchType(self.media_type))
             if res and res.get("size", 0):
                 # find ratingKey
-                metadata = {"rating_key": None, "resolution": None, "season_count": None}
+                metadata = {"rating_key": None, "resolution": None, "season_count": None, "server": None}
                 for child in res:
                     if child.tag in ("Directory", "Video"):
                         rk = child.get("ratingKey")
@@ -429,7 +429,7 @@ class AvailabilityCheckTask(WatchlistCheckBaseTask):
                             else:
                                 metadata["season_count"] = child.get("childCount")
 
-                            self.callback(self.server.name, metadata=metadata)
+                            self.callback(self.server, metadata=metadata)
                             return
             self.callback(None)
         except:
@@ -529,10 +529,11 @@ class WatchlistUtilsMixin(object):
 
         wl_set_btn()
 
-        def wl_av_callback(server_name, metadata=None):
-            if server_name and metadata:
-                self.wl_availability[server_name] = metadata
-                util.DEBUG_LOG("Watchlist availability: {}: {}", server_name, metadata)
+        def wl_av_callback(server, metadata=None):
+            if server and metadata:
+                util.DEBUG_LOG("Watchlist availability: {}: {}", server.name, metadata)
+                metadata["server"] = server
+                self.wl_availability[server.name] = metadata
 
             self.wl_checking_servers -= 1
             if self.wl_checking_servers == 0:
@@ -541,8 +542,8 @@ class WatchlistUtilsMixin(object):
             self.setBoolProperty("wl_availability_multiple", len(self.wl_availability) > 1)
             wl_set_btn()
 
-        for server in pnUtil.SERVERMANAGER.connectedServers:
-            task = AvailabilityCheckTask().setup(server, item.guid, wl_av_callback, media_type=item.type)
+        for cserver in pnUtil.SERVERMANAGER.connectedServers:
+            task = AvailabilityCheckTask().setup(cserver, item.guid, wl_av_callback, media_type=item.type)
             backgroundthread.BGThreader.addTask(task)
 
     @wl_wrap
