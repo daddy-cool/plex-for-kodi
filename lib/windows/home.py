@@ -507,6 +507,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             self.closeWRecompileTpls()
             return
 
+        if self.lastSection == watchlist_section:
+            self.go_root = True
+
         if self.go_root:
             self.setProperty('hub.focus', '')
             self.setFocusId(self.SECTION_LIST_ID)

@@ -118,6 +118,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             self.setProperty('remainingTime', T(32914, "Loading"))
         self.video.reload(checkFiles=1, fromMediaChoice=self.video.mediaChoice is not None, **VIDEO_RELOAD_KW)
         self.refreshInfo(from_reinit=True)
+        self.checkIsWatchlisted(self.video)
         self.initialized = True
 
     def refreshInfo(self, from_reinit=False):
@@ -209,6 +210,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
                 pass
             else:
                 self.openItem(item=list(self.wl_availability.items())[0][1], inherit_from_watchlist=False)
+                self.checkIsWatchlisted(self.video)
         elif controlID in self.WL_BTN_STATE_BTNS:
             is_watchlisted = self.toggleWatchlist(self.video)
             self.waitAndSetFocus(self.WL_BTN_STATE_WATCHLISTED if is_watchlisted else self.WL_BTN_STATE_NOT_WATCHLISTED)
