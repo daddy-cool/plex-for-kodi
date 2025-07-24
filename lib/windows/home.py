@@ -1855,6 +1855,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             if not self.sectionChangeTimeout:
                 return
             while not util.MONITOR.waitForAbort(0.1):
+                # timing issue
+                if not self.sectionChangeTimeout:
+                    return
                 if time.time() >= self.sectionChangeTimeout:
                     break
 
@@ -1874,12 +1877,11 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                 self.backgroundSet = False
 
             util.DEBUG_LOG('Section changed ({0}): {1}', section.key, repr(section.title))
-            self.lastSection = section
-
-            if section == watchlist_section:
+            if section == watchlist_section and self.lastSection != watchlist_section:
                 self.sectionChangeTimeout = None
                 self.sectionClicked()
                 return
+            self.lastSection = section
             self.showHubs(section)
 
         # timing issue
@@ -2508,9 +2510,11 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             return
 
         section = item.dataSource
+        self.lastSection = section
 
         if section.type in ('show', 'movie', 'artist', 'photo', 'mixed'):
             self.processCommand(opener.sectionClicked(section))
+            self.sectionChangeTimeout = None
         elif section.type in ('playlists',):
             self.processCommand(opener.handleOpen(playlists.PlaylistsWindow))
 

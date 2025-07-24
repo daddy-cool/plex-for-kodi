@@ -3,9 +3,9 @@
 import math
 import os
 import threading
-import requests
 from six import ensure_str
 from plexnet import util as pnUtil
+from plexnet import exceptions
 from kodi_six import xbmcvfs
 from kodi_six import xbmc
 
@@ -459,7 +459,12 @@ class WatchlistUtilsMixin(object):
     WL_BTN_SINGLE = 2304
     WL_BTN_UPCOMING = 2305
 
+    WL_BTN_STATE_NOT_WATCHLISTED = 308
+    WL_BTN_STATE_WATCHLISTED = 309
+
     WL_RELEVANT_BTNS = (302, WL_BTN_WAIT, WL_BTN_MULTIPLE, WL_BTN_SINGLE, WL_BTN_UPCOMING)
+
+    WL_BTN_STATE_BTNS = (WL_BTN_STATE_NOT_WATCHLISTED, WL_BTN_STATE_WATCHLISTED)
 
     def __init__(self, *args, **kwargs):
         super(WatchlistUtilsMixin, self).__init__()
@@ -498,10 +503,7 @@ class WatchlistUtilsMixin(object):
                 if change_to and self.wl_play_button_id != change_to:
                     self.wl_play_button_id = change_to
                     # wait for visibility
-                    tries = 0
-                    while not xbmc.getCondVisibility('Control.IsVisible({0})'.format(self.wl_play_button_id)) and tries < 20:
-                        util.MONITOR.waitForAbort(0.1)
-                        tries += 1
+                    kodigui.waitForVisibility(self.wl_play_button_id)
                     self.focusPlayButton(extended=True)
 
         self.focusPlayButton(extended=True)
@@ -542,17 +544,25 @@ class WatchlistUtilsMixin(object):
 
     def _modifyWatchlist(self, item, method="addToWatchlist"):
         server = pnUtil.SERVERMANAGER.getDiscoverServer()
-        res = server.query("/actions/{}".format(method), ratingKey=self.GUIDToRatingKey(item.guid), method="put")
 
-        if res:
+        try:
+            server.query("/actions/{}".format(method), ratingKey=self.GUIDToRatingKey(item.guid), method="put")
             util.DEBUG_LOG("Watchlist action {} for {} succeeded", method, item.ratingKey)
-            return
-        util.DEBUG_LOG("Watchlist action {} for {} failed", method, item.ratingKey)
+            self.is_watchlisted = method == "addToWatchlist"
+            self.setBoolProperty("is_watchlisted", method == "addToWatchlist")
+            pnUtil.APP.trigger("watchlist:modified")
+            return method == "addToWatchlist"
+        except exceptions.BadRequest:
+            util.DEBUG_LOG("Watchlist action {} for {} failed", method, item.ratingKey)
 
     @wl_wrap
     def addToWatchlist(self, item):
-        self._modifyWatchlist(item)
+        return self._modifyWatchlist(item)
 
     @wl_wrap
     def removeFromWatchlist(self, item):
-        self._modifyWatchlist(item, method="removeFromWatchlist")
+        return self._modifyWatchlist(item, method="removeFromWatchlist")
+
+    @wl_wrap
+    def toggleWatchlist(self, item):
+        return self._modifyWatchlist(item, method="removeFromWatchlist" if self.is_watchlisted else "addToWatchlist")

@@ -14,6 +14,7 @@ from kodi_six import xbmc
 from kodi_six import xbmcgui
 from plexnet import playqueue
 from plexnet import plexobjects
+from plexnet import util as pnUtil
 from six.moves import range
 
 from lib import backgroundthread
@@ -437,12 +438,18 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
             self.setWindows(VIEWS_POSTER.get('all'))
             self.setDefault(VIEWS_POSTER.get(viewtype))
 
+    def setWatchlistDirty(self, *args, **kwargs):
+        if self.section.TYPE == 'movies_shows':
+            self.refill = True
+
     @busy.dialog()
     def doClose(self):
+        pnUtil.APP.off("watchlist:modified", self.setWatchlistDirty)
         self.tasks.kill()
         kodigui.MultiWindow.doClose(self)
 
     def onFirstInit(self):
+        pnUtil.APP.on("watchlist:modified", self.setWatchlistDirty)
         if self.showPanelControl and not self.refill:
             self.showPanelControl.newControl(self)
             self.keyListControl.newControl(self)
@@ -450,31 +457,39 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
             self.setFocusId(self.VIEWTYPE_BUTTON_ID)
             self.setBoolProperty("initialized", True)
         else:
-            self.showPanelControl = kodigui.ManagedControlList(self, self.POSTERS_PANEL_ID, 5)
+            self.doRefill()
 
-            hideFilterOptions = self.section.TYPE == 'photodirectory' or self.section.TYPE == 'collection'
+    def doRefill(self):
+        self.showPanelControl = kodigui.ManagedControlList(self, self.POSTERS_PANEL_ID, 5)
 
-            self.keyListControl = kodigui.ManagedControlList(self, self.KEY_LIST_ID, 27)
-            self.setProperty('disable_playback', self.section.TYPE == 'movies_shows' and '1' or '')
-            self.setProperty('subDir', self.subDir and '1' or '')
-            self.setProperty('no.options', self.section.TYPE != 'photodirectory' and '1' or '')
-            self.setProperty('unwatched.hascount', self.section.TYPE == 'show' and '1' or '')
-            util.setGlobalProperty('sort', self.sort)
-            self.setProperty('filter1.display', self.filterUnwatched and T(32368, 'UNPLAYED') or T(32345, 'All'))
-            self.setProperty('sort.display', SORT_KEYS[self.section.TYPE].get(self.sort, SORT_KEYS['movie'].get(self.sort))['title'])
-            self.setProperty('media.itemType', ITEM_TYPE or self.section.TYPE)
-            self.setProperty('media.type', TYPE_PLURAL.get(ITEM_TYPE or self.section.TYPE, self.section.TYPE))
-            self.setProperty('media', self.section.TYPE)
-            self.setProperty('hide.filteroptions', hideFilterOptions and '1' or '')
+        hideFilterOptions = self.section.TYPE == 'photodirectory' or self.section.TYPE == 'collection'
 
-            self.setTitle()
-            self.setBoolProperty("initialized", True)
-            self.fill()
-            self.refill = False
-            if self.getProperty('no.content') or self.getProperty('no.content.filtered'):
-                self.setFocusId(self.HOME_BUTTON_ID)
-            else:
-                self.setFocusId(self.POSTERS_PANEL_ID)
+        self.keyListControl = kodigui.ManagedControlList(self, self.KEY_LIST_ID, 27)
+        self.setProperty('disable_playback', self.section.TYPE == 'movies_shows' and '1' or '')
+        self.setProperty('subDir', self.subDir and '1' or '')
+        self.setProperty('no.options', self.section.TYPE != 'photodirectory' and '1' or '')
+        self.setProperty('unwatched.hascount', self.section.TYPE == 'show' and '1' or '')
+        util.setGlobalProperty('sort', self.sort)
+        self.setProperty('filter1.display', self.filterUnwatched and T(32368, 'UNPLAYED') or T(32345, 'All'))
+        self.setProperty('sort.display',
+                         SORT_KEYS[self.section.TYPE].get(self.sort, SORT_KEYS['movie'].get(self.sort))['title'])
+        self.setProperty('media.itemType', ITEM_TYPE or self.section.TYPE)
+        self.setProperty('media.type', TYPE_PLURAL.get(ITEM_TYPE or self.section.TYPE, self.section.TYPE))
+        self.setProperty('media', self.section.TYPE)
+        self.setProperty('hide.filteroptions', hideFilterOptions and '1' or '')
+
+        self.setTitle()
+        self.setBoolProperty("initialized", True)
+        self.fill()
+        self.refill = False
+        if self.getProperty('no.content') or self.getProperty('no.content.filtered'):
+            self.setFocusId(self.HOME_BUTTON_ID)
+        else:
+            self.setFocusId(self.POSTERS_PANEL_ID)
+
+    def onReInit(self):
+        if self.refill:
+            self.doRefill()
 
     def onAction(self, action):
         try:

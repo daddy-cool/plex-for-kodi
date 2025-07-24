@@ -203,12 +203,15 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             self.roleClicked()
         elif controlID == self.PLAY_BUTTON_ID:
             self.playVideo()
-        elif self.fromWatchlist and self.wl_availability:
+        elif controlID in self.WL_RELEVANT_BTNS and self.fromWatchlist and self.wl_availability:
             if len(self.wl_availability) > 1:
                 # choose
                 pass
             else:
                 self.openItem(item=list(self.wl_availability.items())[0][1], inherit_from_watchlist=False)
+        elif controlID in self.WL_BTN_STATE_BTNS:
+            is_watchlisted = self.toggleWatchlist(self.video)
+            self.waitAndSetFocus(self.WL_BTN_STATE_WATCHLISTED if is_watchlisted else self.WL_BTN_STATE_NOT_WATCHLISTED)
         elif controlID == self.PLAYER_STATUS_BUTTON_ID:
             self.showAudioPlayer()
         elif controlID == self.INFO_BUTTON_ID:
