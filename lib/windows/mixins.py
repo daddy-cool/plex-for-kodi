@@ -444,7 +444,7 @@ class IsWatchlistedTask(WatchlistCheckBaseTask):
 
 def wl_wrap(f):
     def wrapper(cls, item, *args, **kwargs):
-        if not item.guid:
+        if not cls.wl_enabled:
             return
 
         # if watchlist not wanted, return
@@ -470,6 +470,11 @@ class WatchlistUtilsMixin(object):
         super(WatchlistUtilsMixin, self).__init__()
         self.wl_availability = OrderedDict()
         self.is_watchlisted = False
+        self.wl_enabled = False
+
+    def watchlist_setup(self, item):
+        self.wl_enabled = item.guid and item.guid.startswith("plex://")
+        self.setBoolProperty("watchlist_enabled", self.wl_enabled)
 
     def GUIDToRatingKey(self, guid):
         return guid.rsplit("/")[-1]

@@ -555,6 +555,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
     @busy.dialog()
     def setup(self):
         self.focusPlayButton()
+        self.watchlist_setup(self.video)
 
         util.DEBUG_LOG('PrePlay: Showing video info: {0}', self.video)
         if self.video.type == 'episode':
