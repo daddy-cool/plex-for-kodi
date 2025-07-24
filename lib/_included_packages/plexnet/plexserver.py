@@ -20,6 +20,7 @@ from . import plexresource
 from . import plexlibrary
 from . import asyncadapter
 from six.moves import range
+
 # from plexapi.client import Client
 # from plexapi.playqueue import PlayQueue
 
@@ -125,9 +126,13 @@ class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
     def anyLANConnection(self):
         return any(c.localVerified for c in self.connections)
 
-    def getObject(self, key):
+    def getObject(self, key, assume_container=False):
         data = self.query(key)
-        return plexobjects.buildItem(self, data[0], key, container=self)
+
+        container = self
+        if not assume_container:
+            container = plexobjects.PlexContainer(data, initpath=key, server=self, address=key)
+        return plexobjects.buildItem(self, data[0], key, container=container)
 
     def hubs(self, section=None, count=None, search_query=None, section_ids=None, ignore_hubs=None):
         hubs = []
