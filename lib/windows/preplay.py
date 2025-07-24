@@ -209,8 +209,10 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
                 # choose
                 pass
             else:
-                self.openItem(item=list(self.wl_availability.items())[0][1], inherit_from_watchlist=False)
-                self.checkIsWatchlisted(self.video)
+                rk = list(self.wl_availability.items())[0][1].get("rating_key", None)
+                if rk:
+                    self.openItem(item=rk, inherit_from_watchlist=False)
+                    self.checkIsWatchlisted(self.video)
         elif controlID in self.WL_BTN_STATE_BTNS:
             is_watchlisted = self.toggleWatchlist(self.video)
             self.waitAndSetFocus(self.WL_BTN_STATE_WATCHLISTED if is_watchlisted else self.WL_BTN_STATE_NOT_WATCHLISTED)

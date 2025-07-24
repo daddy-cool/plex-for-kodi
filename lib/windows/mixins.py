@@ -6,6 +6,7 @@ import threading
 from six import ensure_str
 from plexnet import util as pnUtil
 from plexnet import exceptions
+from plexnet import plexobjects
 from kodi_six import xbmcvfs
 from kodi_six import xbmc
 
@@ -398,6 +399,12 @@ class WatchlistCheckBaseTask(backgroundthread.Task):
 
 
 class AvailabilityCheckTask(WatchlistCheckBaseTask):
+    def setup(self, *args, **kwargs):
+        media_type = kwargs.pop('media_type', None)
+        super(AvailabilityCheckTask, self).setup(*args)
+        self.media_type = media_type
+        return self
+
     def run(self):
         if self.isCanceled():
             return
@@ -405,17 +412,26 @@ class AvailabilityCheckTask(WatchlistCheckBaseTask):
         try:
             if self.isCanceled():
                 return
-            res = self.server.query("/library/all", guid=self.guid)
+            res = self.server.query("/library/all", guid=self.guid, type=plexobjects.searchType(self.media_type))
             if res and res.get("size", 0):
                 # find ratingKey
+                metadata = {"rating_key": None, "resolution": None, "season_count": None}
                 for child in res:
                     if child.tag in ("Directory", "Video"):
                         rk = child.get("ratingKey")
                         if rk:
-                            self.callback(self.server.name, rating_key=rk)
-                            break
-            else:
-                self.callback(None)
+                            metadata["rating_key"] = rk
+                            # find resolution for movies
+                            if self.media_type == "movie":
+                                for _child in child:
+                                    if _child.tag == "Media":
+                                        metadata["resolution"] = _child.get("videoResolution")
+                            else:
+                                metadata["season_count"] = child.get("childCount")
+
+                            self.callback(self.server.name, metadata=metadata)
+                            return
+            self.callback(None)
         except:
             util.ERROR()
 
@@ -511,13 +527,12 @@ class WatchlistUtilsMixin(object):
                     kodigui.waitForVisibility(self.wl_play_button_id)
                     self.focusPlayButton(extended=True)
 
-        self.focusPlayButton(extended=True)
         wl_set_btn()
 
-        def wl_av_callback(server_name, rating_key=None):
-            if server_name:
-                self.wl_availability[server_name] = rating_key
-                util.DEBUG_LOG("Watchlist availability: {}: {}", server_name, rating_key)
+        def wl_av_callback(server_name, metadata=None):
+            if server_name and metadata:
+                self.wl_availability[server_name] = metadata
+                util.DEBUG_LOG("Watchlist availability: {}: {}", server_name, metadata)
 
             self.wl_checking_servers -= 1
             if self.wl_checking_servers == 0:
@@ -527,7 +542,7 @@ class WatchlistUtilsMixin(object):
             wl_set_btn()
 
         for server in pnUtil.SERVERMANAGER.connectedServers:
-            task = AvailabilityCheckTask().setup(server, item.guid, wl_av_callback)
+            task = AvailabilityCheckTask().setup(server, item.guid, wl_av_callback, media_type=item.type)
             backgroundthread.BGThreader.addTask(task)
 
     @wl_wrap
