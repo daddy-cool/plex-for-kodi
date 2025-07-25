@@ -841,9 +841,11 @@ class SeekPlayerHandler(BasePlayerHandler):
                             'currentaudiostream']['index']
                     except:
                         pass
+                    if currIdx == track.typeIndex:
+                        break
                     util.DEBUG_LOG('Switching audio track - index: {0} (try: {1})', track.typeIndex, tries + 1)
-                    self.player.setAudioStream(track.typeIndex)
                     util.MONITOR.waitForAbort(0.1)
+                    self.player.setAudioStream(track.typeIndex)
                     tries += 1
 
 
