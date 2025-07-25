@@ -3242,3 +3242,12 @@ msgstr "Veröffentlicht"
 msgctxt "#34002"
 msgid "Movies & Shows"
 msgstr "Filme & Serien"
+
+#: e.g.: 8 seasons
+msgctxt "#34003"
+msgid "{} seasons"
+msgstr "{} Staffeln"
+
+msgctxt "#34004"
+msgid "Choose server"
+msgstr "Server auswählen"

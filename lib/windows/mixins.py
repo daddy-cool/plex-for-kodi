@@ -509,7 +509,7 @@ class WatchlistUtilsMixin(object):
                     sub = '{} ({})'.format(meta['resolution'].upper(),
                                            pnUtil.bitrateToString(int(meta['bitrate']) * 1024))
                 else:
-                    sub = '{} seasons'.format(meta['season_count'])
+                    sub = T(34003, '{} seasons').format(meta['season_count'])
                 options.append({'key': server,
                                 'display': '{}, {}'.format(server, sub)
                               })
@@ -519,7 +519,7 @@ class WatchlistUtilsMixin(object):
                 pos=(660, 441),
                 close_direction='none',
                 set_dropdown_prop=False,
-                header='Choose server',
+                header=T(34004, 'Choose server'),
                 dialog_props=self.dialogProps,
                 align_items="left"
             )

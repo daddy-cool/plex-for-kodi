@@ -2655,3 +2655,12 @@ msgstr ""
 msgctxt "#34002"
 msgid "Movies & Shows"
 msgstr ""
+
+#: e.g.: 8 seasons
+msgctxt "#34003"
+msgid "{} seasons"
+msgstr ""
+
+msgctxt "#34004"
+msgid "Choose server"
+msgstr ""
