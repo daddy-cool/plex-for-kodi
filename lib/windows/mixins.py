@@ -3,8 +3,10 @@
 import math
 import os
 import threading
+import six
 from six import ensure_str
 from plexnet import util as pnUtil
+from plexnet import plexapp
 from plexnet import exceptions
 from plexnet import plexobjects
 from kodi_six import xbmcvfs
@@ -415,7 +417,7 @@ class AvailabilityCheckTask(WatchlistCheckBaseTask):
             res = self.server.query("/library/all", guid=self.guid, type=plexobjects.searchType(self.media_type))
             if res and res.get("size", 0):
                 # find ratingKey
-                metadata = {"rating_key": None, "resolution": None, "season_count": None, "server": None}
+                metadata = {"rating_key": None, "resolution": None, "bitrate": None, "season_count": None, "server": None}
                 for child in res:
                     if child.tag in ("Directory", "Video"):
                         rk = child.get("ratingKey")
@@ -426,6 +428,7 @@ class AvailabilityCheckTask(WatchlistCheckBaseTask):
                                 for _child in child:
                                     if _child.tag == "Media":
                                         metadata["resolution"] = _child.get("videoResolution")
+                                        metadata["bitrate"] = _child.get("bitrate")
                             else:
                                 metadata["season_count"] = child.get("childCount")
 
@@ -494,6 +497,57 @@ class WatchlistUtilsMixin(object):
 
     def GUIDToRatingKey(self, guid):
         return guid.rsplit("/")[-1]
+
+    @wl_wrap
+    def wl_item_opener(self, ref, item_open_callback, selected_item=None):
+        if len(self.wl_availability) > 1 and not selected_item:
+            # choose
+            from . import dropdown
+            options = []
+            for server, meta in six.iteritems(self.wl_availability):
+                if ref.TYPE == "movie":
+                    sub = '{} ({})'.format(meta['resolution'].upper(),
+                                           pnUtil.bitrateToString(int(meta['bitrate']) * 1024))
+                else:
+                    sub = '{} seasons'.format(meta['season_count'])
+                options.append({'key': server,
+                                'display': '{}, {}'.format(server, sub)
+                              })
+
+            choice = dropdown.showDropdown(
+                options=options,
+                pos=(660, 441),
+                close_direction='none',
+                set_dropdown_prop=False,
+                header='Choose server',
+                dialog_props=self.dialogProps,
+                align_items="left"
+            )
+
+            if not choice:
+                return
+
+            return self.wl_item_opener(ref, item_open_callback, selected_item=self.wl_availability[choice['key']])
+
+        item_meta = selected_item or list(self.wl_availability.items())[0][1]
+        rk = item_meta.get("rating_key", None)
+        if rk:
+            server_differs = item_meta["server"].uuid != plexapp.SERVERMANAGER.selectedServer.uuid
+            orig_srv = plexapp.SERVERMANAGER.selectedServer
+
+            try:
+                if server_differs:
+                    # fire event to temporarily change server
+                    util.LOG("Temporarily changing server source to: {}", item_meta["server"].name)
+                    plexapp.util.APP.trigger('change:tempServer', server=item_meta["server"])
+
+                item_open_callback(item=rk, inherit_from_watchlist=False, server=item_meta["server"])
+            finally:
+                if server_differs:
+                    util.LOG("Reverting to server source: {}", orig_srv.name)
+                    plexapp.util.APP.trigger('change:tempServer', server=orig_srv)
+
+            self.checkIsWatchlisted(ref)
 
     @wl_wrap
     def watchlistItemAvailable(self, item):

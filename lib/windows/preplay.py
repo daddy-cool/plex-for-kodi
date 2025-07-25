@@ -205,29 +205,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         elif controlID == self.PLAY_BUTTON_ID:
             self.playVideo()
         elif controlID in self.WL_RELEVANT_BTNS and self.fromWatchlist and self.wl_availability:
-            if len(self.wl_availability) > 1:
-                # choose
-                pass
-            else:
-                item_meta = list(self.wl_availability.items())[0][1]
-                rk = item_meta.get("rating_key", None)
-                if rk:
-                    server_differs = item_meta["server"].uuid != plexapp.SERVERMANAGER.selectedServer.uuid
-                    orig_srv = plexapp.SERVERMANAGER.selectedServer
-
-                    try:
-                        if server_differs:
-                            # fire event to temporarily change server
-                            util.LOG("Temporarily changing server source to: {}", item_meta["server"].name)
-                            plexapp.util.APP.trigger('change:tempServer', server=item_meta["server"])
-
-                        self.openItem(item=rk, inherit_from_watchlist=False, server=item_meta["server"])
-                    finally:
-                        if server_differs:
-                            util.LOG("Reverting to server source: {}", orig_srv.name)
-                            plexapp.util.APP.trigger('change:tempServer', server=orig_srv)
-
-                    self.checkIsWatchlisted(self.video)
+            self.wl_item_opener(self.video, self.openItem)
         elif controlID in self.WL_BTN_STATE_BTNS:
             is_watchlisted = self.toggleWatchlist(self.video)
             self.waitAndSetFocus(self.WL_BTN_STATE_WATCHLISTED if is_watchlisted else self.WL_BTN_STATE_NOT_WATCHLISTED)
