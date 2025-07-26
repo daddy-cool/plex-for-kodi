@@ -616,7 +616,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             genres = u' / '.join([g.tag for g in self.video.genres()][:3])
             self.setProperty('info', genres)
             self.setProperty('date', self.video.year)
-            if not self.wl_availability:
+            if self.fromWatchlist and not self.wl_availability:
                 self.setProperty('wl_server_availability_verbose', util.cleanLeadingZeros(self.video.originallyAvailableAt.asDatetime('%B %d, %Y')))
             self.setProperty('content.rating', self.video.contentRating.split('/', 1)[-1])
 
