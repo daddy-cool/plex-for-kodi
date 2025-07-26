@@ -801,7 +801,8 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
         self.reset()
 
         self.clearFilters()
-        self.resetSort()
+        if self.section.TYPE != 'movies_shows':
+            self.resetSort()
 
         if not self.nextWindow(False):
             self.setProperty('media.type', TYPE_PLURAL.get(ITEM_TYPE or self.section.TYPE, self.section.TYPE))
