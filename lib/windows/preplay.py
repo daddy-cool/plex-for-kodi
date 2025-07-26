@@ -586,7 +586,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         if not skip_bg:
             self.updateBackgroundFrom(self.video)
         self.setProperty('title', self.video.title)
-        self.setProperty('duration', util.durationToText(self.video.duration.asInt()))
+        self.setProperty('duration', self.video.duration and util.durationToText(self.video.duration.asInt()))
         self.setProperty('summary', self.video.summary.strip().replace('\t', ' '))
         self.setProperty('unwatched', not self.video.isWatched and '1' or '')
         self.setBoolProperty('watched', self.video.isFullyWatched)
@@ -615,6 +615,8 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             genres = u' / '.join([g.tag for g in self.video.genres()][:3])
             self.setProperty('info', genres)
             self.setProperty('date', self.video.year)
+            if not self.wl_availability:
+                self.setProperty('wl_server_availability_verbose', util.cleanLeadingZeros(self.video.originallyAvailableAt.asDatetime('%B %d, %Y')))
             self.setProperty('content.rating', self.video.contentRating.split('/', 1)[-1])
 
             cast = u' / '.join([r.tag for r in self.video.roles()][:5])
@@ -622,6 +624,8 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             self.setProperty('cast', cast and u'{0}    {1}'.format(castLabel, cast) or '')
             self.setProperty('related.header', T(32404, 'Related Movies'))
 
+        if self.fromWatchlist:
+            self.setProperty('studios', u' / '.join([r.tag for r in self.video.studios()][:2]))
         self.setProperty('video.res', self.video.resolutionString())
         self.setProperty('audio.codec', self.video.audioCodecString())
         self.setProperty('video.codec', self.video.videoCodecString())
@@ -778,3 +782,6 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.reviewsListControl.reset()
         self.reviewsListControl.addItems(items)
         return True
+
+class PrePlayWindowWL(PrePlayWindow):
+    xmlFile = 'script-plex-pre_play-wl.xml'

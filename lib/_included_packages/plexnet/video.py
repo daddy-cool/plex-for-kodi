@@ -627,7 +627,7 @@ class PlayableVideo(CachableItemsMixin, Video, media.RelatedMixin):
 @plexobjects.registerLibType
 class Movie(PlayableVideo):
     __slots__ = ("collections", "countries", "directors", "genres", "media", "producers", "roles", "reviews",
-                 "writers", "markers", "sessionKey", "user", "player", "session", "transcodeSession")
+                 "writers", "studios", "markers", "sessionKey", "user", "player", "session", "transcodeSession")
     TYPE = 'movie'
 
     def _setData(self, data):
@@ -642,6 +642,8 @@ class Movie(PlayableVideo):
                                                        initpath=self.initpath, server=self.server, media=self)
             self.producers = plexobjects.PlexItemList(data, media.Producer, media.Producer.TYPE, server=self.server)
             self.roles = plexobjects.PlexItemList(data, media.Role, media.Role.TYPE, server=self.server,
+                                                  container=self.container)
+            self.studios = plexobjects.PlexItemList(data, media.Studio, media.Studio.TYPE, server=self.server,
                                                   container=self.container)
             self.reviews = plexobjects.PlexItemList(data, media.Review, media.Review.TYPE, server=self.server,
                                                     container=self.container)

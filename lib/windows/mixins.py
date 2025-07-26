@@ -417,12 +417,14 @@ class AvailabilityCheckTask(WatchlistCheckBaseTask):
             res = self.server.query("/library/all", guid=self.guid, type=plexobjects.searchType(self.media_type))
             if res and res.get("size", 0):
                 # find ratingKey
-                metadata = {"rating_key": None, "resolution": None, "bitrate": None, "season_count": None, "server": None}
+                metadata = {"rating_key": None, "resolution": None, "bitrate": None, "season_count": None,
+                            "available": None, "server": None}
                 for child in res:
                     if child.tag in ("Directory", "Video"):
                         rk = child.get("ratingKey")
                         if rk:
                             metadata["rating_key"] = rk
+                            metadata["type"] = self.media_type
                             # find resolution for movies
                             if self.media_type == "movie":
                                 for _child in child:
@@ -431,6 +433,7 @@ class AvailabilityCheckTask(WatchlistCheckBaseTask):
                                         metadata["bitrate"] = _child.get("bitrate")
                             else:
                                 metadata["season_count"] = child.get("childCount")
+                            metadata["available"] = child.get("originallyAvailableAt")
 
                             self.callback(self.server, metadata=metadata)
                             return
@@ -495,8 +498,18 @@ class WatchlistUtilsMixin(object):
         self.wl_enabled = item.guid and item.guid.startswith("plex://")
         self.setBoolProperty("watchlist_enabled", self.wl_enabled)
 
-    def GUIDToRatingKey(self, guid):
+    @staticmethod
+    def GUIDToRatingKey(guid):
         return guid.rsplit("/")[-1]
+
+    @wl_wrap
+    def wl_item_verbose(self, meta):
+        if meta["type"] == "movie":
+            res = "{}p".format(meta['resolution']) if not "k" in meta['resolution'] else meta['resolution'].upper()
+            sub = '{} ({})'.format(res, pnUtil.bitrateToString(int(meta['bitrate']) * 1024))
+        else:
+            sub = T(34003, '{} seasons').format(meta['season_count'])
+        return sub
 
     @wl_wrap
     def wl_item_opener(self, ref, item_open_callback, selected_item=None):
@@ -505,13 +518,9 @@ class WatchlistUtilsMixin(object):
             from . import dropdown
             options = []
             for server, meta in six.iteritems(self.wl_availability):
-                if ref.TYPE == "movie":
-                    sub = '{} ({})'.format(meta['resolution'].upper(),
-                                           pnUtil.bitrateToString(int(meta['bitrate']) * 1024))
-                else:
-                    sub = T(34003, '{} seasons').format(meta['season_count'])
+                verbose = self.wl_item_verbose(meta)
                 options.append({'key': server,
-                                'display': '{}, {}'.format(server, sub)
+                                'display': '{}, {}'.format(server, verbose)
                               })
 
             choice = dropdown.showDropdown(
@@ -594,6 +603,10 @@ class WatchlistUtilsMixin(object):
                 self.setBoolProperty("wl_availability_checking", False)
             self.setProperty("wl_availability", ",".join(self.wl_availability))
             self.setBoolProperty("wl_availability_multiple", len(self.wl_availability) > 1)
+            if self.wl_availability:
+                compute = ", ".join("{}: {}".format(server_name, self.wl_item_verbose(meta)) for server_name, meta in self.wl_availability.items())
+                self.setProperty("wl_server_availability_verbose", compute)
+
             wl_set_btn()
 
         for cserver in pnUtil.SERVERMANAGER.connectedServers:

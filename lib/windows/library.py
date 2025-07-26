@@ -1147,7 +1147,7 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
                 self.processCommand(opener.handleOpen(LibraryWindow, windows=self._windows, default_window=self._next, section=section, filter_=self.filter, subDir=True))
                 self.librarySettings.setItemType(self.librarySettings.getItemType() or ITEM_TYPE)
             else:
-                self.processCommand(opener.handleOpen(preplay.PrePlayWindow, video=datasource, parent_list=self.showPanelControl, **extra_kwargs))
+                self.processCommand(opener.handleOpen(preplay.PrePlayWindow if not sectionType == 'movies_shows' else preplay.PrePlayWindowWL, video=datasource, parent_list=self.showPanelControl, **extra_kwargs))
                 updateUnwatchedAndProgress = True
         elif self.section.TYPE == 'artist' or mli.dataSource.TYPE == 'artist' or mli.dataSource.TYPE == 'album' or mli.dataSource.TYPE == 'track':
             if ITEM_TYPE == 'album' or mli.dataSource.TYPE == 'album' or mli.dataSource.TYPE == 'track':

@@ -3251,3 +3251,7 @@ msgstr "{} Staffeln"
 msgctxt "#34004"
 msgid "Choose server"
 msgstr "Server auswählen"
+
+msgctxt "#34005"
+msgid "Availability"
+msgstr "Verfügbarkeit"

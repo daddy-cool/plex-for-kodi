@@ -327,6 +327,11 @@ class Review(MediaTag):
         return img.split('rottentomatoes://')[1]
 
 
+class Studio(MediaTag):
+    TYPE = 'Studio'
+    FILTER = 'Studio'
+
+
 class RelatedMixin(object):
     _relatedCount = None
     related_source = "similar"

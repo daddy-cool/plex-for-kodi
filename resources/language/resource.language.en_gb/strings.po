@@ -2664,3 +2664,7 @@ msgstr ""
 msgctxt "#34004"
 msgid "Choose server"
 msgstr ""
+
+msgctxt "#34005"
+msgid "Availability"
+msgstr ""

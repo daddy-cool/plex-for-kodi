@@ -95,7 +95,11 @@ def handleOpen(winclass, **kwargs):
 
 def playableClicked(playable, **kwargs):
     from . import preplay
-    return handleOpen(preplay.PrePlayWindow, video=playable, **kwargs)
+    if kwargs.get('from_watchlist', False):
+        win = preplay.PrePlayWindowWL
+    else:
+        win = preplay.PrePlayWindow
+    return handleOpen(win, video=playable, **kwargs)
 
 
 def episodeClicked(episode, **kwargs):
