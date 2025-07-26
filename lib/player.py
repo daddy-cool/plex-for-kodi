@@ -175,7 +175,7 @@ class BasePlayerHandler(object):
 
         new_time_stored = plexapp.util.APP.nowplayingmanager.updatePlaybackState(
             self.timelineType, data, state, _time, self.playQueue, duration=self.currentDuration(),
-            force=overrideChecks, force_time=force_time
+            force=overrideChecks, force_time=force_time, server=item.server
         )
 
         if new_time_stored:
@@ -842,7 +842,8 @@ class SeekPlayerHandler(BasePlayerHandler):
                     except:
                         pass
                     if currIdx == track.typeIndex:
-                        break
+                        util.DEBUG_LOG('Audio track is correct index: {0}', track.typeIndex)
+                        return
                     util.DEBUG_LOG('Switching audio track - index: {0} (try: {1})', track.typeIndex, tries + 1)
                     util.MONITOR.waitForAbort(0.1)
                     self.player.setAudioStream(track.typeIndex)

@@ -83,6 +83,10 @@ class PlexServerManager(signalsmixin.SignalsMixin):
         else:
             return self.serversByUuid[uuid]
 
+    def getDiscoverServer(self):
+        from . import myplexserver
+        return myplexserver.PlexDiscoverServer()
+
     def getServers(self):
         servers = []
         for uuid in list(self.serversByUuid.keys()):
@@ -90,6 +94,10 @@ class PlexServerManager(signalsmixin.SignalsMixin):
                 servers.append(self.serversByUuid[uuid])
 
         return servers
+
+    @property
+    def connectedServers(self):
+        return filter(lambda s: s.activeConnection, self.getServers())
 
     def hasPendingRequests(self):
         for server in self.getServers():

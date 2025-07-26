@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-beta12.4"
+       version="0.8.0-beta13"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -33,11 +33,7 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Player: Make sure we select the right audio track more adamantly on certain start situations
-Missed changelog from last beta:
-- Episodes: Use correct background when going up from related shows back to the episode list
-- Core: Fix hang on exit in certain Linux environments
-- Home: Fix round robining (if it is enabled in addonSettings)
+- Add first version of watchlist functionality
         </news>
         <assets>
             <icon>icon2.png</icon>

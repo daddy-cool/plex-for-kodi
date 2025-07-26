@@ -20,7 +20,7 @@ from . import playersettings
 from . import search
 from . import videoplayer
 from . import windowutils
-from .mixins import RatingsMixin, PlaybackBtnMixin, ThemeMusicMixin
+from .mixins import RatingsMixin, PlaybackBtnMixin, ThemeMusicMixin, WatchlistUtilsMixin
 
 VIDEO_RELOAD_KW = dict(includeExtras=1, includeExtrasCount=10, includeChapters=1, includeReviews=1)
 
@@ -30,7 +30,8 @@ class RelatedPaginator(pagination.BaseRelatedPaginator):
         return self.parentWindow.video.getRelated(offset=offset, limit=amount)
 
 
-class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixin, PlaybackBtnMixin, ThemeMusicMixin):
+class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixin, PlaybackBtnMixin, ThemeMusicMixin,
+                    WatchlistUtilsMixin):
     xmlFile = 'script-plex-pre_play.xml'
     path = util.ADDON.getAddonInfo('path')
     theme = 'Main'
@@ -62,13 +63,18 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
     OPTIONS_BUTTON_ID = 306
     MEDIA_BUTTON_ID = 307
 
+    POSSIBLE_PLAY_BUTTON_IDS = [302, 2302, 2303, 2304, 2305]
+
     PLAYER_STATUS_BUTTON_ID = 204
 
     def __init__(self, *args, **kwargs):
         kodigui.ControlledWindow.__init__(self, *args, **kwargs)
         PlaybackBtnMixin.__init__(self)
+        WatchlistUtilsMixin.__init__(self)
         self.video = kwargs.get('video')
         self.parentList = kwargs.get('parent_list')
+        self.fromWatchlist = kwargs.get('from_watchlist', False)
+        self.directlyFromWatchlist = kwargs.get('directly_from_watchlist')
         self.videos = None
         self.exitCommand = None
         self.trailer = None
@@ -113,6 +119,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             self.setProperty('remainingTime', T(32914, "Loading"))
         self.video.reload(checkFiles=1, fromMediaChoice=self.video.mediaChoice is not None, **VIDEO_RELOAD_KW)
         self.refreshInfo(from_reinit=True)
+        self.checkIsWatchlisted(self.video)
         self.initialized = True
 
     def refreshInfo(self, from_reinit=False):
@@ -193,9 +200,16 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         elif controlID == self.RELATED_LIST_ID:
             self.openItem(self.relatedListControl)
         elif controlID == self.ROLES_LIST_ID:
+            if self.fromWatchlist:
+                return
             self.roleClicked()
         elif controlID == self.PLAY_BUTTON_ID:
             self.playVideo()
+        elif controlID in self.WL_RELEVANT_BTNS and self.fromWatchlist and self.wl_availability:
+            self.wl_item_opener(self.video, self.openItem)
+        elif controlID in self.WL_BTN_STATE_BTNS:
+            is_watchlisted = self.toggleWatchlist(self.video)
+            self.waitAndSetFocus(self.WL_BTN_STATE_WATCHLISTED if is_watchlisted else self.WL_BTN_STATE_NOT_WATCHLISTED)
         elif controlID == self.PLAYER_STATUS_BUTTON_ID:
             self.showAudioPlayer()
         elif controlID == self.INFO_BUTTON_ID:
@@ -515,16 +529,20 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.processCommand(videoplayer.play(video=self.video, resume=resume))
         return True
 
-    def openItem(self, control=None, item=None):
+    def openItem(self, control=None, item=None, inherit_from_watchlist=True, server=None):
         if not item:
             mli = control.getSelectedItem()
             if not mli:
                 return
             item = mli.dataSource
 
-        self.processCommand(opener.open(item))
+        self.processCommand(opener.open(item, from_watchlist=self.fromWatchlist if inherit_from_watchlist else False,
+                                        server=server))
 
-    def focusPlayButton(self):
+    def focusPlayButton(self, extended=False):
+        if extended:
+            self.setFocusId(self.wl_play_button_id)
+            return
         try:
             if not self.getFocusId() == self.PLAY_BUTTON_ID:
                 self.setFocusId(self.PLAY_BUTTON_ID)
@@ -534,6 +552,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
     @busy.dialog()
     def setup(self):
         self.focusPlayButton()
+        self.watchlist_setup(self.video)
 
         util.DEBUG_LOG('PrePlay: Showing video info: {0}', self.video)
         if self.video.type == 'episode':
@@ -541,12 +560,20 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         elif self.video.type == 'movie':
             self.setProperty('preview.no', '1')
 
+        if self.fromWatchlist:
+            # fixme, multiple? choice?
+            self.video.related_source = "more-from-credits"
         self.video.reload(checkFiles=1, **VIDEO_RELOAD_KW)
         try:
             self.relatedPaginator = RelatedPaginator(self.relatedListControl, leaf_count=int(self.video.relatedCount),
                                                      parent_window=self)
         except ValueError:
             raise util.NoDataException
+
+        if self.fromWatchlist:
+            self.watchlistItemAvailable(self.video, shortcut_watchlisted=self.directlyFromWatchlist)
+        else:
+            self.checkIsWatchlisted(self.video)
 
         self.setInfo()
         self.setBoolProperty("initialized", True)
@@ -560,10 +587,11 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         if not skip_bg:
             self.updateBackgroundFrom(self.video)
         self.setProperty('title', self.video.title)
-        self.setProperty('duration', util.durationToText(self.video.duration.asInt()))
+        self.setProperty('duration', self.video.duration and util.durationToText(self.video.duration.asInt()))
         self.setProperty('summary', self.video.summary.strip().replace('\t', ' '))
         self.setProperty('unwatched', not self.video.isWatched and '1' or '')
         self.setBoolProperty('watched', self.video.isFullyWatched)
+        self.setBoolProperty('disable_playback', self.fromWatchlist)
 
         directors = u' / '.join([d.tag for d in self.video.directors()][:3])
         directorsLabel = len(self.video.directors) > 1 and T(32401, u'DIRECTORS').upper() or T(32383, u'DIRECTOR').upper()
@@ -588,6 +616,8 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             genres = u' / '.join([g.tag for g in self.video.genres()][:3])
             self.setProperty('info', genres)
             self.setProperty('date', self.video.year)
+            if self.fromWatchlist and not self.wl_availability:
+                self.setProperty('wl_server_availability_verbose', util.cleanLeadingZeros(self.video.originallyAvailableAt.asDatetime('%B %d, %Y')))
             self.setProperty('content.rating', self.video.contentRating.split('/', 1)[-1])
 
             cast = u' / '.join([r.tag for r in self.video.roles()][:5])
@@ -595,6 +625,8 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             self.setProperty('cast', cast and u'{0}    {1}'.format(castLabel, cast) or '')
             self.setProperty('related.header', T(32404, 'Related Movies'))
 
+        if self.fromWatchlist:
+            self.setProperty('studios', u' / '.join([r.tag for r in self.video.studios()][:2]))
         self.setProperty('video.res', self.video.resolutionString())
         self.setProperty('audio.codec', self.video.audioCodecString())
         self.setProperty('video.codec', self.video.videoCodecString())
@@ -604,20 +636,21 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
 
         self.populateRatings(self.video, self)
 
-        self.setAudioAndSubtitleInfo()
+        if not self.fromWatchlist:
+            self.setAudioAndSubtitleInfo()
 
-        self.setProperty('unavailable', all(not v.isAccessible() for v in self.video.media()) and '1' or '')
+            self.setProperty('unavailable', all(not v.isAccessible() for v in self.video.media()) and '1' or '')
 
-        if self.video.viewOffset.asInt():
-            width = self.video.viewOffset.asInt() and (1 + int((self.video.viewOffset.asInt() / self.video.duration.asFloat()) * self.width)) or 1
-            self.progressImageControl.setWidth(width)
-        else:
-            self.progressImageControl.setWidth(1)
+            if self.video.viewOffset.asInt():
+                width = self.video.viewOffset.asInt() and (1 + int((self.video.viewOffset.asInt() / self.video.duration.asFloat()) * self.width)) or 1
+                self.progressImageControl.setWidth(width)
+            else:
+                self.progressImageControl.setWidth(1)
 
-        if self.video.viewOffset.asInt():
-            self.setProperty('remainingTime', T(33615, "{time} left").format(time=self.video.remainingTimeString))
-        else:
-            self.setProperty('remainingTime', '')
+            if self.video.viewOffset.asInt():
+                self.setProperty('remainingTime', T(33615, "{time} left").format(time=self.video.remainingTimeString))
+            else:
+                self.setProperty('remainingTime', '')
 
     def setAudioAndSubtitleInfo(self):
         sas = self.video.selectedAudioStream()
@@ -657,10 +690,14 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         idx = 0
 
         if not self.video.extras:
-            self.extraListControl.reset()
-            return False
+            if self.fromWatchlist:
+                self.video.fetchExternalExtras()
 
-        for extra in self.video.extras():
+            if not self.video.extras:
+                self.extraListControl.reset()
+                return False
+
+        for extra in self.video.extras:
             if not self.trailer and extra.extraType.asInt() == media.METADATA_RELATED_TRAILER:
                 self.trailer = extra
                 self.setProperty('trailer.button', '1')
@@ -746,3 +783,6 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.reviewsListControl.reset()
         self.reviewsListControl.addItems(items)
         return True
+
+class PrePlayWindowWL(PrePlayWindow):
+    xmlFile = 'script-plex-pre_play-wl.xml'

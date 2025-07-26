@@ -175,6 +175,8 @@ class HomeSection(object):
 
 home_section = HomeSection()
 
+watchlist_section = None
+
 
 class PlaylistsSection(object):
     key = 'playlists'
@@ -424,6 +426,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         self.wantedSections = None
         self.movingSection = False
         self._initialMovingSectionPos = None
+        self.block_section_change = False
         self.go_root = False
         windowutils.HOME = self
 
@@ -503,6 +506,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         if self._applyTheme:
             self.closeWRecompileTpls()
             return
+
+        if self.lastSection == watchlist_section:
+            self.go_root = True
 
         if self.go_root:
             self.setProperty('hub.focus', '')
@@ -698,6 +704,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         plexapp.util.APP.on('change:hubs_use_new_continue_watching', self.setDirty)
         plexapp.util.APP.on('change:path_mapping_indicators', self.setDirty)
         plexapp.util.APP.on('change:hub_season_thumbnails', self.setDirty)
+        plexapp.util.APP.on('change:use_watchlist', self.setDirty)
         plexapp.util.APP.on('change:debug', self.setDebugFlag)
         plexapp.util.APP.on('change:update_source', self.updateSourceChanged)
         plexapp.util.APP.on('theme_relevant_setting', self.setThemeDirty)
@@ -726,6 +733,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         plexapp.util.APP.off('change:spoilers_allowed_genres2', self.setDirty)
         plexapp.util.APP.off('change:hubs_use_new_continue_watching', self.setDirty)
         plexapp.util.APP.off('change:path_mapping_indicators', self.setDirty)
+        plexapp.util.APP.off('change:hub_season_thumbnails', self.setDirty)
+        plexapp.util.APP.off('change:use_watchlist', self.setDirty)
         plexapp.util.APP.off('change:debug', self.setDebugFlag)
         plexapp.util.APP.off('change:update_source', self.updateSourceChanged)
         plexapp.util.APP.off('theme_relevant_setting', self.setThemeDirty)
@@ -871,7 +880,11 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                     return
 
                 if action == xbmcgui.ACTION_CONTEXT_MENU:
-                    show_section = self.sectionMenu()
+                    try:
+                        self.block_section_change = True
+                        show_section = self.sectionMenu()
+                    finally:
+                        self.block_section_change = False
                     if not show_section:
                         return
                     else:
@@ -1156,7 +1169,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
     def refreshLastSection(self, *args, **kwargs):
         self.enableUpdates()
-        if not xbmc.Player().isPlayingVideo():
+        if not xbmc.Player().isPlayingVideo() and not self._shuttingDown:
             util.LOG("Refreshing last section after wake events")
             self.showHubs(self.lastSection, force=True, update=True)
 
@@ -1328,6 +1341,14 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                                     }
                                    )
                     had_section = True
+
+            # hack for an inexistant watchlist due to it being hidden
+            if util.getUserSetting("use_watchlist", True) and not self.librarySettings.get("/library/sections/watchlist", {}).get("show", True):
+                options.append({'key': 'show',
+                                'section_id': "/library/sections/watchlist",
+                                'display': T(33029, "Show library: {}").format(T(34000, 'Watchlist'))
+                                })
+
             if self.hubSettings:
                 had_hidden_hub = False
                 hidden_hubs_opts = []
@@ -1365,7 +1386,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         else:
             options = []
 
-            if plexapp.ACCOUNT.isAdmin and section != playlists_section:
+            if plexapp.ACCOUNT.isAdmin and section not in (watchlist_section, playlists_section):
                 options = [{'key': 'refresh', 'display': T(33082, "Scan Library Files")},
                            {'key': 'emptyTrash', 'display': T(33083, "Empty Trash")},
                            {'key': 'analyze', 'display': T(33084, "Analyze")},
@@ -1388,7 +1409,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             options.append({'key': 'move', 'display': T(33039, "Move")})
             options.append(dropdown.SEPARATOR)
 
-            if 'libraries' in util.getSetting('cache_requests'):
+            if 'libraries' in util.getSetting('cache_requests') and section != watchlist_section:
                 options.append({'key': 'section_cache_reset', 'display': T(33721, "Clear library cache (not items)")})
                 options.append(dropdown.SEPARATOR)
 
@@ -1808,6 +1829,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         self.tasks = [t for t in self.tasks if t]
 
     def sectionChanged(self, force=False):
+        if self._shuttingDown:
+            return
+
         self.sectionChangeTimeout = time.time() + 0.5
 
         # wait 2s at max if we're currently awaiting any hubs to reload
@@ -1830,10 +1854,16 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             self.sectionChangeThread.start()
 
     def _sectionChanged(self, immediate=False):
+        if self._shuttingDown:
+            return
+
         if not immediate:
             if not self.sectionChangeTimeout:
                 return
             while not util.MONITOR.waitForAbort(0.1):
+                # timing issue
+                if not self.sectionChangeTimeout:
+                    return
                 if time.time() >= self.sectionChangeTimeout:
                     break
 
@@ -1845,11 +1875,18 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
     def _sectionReallyChanged(self, section):
         with self.lock:
+            while self.block_section_change:
+                util.MONITOR.waitForAbort(0.1)
+
             self.setProperty('hub.focus', '')
             if util.addonSettings.dynamicBackgrounds:
                 self.backgroundSet = False
 
             util.DEBUG_LOG('Section changed ({0}): {1}', section.key, repr(section.title))
+            if section == watchlist_section and self.lastSection != watchlist_section:
+                self.sectionChangeTimeout = None
+                self.sectionClicked()
+                return
             self.lastSection = section
             self.showHubs(section)
 
@@ -1900,6 +1937,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         self.updateHubCallback(hub, items, reselect_pos=reselect_pos)
 
     def showSections(self, focus_section=None):
+        global watchlist_section
         self.sectionHubs = {}
         items = []
 
@@ -1909,6 +1947,16 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         items.append(homemli)
 
         sections = []
+
+        # https://discover.provider.plex.tv/library/sections/watchlist/all?includeAdvanced=1&includeMeta=1
+        if not plexapp.ACCOUNT.isOffline and util.getUserSetting("use_watchlist", True) and ("/library/sections/watchlist" not in self.librarySettings
+                or ("/library/sections/watchlist" in self.librarySettings and self.librarySettings["/library/sections/watchlist"].get("show", True))):
+            # get watchlist
+            from plexnet import plexlibrary
+            wl = watchlist_section = plexlibrary.WatchlistSection(None, server=plexapp.SERVERMANAGER.getDiscoverServer())
+            if wl.has_data():
+                wl.title = T(34000, 'Watchlist')
+                sections.append(wl)
 
         if "playlists" not in self.librarySettings \
                 or ("playlists" in self.librarySettings and self.librarySettings["playlists"].get("show", True)):
@@ -1954,6 +2002,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             if section == playlists_section:
                 mli.setProperty('is.playlists', '1')
                 mli.setThumbnailImage('script.plex/home/type/playlists.png')
+            elif section == watchlist_section:
+                mli.setThumbnailImage('script.plex/home/type/watchlist.png')
             if pmm.mapping and show_pm_indicator:
                 mli.setBoolProperty('is.mapped', section.isMapped)
             items.append(mli)
@@ -2015,7 +2065,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         if not plexapp.SERVERMANAGER.selectedServer.hasHubs():
             return
 
-        if section.key is False:
+        if section.key is False or section == watchlist_section:
             return
 
         hubs = self.sectionHubs.get(section.key)
@@ -2466,9 +2516,11 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             return
 
         section = item.dataSource
+        self.lastSection = section
 
-        if section.type in ('show', 'movie', 'artist', 'photo'):
+        if section.type in ('show', 'movie', 'artist', 'photo', 'mixed'):
             self.processCommand(opener.sectionClicked(section))
+            self.sectionChangeTimeout = None
         elif section.type in ('playlists',):
             self.processCommand(opener.handleOpen(playlists.PlaylistsWindow))
 

@@ -99,6 +99,13 @@ class BaseFunctions(object):
     def setBoolProperty(self, key, boolean):
         self.setProperty(key, boolean and '1' or '')
 
+    def waitForVisibility(self, control):
+        return waitForVisibility(control)
+
+    def waitAndSetFocus(self, control):
+        self.waitForVisibility(control)
+        self.setFocusId(control)
+
 
 LAST_BG_URL = None
 BG_NA = "script.plex/home/background-fallback_black.png"
@@ -1303,3 +1310,10 @@ class GlobalProperty():
 
     def __exit__(self, exc_type, exc_value, traceback):
         xbmcgui.Window(10000).setProperty('script.plex.{}'.format(self.prop), self.end or self.old)
+
+
+def waitForVisibility(control):
+    tries = 0
+    while not xbmc.getCondVisibility('Control.IsVisible({0})'.format(control)) and tries < 50:
+        util.MONITOR.waitForAbort(0.1)
+        tries += 1

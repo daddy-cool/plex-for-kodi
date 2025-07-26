@@ -51,7 +51,10 @@ def forceMediaChoice(method):
                             media = m
                             break
                 if not media:
-                    media = self.media()[0]
+                    try:
+                        media = self.media()[0]
+                    except (TypeError, IndexError):
+                        pass
 
             if not self.mediaChoice or media.hasStreams():
                 self.setMediaChoice(media=media, partIndex=partIndex)
@@ -192,7 +195,11 @@ class Video(media.MediaItem, AudioCodecMixin):
         return None
 
     def setMediaChoice(self, media=None, partIndex=0):
-        media = media or self.media()[0]
+        try:
+            media = media or self.media()[0]
+        except (TypeError, IndexError):
+            return
+
         self.mediaChoice = mediachoice.MediaChoice(media, partIndex=partIndex)
 
     @forceMediaChoice
@@ -380,6 +387,8 @@ class Video(media.MediaItem, AudioCodecMixin):
 
     @forceMediaChoice
     def resolutionString(self):
+        if not self.mediaChoice:
+            return ''
         res = self.mediaChoice.media.videoResolution
         if not res:
             return ''
@@ -391,17 +400,23 @@ class Video(media.MediaItem, AudioCodecMixin):
 
     @forceMediaChoice
     def audioCodecString(self):
+        if not self.mediaChoice:
+            return ''
         codec = (self.mediaChoice.media.audioCodec or '').lower()
 
         return self.translateAudioCodec(codec).upper()
 
     @forceMediaChoice
     def videoCodecString(self):
+        if not self.mediaChoice:
+            return ''
         return (self.mediaChoice.media.videoCodec or '').upper()
 
     @property
     @forceMediaChoice
     def videoCodecRendering(self):
+        if not self.mediaChoice:
+            return ''
         stream = self.mediaChoice.videoStream
 
         if not stream:
@@ -411,6 +426,8 @@ class Video(media.MediaItem, AudioCodecMixin):
 
     @forceMediaChoice
     def audioChannelsString(self, translate_func=util.dummyTranslate):
+        if not self.mediaChoice:
+            return ''
         channels = self.mediaChoice.media.audioChannels.asInt()
 
         if channels == 1:
@@ -467,7 +484,7 @@ class SectionOnDeckMixin(object):
 class CachableItemsMixin(object):
     @property
     def cachable(self):
-        return 'items' in util.INTERFACE.getPreference('cache_requests')
+        return 'items' in util.INTERFACE.getPreference('cache_requests') and not self._not_cachable
 
     def clearChildCaches(self, return_urls=False):
         # clear caches of this season and its items
@@ -595,6 +612,13 @@ class PlayableVideo(CachableItemsMixin, Video, media.RelatedMixin):
             hubs[hub.hubIdentifier] = hub
         return hubs
 
+    def fetchExternalExtras(self):
+        query = '{}/extras'.format(self.key)
+        data = self.server.query(query)
+        container = plexobjects.PlexContainer(data, initpath=query, server=self.server, address=query)
+        items = plexobjects.PlexItemList(data, Clip, "Video", server=self.server, container=container)
+        self.extras = list(items)
+
     @property
     def in_progress(self):
         return bool(self.get('viewOffset').asInt())
@@ -603,7 +627,7 @@ class PlayableVideo(CachableItemsMixin, Video, media.RelatedMixin):
 @plexobjects.registerLibType
 class Movie(PlayableVideo):
     __slots__ = ("collections", "countries", "directors", "genres", "media", "producers", "roles", "reviews",
-                 "writers", "markers", "sessionKey", "user", "player", "session", "transcodeSession")
+                 "writers", "studios", "markers", "sessionKey", "user", "player", "session", "transcodeSession")
     TYPE = 'movie'
 
     def _setData(self, data):
@@ -618,6 +642,8 @@ class Movie(PlayableVideo):
                                                        initpath=self.initpath, server=self.server, media=self)
             self.producers = plexobjects.PlexItemList(data, media.Producer, media.Producer.TYPE, server=self.server)
             self.roles = plexobjects.PlexItemList(data, media.Role, media.Role.TYPE, server=self.server,
+                                                  container=self.container)
+            self.studios = plexobjects.PlexItemList(data, media.Studio, media.Studio.TYPE, server=self.server,
                                                   container=self.container)
             self.reviews = plexobjects.PlexItemList(data, media.Review, media.Review.TYPE, server=self.server,
                                                     container=self.container)
@@ -720,7 +746,8 @@ class Show(CachableItemsMixin, Video, media.RelatedMixin, SectionOnDeckMixin):
 
     def seasons(self):
         path = self.key
-        return plexobjects.listItems(self.server, path, Season.TYPE, cachable=self.cachable, cache_ref=self.cacheRef)
+        return plexobjects.listItems(self.server, path, Season.TYPE, cachable=self.cachable, cache_ref=self.cacheRef,
+                                     not_cachable=self._not_cachable)
 
     def season(self, title):
         path = self.key
@@ -729,7 +756,7 @@ class Show(CachableItemsMixin, Video, media.RelatedMixin, SectionOnDeckMixin):
     def episodes(self, watched=None, offset=None, limit=None):
         leavesKey = '/library/metadata/%s/allLeaves' % self.ratingKey
         return plexobjects.listItems(self.server, leavesKey, watched=watched, offset=offset, limit=limit,
-                                     cachable=self.cachable, cache_ref=self.cacheRef)
+                                     cachable=self.cachable, cache_ref=self.cacheRef, not_cachable=self._not_cachable)
 
     def episode(self, title):
         path = '/library/metadata/%s/allLeaves' % self.ratingKey
@@ -796,7 +823,7 @@ class Season(CachableItemsMixin, Video):
     def episodes(self, watched=None, offset=None, limit=None):
         path = self.key
         return plexobjects.listItems(self.server, path, watched=watched, offset=offset, limit=limit,
-                                     cachable=self.cachable, cache_ref=self.cacheRef)
+                                     cachable=self.cachable, cache_ref=self.cacheRef, not_cachable=self._not_cachable)
 
     def episode(self, title):
         path = self.key
@@ -806,7 +833,8 @@ class Season(CachableItemsMixin, Video):
         return self.episodes()
 
     def show(self):
-        return plexobjects.listItems(self.server, self.parentKey, cachable=self.cachable, cache_ref=self.cacheRef)[0]
+        return plexobjects.listItems(self.server, self.parentKey, cachable=self.cachable, cache_ref=self.cacheRef,
+                                     not_cachable=self._not_cachable)[0]
 
     def watched(self):
         return self.episodes(watched=True)
@@ -898,7 +926,8 @@ class Episode(PlayableVideo, SectionOnDeckMixin):
         skipParent = self.get('skipParent').asBool()
         key = self.parentKey if not skipParent else self.grandparentKey
         if not self._season:
-            items = plexobjects.listItems(self.server, key, cachable=self.cachable, cache_ref=self.cacheRef)
+            items = plexobjects.listItems(self.server, key, cachable=self.cachable, cache_ref=self.cacheRef,
+                                          not_cachable=self._not_cachable)
 
             if items:
                 self._season = items[0]
@@ -907,7 +936,7 @@ class Episode(PlayableVideo, SectionOnDeckMixin):
     def show(self):
         if not self._show:
             self._show = plexobjects.listItems(self.server, self.grandparentKey, cachable=self.cachable,
-                                               cache_ref=self.cacheRef)[0]
+                                               cache_ref=self.cacheRef, not_cachable=self._not_cachable)[0]
         return self._show
 
     @property

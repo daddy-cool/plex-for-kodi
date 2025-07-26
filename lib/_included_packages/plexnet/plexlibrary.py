@@ -90,6 +90,10 @@ class LibrarySection(plexobjects.PlexObject):
     ALLOWED_SORT = ()
     BOOLEAN_FILTERS = ('unwatched', 'duplicate')
 
+    DEFAULT_URL_ARGS = None
+    DEFAULT_SORT = 'titleSort'
+    DEFAULT_SORT_DESC = False
+
     isLibraryPQ = True
 
     def __init__(self, data, initpath=None, server=None, container=None):
@@ -222,13 +226,19 @@ class LibrarySection(plexobjects.PlexObject):
     def items(self, path, start, size, filter_, sort, unwatched, type_, tag_fallback):
 
         args = {}
+        if self.DEFAULT_URL_ARGS:
+            args.update(self.DEFAULT_URL_ARGS)
 
         if size is not None:
             args['X-Plex-Container-Start'] = start
             args['X-Plex-Container-Size'] = size
 
         if filter_:
-            args[filter_[0]] = filter_[1]
+            # filter might've been returned with a full path (e.g. watchlist)
+            if filter_[1].startswith('/'):
+                path = filter_[1]
+            else:
+                args[filter_[0]] = filter_[1]
         else:
             args['includeCollections'] = 1
 
@@ -252,7 +262,7 @@ class LibrarySection(plexobjects.PlexObject):
         if args:
             path += util.joinArgs(args, '?' not in path)
 
-        return plexobjects.listItems(self.server, path, tag_fallback=tag_fallback, cachable=self.cachable,
+        return plexobjects.listItems(self.server, path, tag_fallback=tag_fallback, not_cachable=not self.cachable,
                                      cache_ref=self.cacheRef)
 
     def jumpList(self, filter_=None, sort=None, unwatched=False, type_=None):
@@ -321,7 +331,12 @@ class LibrarySection(plexobjects.PlexObject):
             args[category] = self._cleanSearchFilter(subcategory, value)
         if libtype is not None:
             args['type'] = plexobjects.searchType(libtype)
-        query = '/library/sections/%s/%s%s' % (self.key, category, util.joinArgs(args))
+
+        if self.key.startswith('/'):
+            base = '{0}/'.format(self.key)
+        else:
+            base = '/library/sections/{0}/'.format(self.key)
+        query = '{0}{1}{2}'.format(base, category, util.joinArgs(args))
 
         return plexobjects.listItems(self.server, query, bytag=True)
 
@@ -445,6 +460,48 @@ class ShowSection(LibrarySection):
 
     def searchEpisodes(self, **kwargs):
         return self.search(libtype='episode', **kwargs)
+
+
+class WatchlistSection(LibrarySection):
+    ALLOWED_FILTERS = (
+        'year', 'decade', 'genre', 'released'
+    )
+    ALLOWED_SORT = (
+        'watchlistedAt', 'firstAvailableAt', 'titleSort', 'rating', 'audienceRating',
+    )
+    DEFAULT_SORT = 'watchlistedAt'
+    DEFAULT_SORT_DESC = True
+
+    TYPE = 'movies_shows'
+    ID = 'watchlist'
+    _key = '/library/sections/watchlist'
+
+    cachable = False
+
+    DEFAULT_URL_ARGS = {
+        "includeAdvanced": 1,
+        "includeMeta": 1
+    }
+
+    def __init__(self, data, initpath=None, server=None, container=None):
+        self.locations = []
+        self._settings = {}
+        data = server.query(self.key+"/all", offset=0, limit=0, type=99, **self.DEFAULT_URL_ARGS) # type: ignore
+        self.type = "mixed"
+        super(LibrarySection, self).__init__(data, initpath=initpath, server=server, container=self)
+        self.server = server
+
+    def has_data(self):
+        return self.totalSize and self.totalSize > 0
+
+    @property
+    def key(self):
+        return self._key
+
+    @key.setter
+    def key(self, value):
+        return
+
 
 
 class MusicSection(LibrarySection):
@@ -768,12 +825,14 @@ SECTION_TYPES = {
     MovieSection.TYPE: MovieSection,
     ShowSection.TYPE: ShowSection,
     MusicSection.TYPE: MusicSection,
-    PhotoSection.TYPE: PhotoSection
+    PhotoSection.TYPE: PhotoSection,
+    WatchlistSection.TYPE: WatchlistSection,
 }
 
 SECTION_IDS = {
     MovieSection.ID: MovieSection,
     ShowSection.ID: ShowSection,
     MusicSection.ID: MusicSection,
-    PhotoSection.ID: PhotoSection
+    PhotoSection.ID: PhotoSection,
+    WatchlistSection.ID: WatchlistSection,
 }

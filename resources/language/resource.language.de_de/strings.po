@@ -3230,3 +3230,42 @@ msgstr "Start: Staffelposter verwenden"
 msgctxt "#33741"
 msgid "Use season thumbnails/posters when displaying episodes in hubs instead of the TV show's."
 msgstr "Staffel-Thumbnails/Poster für Episoden in Hubs anstatt die der TV Serie verwenden."
+
+msgctxt "#34000"
+msgid "Watchlist"
+msgstr "Merkliste"
+
+msgctxt "#34001"
+msgid "Released"
+msgstr "Veröffentlicht"
+
+msgctxt "#34002"
+msgid "Movies & Shows"
+msgstr "Filme & Serien"
+
+#: e.g.: 8 seasons
+msgctxt "#34003"
+msgid "{} seasons"
+msgstr "{} Staffeln"
+
+msgctxt "#34004"
+msgid "Choose server"
+msgstr "Server auswählen"
+
+msgctxt "#34005"
+msgid "Availability"
+msgstr "Verfügbarkeit"
+
+#: e.g.: 1 season
+msgctxt "#34006"
+msgid "{} season"
+msgstr "{} Staffel"
+
+msgctxt "#34007"
+msgid "Use Watchlist"
+msgstr "Merkliste verwenden"
+
+msgctxt "#34008"
+msgid "Activates the current user's Plex watchlist as a section item. Adds watchlist functionality to certain media screens. Per-user setting. Default: On"
+msgstr "Aktiviert die Plex Merkliste des aktuellen Nutzers. Fügt Merklistenfunktionalität zu bestimmten Ansichten hinzu. Pro-Nutzer Einstellung. Standard: An"
+

@@ -20,6 +20,7 @@ from . import plexresource
 from . import plexlibrary
 from . import asyncadapter
 from six.moves import range
+
 # from plexapi.client import Client
 # from plexapi.playqueue import PlayQueue
 
@@ -125,9 +126,13 @@ class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
     def anyLANConnection(self):
         return any(c.localVerified for c in self.connections)
 
-    def getObject(self, key):
+    def getObject(self, key, assume_container=False):
         data = self.query(key)
-        return plexobjects.buildItem(self, data[0], key, container=self)
+
+        container = self
+        if not assume_container:
+            container = plexobjects.PlexContainer(data, initpath=key, server=self, address=key)
+        return plexobjects.buildItem(self, data[0], key, container=container)
 
     def hubs(self, section=None, count=None, search_query=None, section_ids=None, ignore_hubs=None):
         hubs = []
@@ -181,19 +186,20 @@ class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
             self.currentHubs[cdata[0].attrib.get('hubIdentifier')] = cdata[0].attrib.get('title')
             hubs.append(plexlibrary.Hub(cdata[0], server=self, container=ccontainer))
 
-        for elem in data:
-            hubIdent = elem.attrib.get('hubIdentifier')
-            self.currentHubs["{}:{}".format(section, hubIdent)] = elem.attrib.get('title')
+        if data:
+            for elem in data:
+                hubIdent = elem.attrib.get('hubIdentifier')
+                self.currentHubs["{}:{}".format(section, hubIdent)] = elem.attrib.get('title')
 
-            # if we've added continueWatching, which combines continue and ondeck, skip those two hubs
-            if newCW and hubIdent and \
-                    (hubIdent.startswith('home.continue') or hubIdent.startswith('home.ondeck')):
-                continue
+                # if we've added continueWatching, which combines continue and ondeck, skip those two hubs
+                if newCW and hubIdent and \
+                        (hubIdent.startswith('home.continue') or hubIdent.startswith('home.ondeck')):
+                    continue
 
-            if ignore_hubs and "{}:{}".format(section, hubIdent) in ignore_hubs:
-                continue
+                if ignore_hubs and "{}:{}".format(section, hubIdent) in ignore_hubs:
+                    continue
 
-            hubs.append(plexlibrary.Hub(elem, server=self, container=container))
+                hubs.append(plexlibrary.Hub(elem, server=self, container=container))
 
         if section_ids:
             # when we have hidden sections, apply the filter to the hubs keys for subsequent queries
