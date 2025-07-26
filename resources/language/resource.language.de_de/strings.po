@@ -3260,3 +3260,12 @@ msgstr "Verfügbarkeit"
 msgctxt "#34006"
 msgid "{} season"
 msgstr "{} Staffel"
+
+msgctxt "#34007"
+msgid "Use Watchlist"
+msgstr "Merkliste verwenden"
+
+msgctxt "#34008"
+msgid "Activates the current user's Plex watchlist as a section item. Adds watchlist functionality to certain media screens. Per-user setting. Default: On"
+msgstr "Aktiviert die Plex Merkliste des aktuellen Nutzers. Fügt Merklistenfunktionalität zu bestimmten Ansichten hinzu. Pro-Nutzer Einstellung. Standard: An"
+

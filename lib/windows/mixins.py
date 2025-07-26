@@ -495,7 +495,7 @@ class WatchlistUtilsMixin(object):
         self.wl_enabled = False
 
     def watchlist_setup(self, item):
-        self.wl_enabled = item.guid and item.guid.startswith("plex://")
+        self.wl_enabled = util.getUserSetting("use_watchlist", True) and item.guid and item.guid.startswith("plex://")
         self.setBoolProperty("watchlist_enabled", self.wl_enabled)
 
     @staticmethod

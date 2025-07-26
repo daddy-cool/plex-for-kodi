@@ -704,6 +704,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         plexapp.util.APP.on('change:hubs_use_new_continue_watching', self.setDirty)
         plexapp.util.APP.on('change:path_mapping_indicators', self.setDirty)
         plexapp.util.APP.on('change:hub_season_thumbnails', self.setDirty)
+        plexapp.util.APP.on('change:use_watchlist', self.setDirty)
         plexapp.util.APP.on('change:debug', self.setDebugFlag)
         plexapp.util.APP.on('change:update_source', self.updateSourceChanged)
         plexapp.util.APP.on('theme_relevant_setting', self.setThemeDirty)
@@ -732,6 +733,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         plexapp.util.APP.off('change:spoilers_allowed_genres2', self.setDirty)
         plexapp.util.APP.off('change:hubs_use_new_continue_watching', self.setDirty)
         plexapp.util.APP.off('change:path_mapping_indicators', self.setDirty)
+        plexapp.util.APP.off('change:hub_season_thumbnails', self.setDirty)
+        plexapp.util.APP.off('change:use_watchlist', self.setDirty)
         plexapp.util.APP.off('change:debug', self.setDebugFlag)
         plexapp.util.APP.off('change:update_source', self.updateSourceChanged)
         plexapp.util.APP.off('theme_relevant_setting', self.setThemeDirty)
@@ -1340,7 +1343,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                     had_section = True
 
             # hack for an inexistant watchlist due to it being hidden
-            if not self.librarySettings.get("/library/sections/watchlist", {}).get("show", True):
+            if util.getUserSetting("use_watchlist", True) and not self.librarySettings.get("/library/sections/watchlist", {}).get("show", True):
                 options.append({'key': 'show',
                                 'section_id': "/library/sections/watchlist",
                                 'display': T(33029, "Show library: {}").format(T(34000, 'Watchlist'))
@@ -1946,7 +1949,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         sections = []
 
         # https://discover.provider.plex.tv/library/sections/watchlist/all?includeAdvanced=1&includeMeta=1
-        if not plexapp.ACCOUNT.isOffline and ("/library/sections/watchlist" not in self.librarySettings
+        if not plexapp.ACCOUNT.isOffline and util.getUserSetting("use_watchlist", True) and ("/library/sections/watchlist" not in self.librarySettings
                 or ("/library/sections/watchlist" in self.librarySettings and self.librarySettings["/library/sections/watchlist"].get("show", True))):
             # get watchlist
             from plexnet import plexlibrary

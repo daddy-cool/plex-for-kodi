@@ -655,6 +655,12 @@ class Settings(object):
                 ).description(
                     T(33078, "")
                 ),
+                BoolUserSetting(
+                    'use_watchlist', T(34007, 'Use Watchlist'), True
+                ).description(
+                    T(34008, "Activates the current user's Plex watchlist as a section item. Adds watchlist "
+                             "functionality to certain media screens. Per-user setting. Default: On")
+                ),
                 MultiOptionsSetting(
                     'show_ratings', T(33709, 'Show ratings for'),
                     ["series", "movies"],
