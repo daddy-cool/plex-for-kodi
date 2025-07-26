@@ -508,7 +508,8 @@ class WatchlistUtilsMixin(object):
             res = "{}p".format(meta['resolution']) if not "k" in meta['resolution'] else meta['resolution'].upper()
             sub = '{} ({})'.format(res, pnUtil.bitrateToString(int(meta['bitrate']) * 1024))
         else:
-            sub = T(34003, '{} seasons').format(meta['season_count'])
+            season_str = T(34006, '{} season') if int(meta["season_count"]) == 1 else T(34003, '{} seasons')
+            sub = season_str.format(meta['season_count'])
         return sub
 
     @wl_wrap

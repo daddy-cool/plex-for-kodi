@@ -255,7 +255,7 @@
         {% include "includes/wl_availability.xml.tpl" %}
         <control type="textbox">
             <posx>466</posx>
-            <posy>{{ vscale(264) }}</posy>
+            <posy>{{ vscale(274) }}</posy>
             <width>1360</width>
             <height>{{ vscale(179) }}</height>
             <font>font12</font>
