@@ -165,6 +165,10 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
         genres = self.mediaItem.genres()
         self.setProperty('info', genres and (u' / '.join([g.tag for g in genres][:3])) or '')
 
+        if not self.wl_availability:
+            self.setProperty('wl_server_availability_verbose',
+                             util.cleanLeadingZeros(self.mediaItem.originallyAvailableAt.asDatetime('%B %d, %Y')))
+
         self.populateRatings(self.mediaItem, self)
 
         sas = self.mediaItem.selectedAudioStream()
