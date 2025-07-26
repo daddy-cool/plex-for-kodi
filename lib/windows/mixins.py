@@ -559,15 +559,16 @@ class WatchlistUtilsMixin(object):
             self.checkIsWatchlisted(ref)
 
     @wl_wrap
-    def watchlistItemAvailable(self, item):
+    def watchlistItemAvailable(self, item, shortcut_watchlisted=False):
         """
         Is a watchlisted item available on any of the user's Plex servers?
         :param item:
         :return:
         """
 
-        self.is_watchlisted = True
-        self.setBoolProperty("is_watchlisted", True)
+        if shortcut_watchlisted:
+            self.is_watchlisted = True
+            self.setBoolProperty("is_watchlisted", True)
         self.setBoolProperty("wl_availability_checking", True)
         self.wl_checking_servers = len(list(pnUtil.SERVERMANAGER.connectedServers))
         self.wl_play_button_id = self.WL_BTN_WAIT

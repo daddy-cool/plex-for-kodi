@@ -1314,6 +1314,6 @@ class GlobalProperty():
 
 def waitForVisibility(control):
     tries = 0
-    while not xbmc.getCondVisibility('Control.IsVisible({0})'.format(control)) and tries < 20:
+    while not xbmc.getCondVisibility('Control.IsVisible({0})'.format(control)) and tries < 50:
         util.MONITOR.waitForAbort(0.1)
         tries += 1

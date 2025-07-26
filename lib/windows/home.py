@@ -1166,7 +1166,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
     def refreshLastSection(self, *args, **kwargs):
         self.enableUpdates()
-        if not xbmc.Player().isPlayingVideo():
+        if not xbmc.Player().isPlayingVideo() and not self._shuttingDown:
             util.LOG("Refreshing last section after wake events")
             self.showHubs(self.lastSection, force=True, update=True)
 

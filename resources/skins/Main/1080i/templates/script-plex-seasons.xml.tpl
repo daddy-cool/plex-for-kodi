@@ -38,6 +38,18 @@
             {% with attr = theme.seasons.buttons & template = "includes/themed_button.xml.tpl" & hitrect = None %} {# fixme: should hitrect be None? #}
                 {% include template with name="info" & id=301 %}
                 {% include template with name="play" & id=302 & visible="String.IsEmpty(Window.Property(disable_playback))" %}
+                {# watchlist dynamic play button #}
+                    {# checking #}
+                    {% include template with name="wait" & id=2302 & visible="!String.IsEmpty(Window.Property(disable_playback)) + !String.IsEmpty(Window.Property(wl_availability_checking))" %}
+                    {# available multiple #}
+                    {% include template with name="play_plus" & id=2303 & visible="!String.IsEmpty(Window.Property(disable_playback)) + String.IsEmpty(Window.Property(wl_availability_checking)) + !String.IsEmpty(Window.Property(wl_availability_multiple))" %}
+                    {# available single #}
+                    {% include template with name="play" & id=2304 & visible="!String.IsEmpty(Window.Property(disable_playback)) + String.IsEmpty(Window.Property(wl_availability_checking)) + String.IsEmpty(Window.Property(wl_availability_multiple)) + !String.IsEmpty(Window.Property(wl_availability))" %}
+                    {# not available #}
+                    {% include template with name="upcoming" & id=2305 & visible="!String.IsEmpty(Window.Property(disable_playback)) + String.IsEmpty(Window.Property(wl_availability_checking)) + String.IsEmpty(Window.Property(wl_availability))" %}
+                {# /watchlist dynamic play button #}
+                {% include template with name="watchlist" & id=308 & visible="!String.IsEmpty(Window.Property(watchlist_enabled)) + String.IsEmpty(Window.Property(is_watchlisted))" %}
+                {% include template with name="watchlisted" & id=309 & visible="!String.IsEmpty(Window.Property(watchlist_enabled)) + !String.IsEmpty(Window.Property(is_watchlisted))" %}
                 {% include template with name="shuffle" & id=303 & visible="String.IsEmpty(Window.Property(disable_playback))" %}
                 {% include template with name="more" & id=304 & visible="String.IsEmpty(Window.Property(disable_playback))" %}
             {% endwith %}

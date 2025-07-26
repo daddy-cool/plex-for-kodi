@@ -186,19 +186,20 @@ class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
             self.currentHubs[cdata[0].attrib.get('hubIdentifier')] = cdata[0].attrib.get('title')
             hubs.append(plexlibrary.Hub(cdata[0], server=self, container=ccontainer))
 
-        for elem in data:
-            hubIdent = elem.attrib.get('hubIdentifier')
-            self.currentHubs["{}:{}".format(section, hubIdent)] = elem.attrib.get('title')
+        if data:
+            for elem in data:
+                hubIdent = elem.attrib.get('hubIdentifier')
+                self.currentHubs["{}:{}".format(section, hubIdent)] = elem.attrib.get('title')
 
-            # if we've added continueWatching, which combines continue and ondeck, skip those two hubs
-            if newCW and hubIdent and \
-                    (hubIdent.startswith('home.continue') or hubIdent.startswith('home.ondeck')):
-                continue
+                # if we've added continueWatching, which combines continue and ondeck, skip those two hubs
+                if newCW and hubIdent and \
+                        (hubIdent.startswith('home.continue') or hubIdent.startswith('home.ondeck')):
+                    continue
 
-            if ignore_hubs and "{}:{}".format(section, hubIdent) in ignore_hubs:
-                continue
+                if ignore_hubs and "{}:{}".format(section, hubIdent) in ignore_hubs:
+                    continue
 
-            hubs.append(plexlibrary.Hub(elem, server=self, container=container))
+                hubs.append(plexlibrary.Hub(elem, server=self, container=container))
 
         if section_ids:
             # when we have hidden sections, apply the filter to the hubs keys for subsequent queries

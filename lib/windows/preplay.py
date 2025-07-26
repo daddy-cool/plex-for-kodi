@@ -74,6 +74,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.video = kwargs.get('video')
         self.parentList = kwargs.get('parent_list')
         self.fromWatchlist = kwargs.get('from_watchlist', False)
+        self.directlyFromWatchlist = kwargs.get('directly_from_watchlist')
         self.videos = None
         self.exitCommand = None
         self.trailer = None
@@ -570,7 +571,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             raise util.NoDataException
 
         if self.fromWatchlist:
-            self.watchlistItemAvailable(self.video)
+            self.watchlistItemAvailable(self.video, shortcut_watchlisted=self.directlyFromWatchlist)
         else:
             self.checkIsWatchlisted(self.video)
 
