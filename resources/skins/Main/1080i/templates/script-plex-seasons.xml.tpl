@@ -128,9 +128,9 @@
 
         <control type="grouplist">
             <visible>!String.IsEmpty(Window.Property(rating)) | !String.IsEmpty(Window.Property(rating2))</visible>
-            <posx>1660</posx>
+            <posx>1560</posx>
             <posy>{{ vscale(70) }}</posy>
-            <width>200</width>
+            <width>300</width>
             <height>{{ vscale(32) }}</height>
             <align>right</align>
             <itemgap>15</itemgap>
@@ -156,7 +156,7 @@
             <control type="image">
                 <visible>!String.IsEmpty(Window.Property(rating2))</visible>
                 <posy>2</posy>
-                <width>63</width>
+                <width>40</width>
                 <height>{{ vscale(30) }}</height>
                 <texture fallback="script.plex/ratings/other/image.rating.png">$INFO[Window.Property(rating2.image)]</texture>
                 <aspectratio align="right">keep</aspectratio>
