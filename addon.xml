@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-beta13"
+       version="0.8.0-beta13.1"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -33,7 +33,8 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Add first version of watchlist functionality
+- Watchlist: Auto-remove fully watched items (watch state based on current server)
+- Settings: Add setting to auto remove fully watched items from watchlist (default: on)
         </news>
         <assets>
             <icon>icon2.png</icon>
