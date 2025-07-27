@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-beta13.2"
+       version="0.8.0-beta13.3"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -33,9 +33,8 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Watchlist: Auto-remove fully watched items (watch state based on current server)
-- Settings: Add setting to auto remove fully watched items from watchlist (default: on)
-- Home/Watchlist: Remove auto-enter functionality for the time being
+- Library/Collections: Fix broken display due to missing default sort attributes
+- Library/Watchlist: Clamp chunk size to 240 regardless of addonSettings in case of Watchlist (it breaks otherwise, investigating)
         </news>
         <assets>
             <icon>icon2.png</icon>
