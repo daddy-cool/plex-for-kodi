@@ -1885,7 +1885,6 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             util.DEBUG_LOG('Section changed ({0}): {1}', section.key, repr(section.title))
             if section == watchlist_section and self.lastSection != watchlist_section:
                 self.sectionChangeTimeout = None
-                self.sectionClicked()
                 return
             self.lastSection = section
             self.showHubs(section)
