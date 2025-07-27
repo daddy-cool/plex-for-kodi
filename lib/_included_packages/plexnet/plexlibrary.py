@@ -533,6 +533,8 @@ class PhotoSection(LibrarySection):
 @plexobjects.registerLibType
 class Collection(media.MediaItem):
     TYPE = 'collection'
+    DEFAULT_SORT = 'titleSort'
+    DEFAULT_SORT_DESC = False
 
     def __repr__(self):
         title = self.title.replace(' ', '.')[0:20]
