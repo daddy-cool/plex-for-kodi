@@ -113,6 +113,8 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
 
     def onReInit(self):
         PlaybackBtnMixin.onReInit(self)
+        self.wl_auto_remove(self.mediaItem)
+        self.checkIsWatchlisted(self.mediaItem)
 
     def setup(self):
         if self.fromWatchlist:
@@ -532,6 +534,8 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
             xbmc.executebuiltin('PlayerControl(Next)')
         elif choice['key'] == 'mark_watched':
             item.markWatched()
+            self.wl_auto_remove(self.mediaItem)
+            self.checkIsWatchlisted(self.mediaItem)
             self.updateItems()
             self.updateProperties()
             util.MONITOR.watchStatusChanged()

@@ -560,6 +560,12 @@ class WatchlistUtilsMixin(object):
             self.checkIsWatchlisted(ref)
 
     @wl_wrap
+    def wl_auto_remove(self, ref):
+        if self.is_watchlisted and ref.isFullyWatched and util.getUserSetting('watchlist_auto_remove', False):
+            self.removeFromWatchlist(ref)
+            util.DEBUG_LOG("Watchlist: Item {} is fully watched, removed from watchlist", ref.ratingKey)
+
+    @wl_wrap
     def watchlistItemAvailable(self, item, shortcut_watchlisted=False):
         """
         Is a watchlisted item available on any of the user's Plex servers?

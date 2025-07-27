@@ -2681,3 +2681,11 @@ msgstr ""
 msgctxt "#34008"
 msgid "Activates the current user's Plex watchlist as a section item. Adds watchlist functionality to certain media screens. Per-user setting. Default: On"
 msgstr ""
+
+msgctxt "#34009"
+msgid "Watchlist auto-remove"
+msgstr ""
+
+msgctxt "#34010"
+msgid "Automatically remove fully watched items from watchlist. Default: On"
+msgstr ""

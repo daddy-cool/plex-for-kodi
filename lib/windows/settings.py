@@ -661,6 +661,11 @@ class Settings(object):
                     T(34008, "Activates the current user's Plex watchlist as a section item. Adds watchlist "
                              "functionality to certain media screens. Per-user setting. Default: On")
                 ),
+                BoolUserSetting(
+                    'watchlist_auto_remove', T(34009, 'Watchlist auto-remove'), True
+                ).description(
+                    T(34010, "Automatically remove fully watched items from watchlist. Default: On")
+                ),
                 MultiOptionsSetting(
                     'show_ratings', T(33709, 'Show ratings for'),
                     ["series", "movies"],

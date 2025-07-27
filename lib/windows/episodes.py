@@ -25,7 +25,7 @@ from . import playersettings
 from . import search
 from . import videoplayer
 from . import windowutils
-from .mixins import SeasonsMixin, RatingsMixin, SpoilersMixin, PlaybackBtnMixin, ThemeMusicMixin
+from .mixins import SeasonsMixin, RatingsMixin, SpoilersMixin, PlaybackBtnMixin, ThemeMusicMixin, WatchlistUtilsMixin
 
 VIDEO_RELOAD_KW = dict(includeExtras=1, includeExtrasCount=10, includeChapters=1)
 
@@ -190,7 +190,7 @@ class RedirectToEpisode(Exception):
 VIDEO_PROGRESS = OrderedDict()
 
 class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, RatingsMixin, SpoilersMixin,
-                     PlaybackBtnMixin, ThemeMusicMixin, playbacksettings.PlaybackSettingsMixin):
+                     PlaybackBtnMixin, ThemeMusicMixin, WatchlistUtilsMixin, playbacksettings.PlaybackSettingsMixin):
     xmlFile = 'script-plex-episodes.xml'
     path = util.ADDON.getAddonInfo('path')
     theme = 'Main'
@@ -235,6 +235,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         windowutils.UtilMixin.__init__(self)
         SpoilersMixin.__init__(self, *args, **kwargs)
         PlaybackBtnMixin.__init__(self, *args, **kwargs)
+        WatchlistUtilsMixin.__init__(self)
         self.episode = None
         self.reset(kwargs.get('episode'), kwargs.get('season'), kwargs.get('show'))
         self.parentList = kwargs.get('parentList')
@@ -371,6 +372,8 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         if not mli or not self.episodesPaginator:
             return
 
+        self.wl_auto_remove(self.show_)
+
         reload_items = [mli]
         skip_progress_for = None
         if vp:
@@ -438,6 +441,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             self.relatedPaginator = RelatedPaginator(self.relatedListControl, leaf_count=int(self.show_.relatedCount),
                                                      parent_window=self)
 
+        self.watchlist_setup(self.show_)
         self.updateProperties()
         self.setBoolProperty("initialized", True)
         self.fillEpisodes()
@@ -1120,7 +1124,11 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             xbmc.executebuiltin('PlayerControl(Next)')
         elif choice['key'] == 'mark_watched':
             mli.dataSource.markWatched(**VIDEO_RELOAD_KW)
+            self.show_ = (self.episode or self.season).show().reload(includeExtras=1, includeExtrasCount=10,
+                                                                     includeOnDeck=1)
+            self.wl_auto_remove(self.show_)
             self.updateItems(mli)
+            self.checkIsWatchlisted(self.show_)
             util.MONITOR.watchStatusChanged()
         elif choice['key'] == 'mark_unwatched':
             mli.dataSource.markUnwatched(**VIDEO_RELOAD_KW)
@@ -1128,7 +1136,11 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             util.MONITOR.watchStatusChanged()
         elif choice['key'] == 'mark_season_watched':
             self.season.markWatched(**VIDEO_RELOAD_KW)
+            self.show_ = (self.episode or self.season).show().reload(includeExtras=1, includeExtrasCount=10,
+                                                                     includeOnDeck=1)
+            self.wl_auto_remove(self.show_)
             self.updateItems()
+            self.checkIsWatchlisted(self.show_)
             util.MONITOR.watchStatusChanged()
         elif choice['key'] == 'mark_season_unwatched':
             self.season.markUnwatched(**VIDEO_RELOAD_KW)

@@ -970,7 +970,8 @@ class MultiWindow(object):
         self.exitCommand = None
 
     def __getattr__(self, name):
-        return getattr(self._current, name)
+        if self._current:
+            return getattr(self._current, name)
 
     def onCloseSignal(self, *args, **kwargs):
         self._closeSignalled = True

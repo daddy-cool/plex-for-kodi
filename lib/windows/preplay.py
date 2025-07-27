@@ -118,6 +118,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             self.progressImageControl.setWidth(1)
             self.setProperty('remainingTime', T(32914, "Loading"))
         self.video.reload(checkFiles=1, fromMediaChoice=self.video.mediaChoice is not None, **VIDEO_RELOAD_KW)
+        self.wl_auto_remove(self.video)
         self.refreshInfo(from_reinit=True)
         self.checkIsWatchlisted(self.video)
         self.initialized = True
@@ -307,7 +308,9 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             xbmc.executebuiltin('PlayerControl(Next)')
         elif choice['key'] == 'mark_watched':
             self.video.markWatched(**VIDEO_RELOAD_KW)
+            self.wl_auto_remove(self.video)
             self.refreshInfo()
+            self.checkIsWatchlisted(self.video)
             util.MONITOR.watchStatusChanged()
         elif choice['key'] == 'mark_unwatched':
             self.video.markUnwatched(**VIDEO_RELOAD_KW)
