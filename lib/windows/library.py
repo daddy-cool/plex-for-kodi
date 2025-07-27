@@ -424,7 +424,10 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
         self.alreadyFetchedChunkList = set()
         self.finalChunkPosition = 0
 
-        self.CHUNK_SIZE = util.addonSettings.libraryChunkSize
+        if self.section.TYPE == 'movies_shows':
+            self.CHUNK_SIZE = 240
+        else:
+            self.CHUNK_SIZE = util.addonSettings.libraryChunkSize
 
         key = self.section.key
         if not key.isdigit():
