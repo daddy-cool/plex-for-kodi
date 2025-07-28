@@ -807,10 +807,12 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             self.showHubs(self.lastSection, update=True)
 
     def doClose(self):
+        util.DEBUG_LOG("Home: doClose called, triggering close.windows")
         plexapp.util.APP.trigger('close.windows')
         #if self.sectionChangeThread and self.sectionChangeThread.isAlive():
         #    self.sectionChangeThread.join(timeout=2.0)
 
+        util.DEBUG_LOG("Home: doClose called, calling super")
         super(HomeWindow, self).doClose()
 
     def stopRetryingRequests(self):
@@ -818,6 +820,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         plexnet.asyncadapter.STOP_RETRYING_REQUESTS = True
 
     def shutdown(self):
+        util.DEBUG_LOG("Home: shutdown called")
         self._shuttingDown = True
         self._ignoreTick = True
         self.stopRetryingRequests()
@@ -826,10 +829,13 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         except AttributeError:
             pass
 
+        util.DEBUG_LOG("Home: unhooking signals")
         self.unhookSignals()
         if (self.closeOption != "switch" and
                 (not isinstance(self.closeOption, dict) or (isinstance(self.closeOption, dict) and not self.closeOption.get('fast_switch')))):
             self.storeLastBG()
+        util.DEBUG_LOG("Home: exiting shutdown method")
+
 
     def storeLastBG(self):
         if util.addonSettings.dynamicBackgrounds:
@@ -1006,6 +1012,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                             # rare case confirmed in Kodi 18 when requests are still running and we're exiting quickly
                             return
 
+                        util.DEBUG_LOG("Home: Showing exit confirmation dialog")
+
                         ex = self.confirmExit()
                         # 0 = exit; 1 = minimize; 2 = cancel
                         if ex.button in (2, None):
@@ -1017,6 +1025,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                             return
                         elif ex.button == 0:
                             self._shuttingDown = True
+                            util.DEBUG_LOG("Home: Initiating shutdown, setting background")
                             background.setShutdown()
                             if ex.modifier == "quit":
                                 self.closeOption = "quit"

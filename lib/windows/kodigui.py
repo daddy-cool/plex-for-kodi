@@ -158,6 +158,7 @@ class XMLBase(object):
     def goHomeAction(self, action):
         if (util.HOME_BUTTON_MAPPED is not None
                 and action.getButtonCode() == int(util.HOME_BUTTON_MAPPED) and hasattr(self, "goHome")):
+            util.DEBUG("Kodigui: Going home action")
             self.goHome(with_root=True)
             return True
         return
