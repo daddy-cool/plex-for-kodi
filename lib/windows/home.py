@@ -801,8 +801,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         if hubs is None:
             return
 
-        if (self.is_active and time.time() - hubs.lastUpdated > HUBS_REFRESH_INTERVAL and
+        if (self.is_active and not self._checkingForExit and time.time() - hubs.lastUpdated > HUBS_REFRESH_INTERVAL and
                 not xbmc.Player().isPlayingVideo()):
+            util.DEBUG_LOG("Home: Ticking, section stale, calling showHubs(update=True)")
             self.showHubs(self.lastSection, update=True)
 
     def doClose(self):
@@ -1063,7 +1064,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         if 399 < controlID < 500:
             self.setProperty('hub.focus', str(self.hubFocusIndexes[controlID - 400]))
 
-        if controlID == self.SECTION_LIST_ID and not self.changingServer:
+        if (controlID == self.SECTION_LIST_ID and not self.changingServer and not self._checkingForExit and not
+        self._shuttingDown):
             self.checkSectionItem()
 
         if xbmc.getCondVisibility('ControlGroup(50).HasFocus(0) + ControlGroup(100).HasFocus(0)'):
