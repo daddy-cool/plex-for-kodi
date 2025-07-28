@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-beta13.3"
+       version="0.8.0-beta13.4"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -33,8 +33,12 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Library/Collections: Fix broken display due to missing default sort attributes
-- Library/Watchlist: Clamp chunk size to 240 regardless of addonSettings in case of Watchlist (it breaks otherwise, investigating)
+- Watchlist/Mixins: Make watchlist check tasks leaner by not passing around related objects (server)
+- Home: Try avoiding race conditions on tick/section stale while checking for exit/shutting down
+- Home: Don't try fetching hubs for watchlist section
+- Home/Kodigui: Add more debug logging for shutdown/close procedures
+- Core/Watchlist: Correctly supply language code to requests so watchlist returns translated items
+- Home/Library: (blindly) remove item from watchlist if manually marked watched via Home or Library context menus
         </news>
         <assets>
             <icon>icon2.png</icon>
