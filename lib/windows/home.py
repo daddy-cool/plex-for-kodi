@@ -1131,7 +1131,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                 if mli.dataSource is not None and mli.dataSource != self.lastSection:
                     sections.add(mli.dataSource)
             tasks = [SectionHubsTask().setup(s, self.sectionHubsCallback, self.wantedSections, self.ignoredHubs)
-                     for s in [self.lastSection] + list(sections)]
+                     for s in [self.lastSection] + list(sections) if s != watchlist_section]
         else:
             # fetch hubs we need to update
             rp = self.getCurrentHubsPositions(self.lastSection)
@@ -1991,7 +1991,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
         if plexapp.SERVERMANAGER.selectedServer.hasHubs():
             self.tasks = [SectionHubsTask().setup(s, self.sectionHubsCallback, self.wantedSections, self.ignoredHubs)
-                          for s in [home_section] + sections]
+                          for s in [home_section] + sections if s != watchlist_section]
             backgroundthread.BGThreader.addTasks(self.tasks)
 
         show_pm_indicator = util.getSetting('path_mapping_indicators')
