@@ -80,6 +80,8 @@ class PlexServerManager(signalsmixin.SignalsMixin):
         elif uuid == "myplex":
             from . import myplexserver
             return myplexserver.MyPlexServer()
+        elif uuid == "plexdiscover":
+            return self.getDiscoverServer()
         else:
             return self.serversByUuid[uuid]
 

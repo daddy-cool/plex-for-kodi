@@ -393,11 +393,14 @@ class PlexSubtitleDownloadMixin(object):
 
 
 class WatchlistCheckBaseTask(backgroundthread.Task):
-    def setup(self, server, guid, callback):
-        self.server = server
+    def setup(self, server_uuid, guid, callback):
+        self.server_uuid = server_uuid
         self.guid = guid
         self.callback = callback
         return self
+
+    def getServer(self):
+        return plexapp.SERVERMANAGER.getServer(self.server_uuid)
 
 
 class AvailabilityCheckTask(WatchlistCheckBaseTask):
@@ -411,14 +414,17 @@ class AvailabilityCheckTask(WatchlistCheckBaseTask):
         if self.isCanceled():
             return
 
+        server = None
         try:
             if self.isCanceled():
                 return
-            res = self.server.query("/library/all", guid=self.guid, type=plexobjects.searchType(self.media_type))
+
+            server = self.getServer()
+            res = server.query("/library/all", guid=self.guid, type=plexobjects.searchType(self.media_type))
             if res and res.get("size", 0):
                 # find ratingKey
                 metadata = {"rating_key": None, "resolution": None, "bitrate": None, "season_count": None,
-                            "available": None, "server": None}
+                            "available": None, "server_uuid": str(self.server_uuid)}
                 for child in res:
                     if child.tag in ("Directory", "Video"):
                         rk = child.get("ratingKey")
@@ -435,21 +441,25 @@ class AvailabilityCheckTask(WatchlistCheckBaseTask):
                                 metadata["season_count"] = child.get("childCount")
                             metadata["available"] = child.get("originallyAvailableAt")
 
-                            self.callback(self.server, metadata=metadata)
+                            self.callback(server.name, metadata=metadata)
                             return
             self.callback(None)
         except:
             util.ERROR()
+        finally:
+            del server
 
 class IsWatchlistedTask(WatchlistCheckBaseTask):
     def run(self):
         if self.isCanceled():
             return
 
+        server = None
         try:
             if self.isCanceled():
                 return
-            res = self.server.query("/library/metadata/{}/userState".format(self.guid))
+            server = self.getServer()
+            res = server.query("/library/metadata/{}/userState".format(self.guid))
             is_wl = False
 
             # some etree foo to find the watchlisted state
@@ -462,6 +472,8 @@ class IsWatchlistedTask(WatchlistCheckBaseTask):
             self.callback(is_wl)
         except:
             util.ERROR()
+        finally:
+            del server
 
 
 def wl_wrap(f):
@@ -542,16 +554,19 @@ class WatchlistUtilsMixin(object):
         item_meta = selected_item or list(self.wl_availability.items())[0][1]
         rk = item_meta.get("rating_key", None)
         if rk:
-            server_differs = item_meta["server"].uuid != plexapp.SERVERMANAGER.selectedServer.uuid
-            orig_srv = plexapp.SERVERMANAGER.selectedServer
+            server_differs = item_meta["server_uuid"] != plexapp.SERVERMANAGER.selectedServer.uuid
+            server = orig_srv = plexapp.SERVERMANAGER.selectedServer
+
+            if server_differs:
+                server = plexapp.SERVERMANAGER.getServer(item_meta["server_uuid"])
 
             try:
                 if server_differs:
                     # fire event to temporarily change server
-                    util.LOG("Temporarily changing server source to: {}", item_meta["server"].name)
-                    plexapp.util.APP.trigger('change:tempServer', server=item_meta["server"])
+                    util.LOG("Temporarily changing server source to: {}", server.name)
+                    plexapp.util.APP.trigger('change:tempServer', server=server)
 
-                item_open_callback(item=rk, inherit_from_watchlist=False, server=item_meta["server"])
+                item_open_callback(item=rk, inherit_from_watchlist=False, server=server)
             finally:
                 if server_differs:
                     util.LOG("Reverting to server source: {}", orig_srv.name)
@@ -600,11 +615,10 @@ class WatchlistUtilsMixin(object):
 
         wl_set_btn()
 
-        def wl_av_callback(server, metadata=None):
-            if server and metadata:
-                util.DEBUG_LOG("Watchlist availability: {}: {}", server.name, metadata)
-                metadata["server"] = server
-                self.wl_availability[server.name] = metadata
+        def wl_av_callback(server_name, metadata=None):
+            if server_name and metadata:
+                util.DEBUG_LOG("Watchlist availability: {}: {}", server_name, metadata)
+                self.wl_availability[server_name] = metadata
 
             self.wl_checking_servers -= 1
             if self.wl_checking_servers == 0:
@@ -618,7 +632,7 @@ class WatchlistUtilsMixin(object):
             wl_set_btn()
 
         for cserver in pnUtil.SERVERMANAGER.connectedServers:
-            task = AvailabilityCheckTask().setup(cserver, item.guid, wl_av_callback, media_type=item.type)
+            task = AvailabilityCheckTask().setup(cserver.uuid, item.guid, wl_av_callback, media_type=item.type)
             backgroundthread.BGThreader.addTask(task)
 
     @wl_wrap
@@ -635,7 +649,7 @@ class WatchlistUtilsMixin(object):
             util.DEBUG_LOG("Watchlist state for item {}: {}", item.ratingKey, state)
 
         wl_rk = self.GUIDToRatingKey(item.guid)
-        task = IsWatchlistedTask().setup(pnUtil.SERVERMANAGER.getDiscoverServer(), wl_rk, callback)
+        task = IsWatchlistedTask().setup('plexdiscover', wl_rk, callback)
         backgroundthread.BGThreader.addTask(task)
 
     def _modifyWatchlist(self, item, method="addToWatchlist"):
