@@ -26,7 +26,7 @@ from . import playlists
 from . import search
 from . import windowutils
 from . import background
-from .mixins import SpoilersMixin
+from .mixins import SpoilersMixin, removeFromWatchlistBlind
 
 HUBS_REFRESH_INTERVAL = 300  # 5 Minutes
 HUB_PAGE_SIZE = 10
@@ -1630,6 +1630,10 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
             if choice["key"] == "mark_watched":
                 mli.dataSource.markWatched()
+                if mli.dataSource.isFullyWatched:
+                    guid = mli.dataSource.show().guid if mli.dataSource.TYPE in ('episode',
+                                                                                 'season') else mli.dataSource.guid
+                    removeFromWatchlistBlind(guid)
                 self._updateOnDeckHubs()
 
             elif choice["key"] == "mark_unwatched":

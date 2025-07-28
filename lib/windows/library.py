@@ -31,7 +31,7 @@ from . import search
 from . import subitems
 from . import windowutils
 from . import mixins
-from .mixins import PlaybackBtnMixin
+from .mixins import PlaybackBtnMixin, removeFromWatchlistBlind
 
 KEYS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
@@ -640,6 +640,10 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
 
                 if choice["key"] == "mark_watched":
                     mli.dataSource.markWatched()
+                    if mli.dataSource.isFullyWatched:
+                        guid = mli.dataSource.show().guid if mli.dataSource.TYPE in ('episode',
+                                                                                     'season') else mli.dataSource.guid
+                        removeFromWatchlistBlind(guid)
                     self.updateUnwatchedAndProgress(mli)
 
                 elif choice["key"] == "mark_unwatched":

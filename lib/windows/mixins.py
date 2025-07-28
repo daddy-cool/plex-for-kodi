@@ -487,6 +487,24 @@ def wl_wrap(f):
     return wrapper
 
 
+def GUIDToRatingKey(guid):
+    return guid.rsplit("/")[-1]
+
+
+def removeFromWatchlistBlind(guid):
+    if not util.getUserSetting("use_watchlist", True):
+        return
+
+    try:
+        if not guid or not guid.startswith("plex://"):
+            return
+
+        server = pnUtil.SERVERMANAGER.getDiscoverServer()
+        server.query("/actions/removeFromWatchlist", ratingKey=GUIDToRatingKey(guid), method="put")
+    except:
+        pass
+
+
 class WatchlistUtilsMixin(object):
     WL_BTN_WAIT = 2302
     WL_BTN_MULTIPLE = 2303
@@ -509,10 +527,6 @@ class WatchlistUtilsMixin(object):
     def watchlist_setup(self, item):
         self.wl_enabled = util.getUserSetting("use_watchlist", True) and item.guid and item.guid.startswith("plex://")
         self.setBoolProperty("watchlist_enabled", self.wl_enabled)
-
-    @staticmethod
-    def GUIDToRatingKey(guid):
-        return guid.rsplit("/")[-1]
 
     @wl_wrap
     def wl_item_verbose(self, meta):
@@ -648,7 +662,7 @@ class WatchlistUtilsMixin(object):
             self.setBoolProperty("is_watchlisted", state)
             util.DEBUG_LOG("Watchlist state for item {}: {}", item.ratingKey, state)
 
-        wl_rk = self.GUIDToRatingKey(item.guid)
+        wl_rk = GUIDToRatingKey(item.guid)
         task = IsWatchlistedTask().setup('plexdiscover', wl_rk, callback)
         backgroundthread.BGThreader.addTask(task)
 
@@ -656,7 +670,7 @@ class WatchlistUtilsMixin(object):
         server = pnUtil.SERVERMANAGER.getDiscoverServer()
 
         try:
-            server.query("/actions/{}".format(method), ratingKey=self.GUIDToRatingKey(item.guid), method="put")
+            server.query("/actions/{}".format(method), ratingKey=GUIDToRatingKey(item.guid), method="put")
             util.DEBUG_LOG("Watchlist action {} for {} succeeded", method, item.ratingKey)
             self.is_watchlisted = method == "addToWatchlist"
             self.setBoolProperty("is_watchlisted", method == "addToWatchlist")
