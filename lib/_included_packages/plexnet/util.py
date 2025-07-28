@@ -44,6 +44,7 @@ def resetBaseHeaders():
         'X-Plex-Version': ADDON.getAddonInfo('version'),
         'X-Plex-Device': X_PLEX_DEVICE,
         'X-Plex-Client-Identifier': X_PLEX_IDENTIFIER,
+        'X-Plex-Language': LANGUAGE_CODE,
         'Accept-Encoding': 'gzip,deflate',
         'Accept-Language': ACCEPT_LANGUAGE,
         'User-Agent': '{0}/{1}'.format("PM4K", ADDON.getAddonInfo('version'))
@@ -70,6 +71,7 @@ REQUESTS_CACHE_EXPIRY = 168
 X_PLEX_CONTAINER_SIZE = 50                          # max results to return in a single search page
 
 ACCEPT_LANGUAGE = 'en-US,en'
+LANGUAGE_CODE = 'en'
 
 # Plex Header Configuation
 X_PLEX_PROVIDES = 'player,controller'          # one or more of [player, controller, server]
@@ -257,6 +259,7 @@ def getPlexHeaders():
             "X-Plex-Device": INTERFACE.getGlobal("device"),
             "X-Plex-Model": INTERFACE.getGlobal("model"),
             "X-Plex-Device-Name": INTERFACE.getGlobal("friendlyName"),
+            "X-Plex-Language": LANGUAGE_CODE,
             'Accept-Encoding': 'gzip,deflate',
             'Accept-Language': ACCEPT_LANGUAGE,
             'User-Agent': '{0}/{1}'.format("PM4K", ADDON.getAddonInfo('version'))

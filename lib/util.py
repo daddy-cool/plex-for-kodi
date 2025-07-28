@@ -74,16 +74,16 @@ def getLanguageCode(add_def=None):
         base, variant = data.split("_")
         lang += "{}-{},{}".format(base, variant.upper(), base)
     else:
-        lang = data
+        lang = base = data
     if add_def and lang not in add_def:
         lang += ",{}".format(add_def)
-    return lang
+    return lang, base
 
 
 try:
-    ACCEPT_LANGUAGE_CODE = getLanguageCode(add_def='en-US,en')
+    ACCEPT_LANGUAGE_CODE, LANGUAGE_CODE = getLanguageCode(add_def='en-US,en')
 except:
-    ACCEPT_LANGUAGE_CODE = 'en-US,en'
+    ACCEPT_LANGUAGE_CODE, LANGUAGE_CODE = ('en-US,en', 'en')
 
 
 try:
