@@ -75,6 +75,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.parentList = kwargs.get('parent_list')
         self.fromWatchlist = kwargs.get('from_watchlist', False)
         self.directlyFromWatchlist = kwargs.get('directly_from_watchlist')
+        self.is_watchlisted = kwargs.get('is_watchlisted', False)
         self.videos = None
         self.exitCommand = None
         self.trailer = None
@@ -84,6 +85,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.relatedPaginator = None
         self.openedWithAutoPlay = False
         self.needs_related_divider = False
+        self.fromPlayback = False
 
     def doClose(self):
         self.relatedPaginator = None
@@ -94,6 +96,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.relatedListControl = kodigui.ManagedControlList(self, self.RELATED_LIST_ID, 5)
         self.rolesListControl = kodigui.ManagedControlList(self, self.ROLES_LIST_ID, 5)
         self.reviewsListControl = kodigui.ManagedControlList(self, self.REVIEWS_LIST_ID, 5)
+        self.setBoolProperty("is_watchlisted", self.is_watchlisted)
 
         self.progressImageControl = self.getControl(self.PROGRESS_IMAGE_ID)
         self.setup()
@@ -118,9 +121,11 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             self.progressImageControl.setWidth(1)
             self.setProperty('remainingTime', T(32914, "Loading"))
         self.video.reload(checkFiles=1, fromMediaChoice=self.video.mediaChoice is not None, **VIDEO_RELOAD_KW)
-        self.wl_auto_remove(self.video)
+        if self.fromPlayback:
+            self.wl_auto_remove(self.video)
         self.refreshInfo(from_reinit=True)
         self.checkIsWatchlisted(self.video)
+        self.fromPlayback = False
         self.initialized = True
 
     def refreshInfo(self, from_reinit=False):
@@ -529,10 +534,11 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         if not from_auto_play:
             self.playBtnClicked = True
 
+        self.fromPlayback = True
         self.processCommand(videoplayer.play(video=self.video, resume=resume))
         return True
 
-    def openItem(self, control=None, item=None, inherit_from_watchlist=True, server=None):
+    def openItem(self, control=None, item=None, inherit_from_watchlist=True, server=None, is_watchlisted=False):
         if not item:
             mli = control.getSelectedItem()
             if not mli:
@@ -540,7 +546,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             item = mli.dataSource
 
         self.processCommand(opener.open(item, from_watchlist=self.fromWatchlist if inherit_from_watchlist else False,
-                                        server=server))
+                                        server=server, is_watchlisted=is_watchlisted))
 
     def focusPlayButton(self, extended=False):
         if extended:

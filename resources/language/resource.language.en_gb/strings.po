@@ -2689,3 +2689,7 @@ msgstr ""
 msgctxt "#34010"
 msgid "Automatically remove fully watched items from watchlist. Default: On"
 msgstr ""
+
+msgctxt "#34011"
+msgid "Remove from watchlist"
+msgstr ""

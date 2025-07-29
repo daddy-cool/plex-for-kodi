@@ -580,7 +580,7 @@ class WatchlistUtilsMixin(object):
                     util.LOG("Temporarily changing server source to: {}", server.name)
                     plexapp.util.APP.trigger('change:tempServer', server=server)
 
-                item_open_callback(item=rk, inherit_from_watchlist=False, server=server)
+                item_open_callback(item=rk, inherit_from_watchlist=False, server=server, is_watchlisted=True)
             finally:
                 if server_differs:
                     util.LOG("Reverting to server source: {}", orig_srv.name)
@@ -590,9 +590,11 @@ class WatchlistUtilsMixin(object):
 
     @wl_wrap
     def wl_auto_remove(self, ref):
-        if self.is_watchlisted and ref.isFullyWatched and util.getUserSetting('watchlist_auto_remove', False):
+        if self.is_watchlisted and ref.isFullyWatched and util.getUserSetting('watchlist_auto_remove', True):
             self.removeFromWatchlist(ref)
             util.DEBUG_LOG("Watchlist: Item {} is fully watched, removed from watchlist", ref.ratingKey)
+        elif not ref.isFullyWatched:
+            util.DEBUG_LOG("Watchlist: Item {} is not fully watched, skipping", ref.ratingKey)
 
     @wl_wrap
     def watchlistItemAvailable(self, item, shortcut_watchlisted=False):

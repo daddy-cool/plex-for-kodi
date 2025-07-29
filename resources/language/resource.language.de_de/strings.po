@@ -3276,3 +3276,7 @@ msgstr "Merkliste Auto-Löschen"
 msgctxt "#34010"
 msgid "Automatically remove fully watched items from watchlist. Default: On"
 msgstr "Automatisch vollständig geschaute Medien von der Merkliste entfernen. Standard: An"
+
+msgctxt "#34011"
+msgid "Remove from watchlist"
+msgstr "Von Merkliste entfernen"

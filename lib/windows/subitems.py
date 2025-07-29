@@ -75,6 +75,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
         self.cameFrom = kwargs.get('came_from')
         self.fromWatchlist = kwargs.get('from_watchlist')
         self.directlyFromWatchlist = kwargs.get('directly_from_watchlist')
+        self.is_watchlisted = kwargs.get('is_watchlisted')
         self.mediaItems = None
         self.exitCommand = None
         self.lastFocusID = None
@@ -384,7 +385,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
     def searchButtonClicked(self):
         self.processCommand(search.dialog(self, section_id=self.mediaItem.getLibrarySectionId() or None))
 
-    def openItem(self, control=None, item=None, inherit_from_watchlist=True, server=None):
+    def openItem(self, control=None, item=None, inherit_from_watchlist=True, server=None, is_watchlisted=False):
         if not item:
             mli = control.getSelectedItem()
             if not mli:
@@ -392,7 +393,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
             item = mli.dataSource
 
         self.processCommand(opener.open(item, from_watchlist=self.fromWatchlist if inherit_from_watchlist else False,
-                                        server=server))
+                                        server=server, is_watchlisted=is_watchlisted))
 
     def subItemListClicked(self):
         mli = self.subItemListControl.getSelectedItem()

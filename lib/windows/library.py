@@ -443,6 +443,7 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
 
     def setWatchlistDirty(self, *args, **kwargs):
         if self.section.TYPE == 'movies_shows':
+            util.DEBUG_LOG("Library: Watchlist item state changed, setting dirty")
             self.refill = True
 
     @busy.dialog()
@@ -600,12 +601,18 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
         if mli.dataSource.TYPE in ('episode', 'season', 'movie', 'show'):
             options = []
             ds = mli.dataSource
-            if not mli.getProperty('watched'):
-                options.append({'key': 'mark_watched', 'display': T(32319, "Mark Played")})
+            guid = mli.dataSource.show().guid if ds.TYPE in ('episode', 'season') else ds.guid
 
-            if (ds.isFullyWatched or ds.isWatched or
-                    (ds.TYPE in ("show", "season") and 0 < ds.unViewedLeafCount < ds.leafCount)):
-                options.append({'key': 'mark_unwatched', 'display': T(32318, "Mark Unplayed")})
+            if self.section.TYPE != "movies_shows":
+                # we don't want mark watched for watchlist items
+                if not mli.getProperty('watched'):
+                    options.append({'key': 'mark_watched', 'display': T(32319, "Mark Played")})
+
+                if (ds.isFullyWatched or ds.isWatched or
+                        (ds.TYPE in ("show", "season") and 0 < ds.unViewedLeafCount < ds.leafCount)):
+                    options.append({'key': 'mark_unwatched', 'display': T(32318, "Mark Unplayed")})
+            else:
+                options.append({'key': 'remove_from_watchlist', 'display': T(34011, "Remove from watchlist")})
 
             title = mli.label
             secondary = mli.label2
@@ -626,10 +633,12 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
                 align_items="left",
             )
 
-            if choice and choice["key"] in ("mark_watched", "mark_unwatched"):
+            if choice and choice["key"] in ("mark_watched", "mark_unwatched", "remove_from_watchlist"):
                 if util.getSetting('home_confirm_actions'):
                     button = optionsdialog.show(
-                        T(32319, "Mark Played") if choice["key"] == "mark_watched" else T(32318, "Mark Unplayed"),
+                        T(32319, "Mark Played") if choice["key"] == "mark_watched"
+                        else T(34011,"Remove from watchlist")
+                        if choice["key"] == "remove_from_watchlist" else T(32318, "Mark Unplayed"),
                         label,
                         T(32328, 'Yes'),
                         T(32329, 'No'),
@@ -641,14 +650,15 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
                 if choice["key"] == "mark_watched":
                     mli.dataSource.markWatched()
                     if mli.dataSource.isFullyWatched:
-                        guid = mli.dataSource.show().guid if mli.dataSource.TYPE in ('episode',
-                                                                                     'season') else mli.dataSource.guid
                         removeFromWatchlistBlind(guid)
                     self.updateUnwatchedAndProgress(mli)
 
                 elif choice["key"] == "mark_unwatched":
                     mli.dataSource.markUnwatched()
                     self.updateUnwatchedAndProgress(mli)
+                elif choice["key"] == "remove_from_watchlist":
+                    removeFromWatchlistBlind(guid)
+                    self.doRefill()
             return True
 
 

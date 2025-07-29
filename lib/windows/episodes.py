@@ -372,7 +372,9 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         if not mli or not self.episodesPaginator:
             return
 
-        self.wl_auto_remove(self.show_)
+        if vp:
+            self.show_.reload(checkFiles=1, **VIDEO_RELOAD_KW)
+            self.wl_auto_remove(self.show_)
 
         reload_items = [mli]
         skip_progress_for = None
