@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-beta13.4"
+       version="0.8.0-beta13.5"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -33,12 +33,12 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Watchlist/Mixins: Make watchlist check tasks leaner by not passing around related objects (server)
-- Home: Try avoiding race conditions on tick/section stale while checking for exit/shutting down
-- Home: Don't try fetching hubs for watchlist section
-- Home/Kodigui: Add more debug logging for shutdown/close procedures
-- Core/Watchlist: Correctly supply language code to requests so watchlist returns translated items
-- Home/Library: (blindly) remove item from watchlist if manually marked watched via Home or Library context menus
+- Kodigui: Fix go home bind not working
+- Watchlist/Autoremove: Only run auto remove check when coming from playback; add more debug info
+- Watchlist: Don't show "mark watched" but "remove from watchlist" in context menu
+- Watchlist/Movies/Shows: Carry is_watchlisted from watchlist view over to item view; shortcuts the check
+- Watchlist/Movies: Allow selection between multiple versions, if the case, instead of only one/the first per server (ordered by bitrate)
+- Watchlist/Movies: Make availability info scrollable if too long
         </news>
         <assets>
             <icon>icon2.png</icon>
