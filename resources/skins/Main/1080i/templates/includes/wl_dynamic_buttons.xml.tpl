@@ -6,5 +6,5 @@
     {# available single #}
     {% include template with name="play" & id=2304 & visible="!String.IsEmpty(Window.Property(disable_playback)) + String.IsEmpty(Window.Property(wl_availability_checking)) + String.IsEmpty(Window.Property(wl_availability_multiple)) + !String.IsEmpty(Window.Property(wl_availability))" %}
     {# not available #}
-    {% include template with name="upcoming" & id=2305 & visible="!String.IsEmpty(Window.Property(disable_playback)) + String.IsEmpty(Window.Property(wl_availability_checking)) + String.IsEmpty(Window.Property(wl_availability))" %}
+    {% include template with name="upcoming" & id=2305 & visible="!String.IsEmpty(Window.Property(disable_playback)) + String.IsEmpty(Window.Property(wl_availability_checking)) + String.IsEmpty(Window.Property(wl_availability_multiple)) + String.IsEmpty(Window.Property(wl_availability))" %}
 {# /watchlist dynamic play button #}

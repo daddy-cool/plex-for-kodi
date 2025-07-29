@@ -22,12 +22,14 @@
             <label>[UPPERCASE]$ADDON[script.plexmod 34005][/UPPERCASE]</label>
         </control>
         <control type="label">
-            <width>auto</width>
+            <width>1160</width>
             <height>{{ vscale(34) }}</height>
             <font>font12</font>
             <align>left</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
+            <scroll>true</scroll>
+            <scrollspeed>10</scrollspeed>
             <label>$INFO[Window.Property(wl_server_availability_verbose)]</label>
         </control>
     </control>

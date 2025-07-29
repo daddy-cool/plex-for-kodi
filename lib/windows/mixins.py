@@ -423,14 +423,14 @@ class AvailabilityCheckTask(WatchlistCheckBaseTask):
             res = server.query("/library/all", guid=self.guid, type=plexobjects.searchType(self.media_type))
             if res and res.get("size", 0):
                 # find ratingKey
-                metadata = {"rating_key": None, "resolution": None, "bitrate": None, "season_count": None,
-                            "available": None, "server_uuid": str(self.server_uuid)}
+                found = []
                 for child in res:
                     if child.tag in ("Directory", "Video"):
                         rk = child.get("ratingKey")
                         if rk:
-                            metadata["rating_key"] = rk
-                            metadata["type"] = self.media_type
+                            metadata = {"rating_key": rk, "resolution": None, "bitrate": None, "season_count": None,
+                                        "available": None, "server_uuid": str(self.server_uuid), "type": self.media_type}
+
                             # find resolution for movies
                             if self.media_type == "movie":
                                 for _child in child:
@@ -440,9 +440,15 @@ class AvailabilityCheckTask(WatchlistCheckBaseTask):
                             else:
                                 metadata["season_count"] = child.get("childCount")
                             metadata["available"] = child.get("originallyAvailableAt")
+                            found.append((server.name, metadata))
 
-                            self.callback(server.name, metadata=metadata)
-                            return
+                if found:
+                    # sort by quality
+                    if self.media_type == "movie" and len(found) > 1:
+                        found.sort(key=lambda item: int(item[1]["bitrate"]), reverse=True)
+
+                self.callback(found)
+                return
             self.callback(None)
         except:
             util.ERROR()
@@ -518,9 +524,11 @@ class WatchlistUtilsMixin(object):
 
     WL_BTN_STATE_BTNS = (WL_BTN_STATE_NOT_WATCHLISTED, WL_BTN_STATE_WATCHLISTED)
 
+    wl_availability = None
+
     def __init__(self, *args, **kwargs):
         super(WatchlistUtilsMixin, self).__init__()
-        self.wl_availability = OrderedDict()
+        self.wl_availability = []
         self.is_watchlisted = False
         self.wl_enabled = False
 
@@ -544,9 +552,10 @@ class WatchlistUtilsMixin(object):
             # choose
             from . import dropdown
             options = []
-            for server, meta in six.iteritems(self.wl_availability):
+            for idx, tup in enumerate(self.wl_availability):
+                server, meta = tup
                 verbose = self.wl_item_verbose(meta)
-                options.append({'key': server,
+                options.append({'key': idx,
                                 'display': '{}, {}'.format(server, verbose)
                               })
 
@@ -563,9 +572,9 @@ class WatchlistUtilsMixin(object):
             if not choice:
                 return
 
-            return self.wl_item_opener(ref, item_open_callback, selected_item=self.wl_availability[choice['key']])
+            return self.wl_item_opener(ref, item_open_callback, selected_item=self.wl_availability[choice['key']][1])
 
-        item_meta = selected_item or list(self.wl_availability.items())[0][1]
+        item_meta = selected_item or self.wl_availability[0][1]
         rk = item_meta.get("rating_key", None)
         if rk:
             server_differs = item_meta["server_uuid"] != plexapp.SERVERMANAGER.selectedServer.uuid
@@ -618,7 +627,7 @@ class WatchlistUtilsMixin(object):
                     change_to = self.WL_BTN_WAIT
                 elif len(self.wl_availability) > 1:
                     change_to = self.WL_BTN_MULTIPLE
-                elif self.wl_availability:
+                elif len(self.wl_availability) == 1:
                     change_to = self.WL_BTN_SINGLE
                 elif not self.wl_availability:
                     change_to = self.WL_BTN_UPCOMING
@@ -631,18 +640,19 @@ class WatchlistUtilsMixin(object):
 
         wl_set_btn()
 
-        def wl_av_callback(server_name, metadata=None):
-            if server_name and metadata:
-                util.DEBUG_LOG("Watchlist availability: {}: {}", server_name, metadata)
-                self.wl_availability[server_name] = metadata
+        def wl_av_callback(data):
+            if data:
+                self.wl_availability += data
+                for server_name, metadata in data:
+                    util.DEBUG_LOG("Watchlist availability: {}: {}", server_name, metadata)
 
+            self.setBoolProperty("wl_availability", len(self.wl_availability) == 1)
+            self.setBoolProperty("wl_availability_multiple", len(self.wl_availability) > 1)
             self.wl_checking_servers -= 1
             if self.wl_checking_servers == 0:
                 self.setBoolProperty("wl_availability_checking", False)
-            self.setProperty("wl_availability", ",".join(self.wl_availability))
-            self.setBoolProperty("wl_availability_multiple", len(self.wl_availability) > 1)
             if self.wl_availability:
-                compute = ", ".join("{}: {}".format(server_name, self.wl_item_verbose(meta)) for server_name, meta in self.wl_availability.items())
+                compute = ", ".join("{}: {}".format(sn, self.wl_item_verbose(meta)) for sn, meta in self.wl_availability)
                 self.setProperty("wl_server_availability_verbose", compute)
 
             wl_set_btn()
