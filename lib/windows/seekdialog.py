@@ -195,6 +195,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.no_spoilers = util.getSetting('no_episode_spoilers4')
         self.no_time_no_osd_spoilers = util.getSetting('no_osd_time_spoilers')
         self.clientLikePlex = util.getSetting('player_official')
+        self.fastPauseResume = self.clientLikePlex and util.getUserSetting('fast_pause_resume', []) or []
 
         self._videoBelowOneHour = False
         self.timeFmtKodi = util.timeFormatKN
@@ -924,7 +925,15 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                         # in that case, don't show the OSD
                         if not self._currentMarker or not util.addonSettings.skipMarkerTimerImmediate or \
                                 self._currentMarker["countdown"] is None:
-                            self.showOSD()
+                            # check if fast pause or resume are enabled and act accordingly instead of showing OSD
+                            if "paused" in self.fastPauseResume and self.player.playState == self.player.STATE_PAUSED:
+                                self.player.pause()
+                                return
+                            elif "playing" in self.fastPauseResume and self.player.playState == self.player.STATE_PLAYING:
+                                self.player.pause()
+                                return
+                            else:
+                                self.showOSD()
                     else:
                         # currently seeking without the OSD, apply the seek
                         self.doSeek()

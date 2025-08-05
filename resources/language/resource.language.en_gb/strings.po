@@ -2693,3 +2693,19 @@ msgstr ""
 msgctxt "#34011"
 msgid "Remove from watchlist"
 msgstr ""
+
+msgctxt "#34012"
+msgid "Fast pause/resume"
+msgstr ""
+
+msgctxt "#34013"
+msgid "when paused"
+msgstr ""
+
+msgctxt "#34014"
+msgid "when playing"
+msgstr ""
+
+msgctxt "#34015"
+msgid "User-specific. Use OK/ENTER button to pause instead of showing the OSD (which can then only be accessed using DOWN), or resume when paused. Only works with 'Behave like official Plex clients' enabled."
+msgstr ""

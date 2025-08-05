@@ -754,6 +754,16 @@ class Settings(object):
                         ('skip_credits', T(32496, 'Skip Credits')),
                     )
                 ).description(T(32939, 'Only applies to video player UI')),
+                MultiUAOptionsSetting(
+                    'fast_pause_resume', T(34012, 'Fast pause/resume'),
+                    [],
+                    (
+                        ('paused', T(34013, 'when paused')),
+                        ('playing', T(34014, 'when playing')),
+                    )
+                ).description(T(34015, 'User-specific. Use OK/ENTER button to pause instead of showing the OSD'
+                                       ' (which can then only be accessed using DOWN), or resume when paused. '
+                                       'Only works with \'Behave like official Plex clients\' enabled.')),
                 OptionsSetting(
                     'video_show_playlist', T(32936, 'Show playlist button'), 'eponly',
                     (
