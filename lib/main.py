@@ -7,6 +7,12 @@ import threading
 import six
 import sys
 import logging
+import time
+
+try:
+    from _thread import interrupt_main
+except:
+    from thread import interrupt_main
 
 from kodi_six import xbmc
 
@@ -46,28 +52,37 @@ if util.addonSettings.debugRequests:
 
 def waitForThreads():
     util.DEBUG_LOG('Main: Checking for any remaining threads (current: {})'.format(threading.currentThread().name))
-    while len(threading.enumerate()) > 1:
-        alive_threads = [t for t in list(threading.enumerate()) if t.is_alive()]
-        alive_threads_out = ", ".join(t.name for t in alive_threads)
-        alive_threads_count = len(alive_threads)
+    started = time.time()
+    exit_timer_was_alive = exit_timer.is_alive()
 
-        # With certain linux instances we might have two threads, while Dummy is the one we're on.
-        if alive_threads_count == 2 and "Dummy" in alive_threads_out and "MainThread" in alive_threads_out:
-            break
+    # if the exit timer was still alive at this point, try cancelling all threads for 5 seconds
+    if exit_timer_was_alive:
+        while len(threading.enumerate()) > 1 and time.time() < started + 5:
+            alive_threads = [t for t in list(threading.enumerate()) if t.is_alive()]
+            alive_threads_out = ", ".join(t.name for t in alive_threads)
+            alive_threads_count = len(alive_threads)
 
-        for t in threading.enumerate():
-            if t != threading.currentThread():
-                if t.is_alive():
-                    util.DEBUG_LOG('Main: Waiting on: {0}... (alive: {1})', t.name, alive_threads_out)
-                    if isinstance(t, _Timer):
-                        t.cancel()
+            # With certain linux instances we might have two threads, while Dummy is the one we're on.
+            if alive_threads_count == 2 and "Dummy" in alive_threads_out and "MainThread" in alive_threads_out:
+                break
 
-                    try:
-                        t.join(.25)
-                    except:
-                        util.ERROR()
-        util.MONITOR.waitForAbort(0.05)
+            for t in threading.enumerate():
+                if t != threading.currentThread():
+                    if t.is_alive():
+                        util.DEBUG_LOG('Main: Waiting on: {0}... (alive: {1})', t.name, alive_threads_out)
+                        if isinstance(t, _Timer):
+                            t.cancel()
 
+                        try:
+                            t.join(.25)
+                        except:
+                            util.ERROR()
+            util.MONITOR.waitForAbort(0.05)
+    else:
+        util.DEBUG_LOG("Main: Not waiting for remaining threads as exit already took to long; hard exit")
+
+    if time.time() >= started + 5 or not exit_timer_was_alive:
+        sys.exit(0)
 
 @atexit.register
 def realExit():
@@ -84,6 +99,15 @@ def signout():
     util.setSetting('auth.token', '')
     util.DEBUG_LOG('Main: Signing out...')
     plexapp.ACCOUNT.signOut()
+
+def hardExit():
+    util.LOG('Main: script.plexmod: timer hit, HARD EXITING')
+    xbmc.executebuiltin('StopScript(script.plexmod)')
+    interrupt_main()
+
+
+exit_timer = threading.Timer(5, hardExit)
+exit_timer.name = 'HARDEXIT-TIMER'
 
 
 def main(force_render=False):
@@ -232,6 +256,8 @@ def _main():
                             restart = True
                             return
                     finally:
+                        util.DEBUG_LOG("Main: Starting hard exit timer of 5 seconds...")
+                        exit_timer.start()
                         windowutils.shutdownHome()
                         BACKGROUND.activate()
                         background.setShutdown()
@@ -239,35 +265,45 @@ def _main():
 
             else:
                 break
+    except KeyboardInterrupt:
+        util.LOG("Main: Interrupted, hard exiting...")
+        sys.exit(0)
+    except SystemExit:
+        util.LOG("Main: SystemExit exception caught (inner)...")
+        return
     except:
         util.ERROR()
     finally:
-        util.DEBUG_LOG('Main: SHUTTING DOWN...')
-        dcm.storeDataCache()
-        dcm.deinit()
-        plexapp.util.INTERFACE.shutdownCache()
-        plexapp.util.INTERFACE.playbackManager.deinit()
-        player.shutdown()
-        plexapp.util.APP.preShutdown()
-        util.CRON.stop()
-        backgroundthread.BGThreader.shutdown()
-        plexapp.util.APP.shutdown()
-        waitForThreads()
-        background.setBusy(False)
-        background.setSplash(False)
-        background.killMonitor()
+        try:
+            util.DEBUG_LOG('Main: SHUTTING DOWN...')
+            dcm.storeDataCache()
+            dcm.deinit()
+            plexapp.util.INTERFACE.shutdownCache()
+            plexapp.util.INTERFACE.playbackManager.deinit()
+            player.shutdown()
+            plexapp.util.APP.preShutdown()
+            util.CRON.stop()
+            backgroundthread.BGThreader.shutdown()
+            plexapp.util.APP.shutdown()
+            waitForThreads()
+            background.setBusy(False)
+            background.setSplash(False)
+            background.killMonitor()
 
-        # uncomment to profile code #2
-        #pr.disable()
-        #sortby = SortKey.CUMULATIVE
-        #s = io.StringIO()
-        #ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-        #ps.print_stats()
-        #util.DEBUG_LOG(s.getvalue())
+            # uncomment to profile code #2
+            #pr.disable()
+            #sortby = SortKey.CUMULATIVE
+            #s = io.StringIO()
+            #ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+            #ps.print_stats()
+            #util.DEBUG_LOG(s.getvalue())
 
-        util.DEBUG_LOG('FINISHED')
-        util.shutdown()
-        gc.collect(2)
+            util.DEBUG_LOG('FINISHED')
+            util.shutdown()
+            gc.collect(2)
+        except SystemExit:
+            util.LOG("Main: SystemExit exception caught (outer)...")
+            return
 
         if util.KODI_VERSION_MAJOR == 18:
             realExit()
