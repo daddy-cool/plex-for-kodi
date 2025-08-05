@@ -115,17 +115,20 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
     @busy.dialog()
     def onReInit(self):
         PlaybackBtnMixin.onReInit(self)
-        self.useBGM = False
+        self.themeMusicReinit(self.video)
         self.initialized = False
         if util.getSetting("slow_connection"):
             self.progressImageControl.setWidth(1)
             self.setProperty('remainingTime', T(32914, "Loading"))
         self.video.reload(checkFiles=1, fromMediaChoice=self.video.mediaChoice is not None, **VIDEO_RELOAD_KW)
+        removed_from_wl = False
         if self.fromPlayback:
-            self.wl_auto_remove(self.video)
-        self.refreshInfo(from_reinit=True)
-        self.checkIsWatchlisted(self.video)
+            removed_from_wl = self.wl_auto_remove(self.video)
         self.fromPlayback = False
+        self.refreshInfo(from_reinit=True)
+
+        if not removed_from_wl:
+            self.checkIsWatchlisted(self.video)
         self.initialized = True
 
     def refreshInfo(self, from_reinit=False):
@@ -538,7 +541,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.processCommand(videoplayer.play(video=self.video, resume=resume))
         return True
 
-    def openItem(self, control=None, item=None, inherit_from_watchlist=True, server=None, is_watchlisted=False):
+    def openItem(self, control=None, item=None, inherit_from_watchlist=True, server=None, is_watchlisted=False, **kw):
         if not item:
             mli = control.getSelectedItem()
             if not mli:
@@ -546,7 +549,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             item = mli.dataSource
 
         self.processCommand(opener.open(item, from_watchlist=self.fromWatchlist if inherit_from_watchlist else False,
-                                        server=server, is_watchlisted=is_watchlisted))
+                                        server=server, is_watchlisted=is_watchlisted, **kw))
 
     def focusPlayButton(self, extended=False):
         if extended:

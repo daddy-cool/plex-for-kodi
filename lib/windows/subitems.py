@@ -1,14 +1,12 @@
 from __future__ import absolute_import
 
 import gc
-import threading
 
 from kodi_six import xbmc
 from kodi_six import xbmcgui
 from plexnet import playlist, util as pnUtil, plexapp
 
 from lib import metadata
-from lib import player
 from lib import util
 from lib.util import T
 from . import busy
@@ -24,7 +22,7 @@ from . import search
 from . import tracks
 from . import videoplayer
 from . import windowutils
-from .mixins import SeasonsMixin, DeleteMediaMixin, RatingsMixin, PlaybackBtnMixin, WatchlistUtilsMixin
+from .mixins import SeasonsMixin, DeleteMediaMixin, RatingsMixin, PlaybackBtnMixin, WatchlistUtilsMixin, ThemeMusicMixin
 
 
 class RelatedPaginator(pagination.BaseRelatedPaginator):
@@ -33,7 +31,7 @@ class RelatedPaginator(pagination.BaseRelatedPaginator):
 
 
 class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, DeleteMediaMixin, RatingsMixin,
-                 PlaybackBtnMixin, WatchlistUtilsMixin, playbacksettings.PlaybackSettingsMixin):
+                 PlaybackBtnMixin, WatchlistUtilsMixin, ThemeMusicMixin, playbacksettings.PlaybackSettingsMixin):
     xmlFile = 'script-plex-seasons.xml'
     path = util.ADDON.getAddonInfo('path')
     theme = 'Main'
@@ -70,6 +68,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
         DeleteMediaMixin.__init__(*args, **kwargs)
         PlaybackBtnMixin.__init__(self, *args, **kwargs)
         WatchlistUtilsMixin.__init__(self)
+        ThemeMusicMixin.__init__(self)
         self.mediaItem = kwargs.get('media_item')
         self.parentList = kwargs.get('parent_list')
         self.cameFrom = kwargs.get('came_from')
@@ -99,23 +98,13 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
 
         self.setup()
         self.initialized = True
-
-    def onInit(self, *args, **kwargs):
-        super(ShowWindow, self).onInit(*args, **kwargs)
-        if self.mediaItem.theme and (not self.cameFrom or self.cameFrom != self.mediaItem.ratingKey) \
-                and not util.getSetting("slow_connection"):
-            self.cameFrom = self.mediaItem.ratingKey
-            volume = self.mediaItem.settings.getThemeMusicValue()
-            if volume > 0:
-                t = threading.Thread(target=player.PLAYER.playBackgroundMusic,
-                                     args=(self.mediaItem.theme.asURL(True), volume, self.mediaItem.ratingKey),
-                                     name="bgm")
-                t.start()
+        self.themeMusicInit(self.mediaItem)
 
     def onReInit(self):
         PlaybackBtnMixin.onReInit(self)
         self.wl_auto_remove(self.mediaItem)
         self.checkIsWatchlisted(self.mediaItem)
+        self.themeMusicReinit(self.mediaItem)
 
     def setup(self):
         if self.fromWatchlist:
@@ -308,9 +297,6 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
         elif xbmc.getCondVisibility('ControlGroup(50).HasFocus(0) + !ControlGroup(300).HasFocus(0)'):
             self.setProperty('on.extras', '1')
 
-        if player.PLAYER.bgmPlaying and player.PLAYER.handler.currentlyPlaying != self.mediaItem.ratingKey:
-            player.PLAYER.stopAndWait()
-
     def getMediaItems(self):
         return False
 
@@ -385,7 +371,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
     def searchButtonClicked(self):
         self.processCommand(search.dialog(self, section_id=self.mediaItem.getLibrarySectionId() or None))
 
-    def openItem(self, control=None, item=None, inherit_from_watchlist=True, server=None, is_watchlisted=False):
+    def openItem(self, control=None, item=None, inherit_from_watchlist=True, server=None, is_watchlisted=False, **kw):
         if not item:
             mli = control.getSelectedItem()
             if not mli:
@@ -393,7 +379,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
             item = mli.dataSource
 
         self.processCommand(opener.open(item, from_watchlist=self.fromWatchlist if inherit_from_watchlist else False,
-                                        server=server, is_watchlisted=is_watchlisted))
+                                        server=server, is_watchlisted=is_watchlisted, **kw))
 
     def subItemListClicked(self):
         mli = self.subItemListControl.getSelectedItem()

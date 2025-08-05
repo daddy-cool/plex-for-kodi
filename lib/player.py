@@ -38,6 +38,7 @@ class BasePlayerHandler(object):
         self.playQueue = None
         self.sessionID = session_id
         self.isMapped = False
+        self.currentlyPlaying = None
 
     def onAVChange(self):
         pass
@@ -1397,6 +1398,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
 
         self.started = False
         self.bgmStarting = True
+        self.dontRequeueBGM = False
         self.handler = BGMPlayerHandler(self, [source, volume, rating_key])
 
         # store current volume if it's different from the BGM volume
@@ -1952,6 +1954,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
     def stopAndWait(self):
         if self.isPlaying():
             util.DEBUG_LOG('Player: Stopping and waiting...')
+            self.dontRequeueBGM = True
             self.stop()
             if not util.MONITOR.abortRequested():
                 while not util.MONITOR.waitForAbort(0.1) and self.isPlaying():

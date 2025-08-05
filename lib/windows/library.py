@@ -494,6 +494,8 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
     def onReInit(self):
         if self.refill:
             self.doRefill()
+        if player.PLAYER.bgmPlaying:
+            player.PLAYER.stopAndWait()
 
     def onAction(self, action):
         try:
@@ -577,9 +579,6 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
 
         if controlID == self.KEY_LIST_ID:
             self.selectKey()
-
-        if player.PLAYER.bgmPlaying:
-            player.PLAYER.stopAndWait()
 
     def onItemChanged(self, mli):
         if not mli:

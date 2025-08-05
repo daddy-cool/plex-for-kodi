@@ -273,7 +273,46 @@ class PlaybackBtnMixin(object):
         self.playBtnClicked = False
 
 
+class ThemeMusicTask(backgroundthread.Task):
+    def setup(self, url, volume, rating_key):
+        self.url = url
+        self.volume = volume
+        self.rating_key = rating_key
+        return self
+
+    def run(self):
+        player.PLAYER.playBackgroundMusic(self.url, self.volume, self.rating_key)
+
+
 class ThemeMusicMixin(object):
+    """
+    needs watchlistmixin as well to work
+    """
+    def isPlayingOurs(self, item):
+        return (player.PLAYER.bgmPlaying and player.PLAYER.handler.currentlyPlaying in
+                         [self.wl_ref, item.ratingKey]+self.wl_item_children)
+
+    def themeMusicInit(self, item):
+        # determine bgm state
+        hasBGM =  item.theme and item.theme.asURL(True) or None
+        isPlayingOurs = self.isPlayingOurs(item)
+        playBGM = False
+        if not isPlayingOurs:
+            playBGM = hasBGM
+
+        if util.getSetting("slow_connection"):
+            playBGM = False
+
+        if playBGM:
+            self.playThemeMusic(item.theme.asURL(True), item.ratingKey, [loc.get("path") for loc in item.locations],
+                                item.server)
+
+    def themeMusicReinit(self, item):
+        hasBGM = item.theme and item.theme.asURL(True) or None
+        if player.PLAYER.bgmPlaying and (not hasBGM or not self.isPlayingOurs(item)):
+            player.PLAYER.stopAndWait()
+        self.useBGM = False
+
     def playThemeMusic(self, theme_url, identifier, locations, server):
         volume = pnUtil.INTERFACE.getThemeMusicValue()
         if not volume:
@@ -295,10 +334,8 @@ class ThemeMusicMixin(object):
                         break
 
         if theme_url:
-            t = threading.Thread(target=player.PLAYER.playBackgroundMusic,
-                                 args=(theme_url, volume, identifier),
-                                 name="bgm")
-            t.start()
+            task = ThemeMusicTask().setup(theme_url, volume, identifier)
+            backgroundthread.BGThreader.addTask(task)
             self.useBGM = True
 
 
@@ -531,9 +568,12 @@ class WatchlistUtilsMixin(object):
         self.wl_availability = []
         self.is_watchlisted = False
         self.wl_enabled = False
+        self.wl_ref = None
+        self.wl_item_children = []
 
     def watchlist_setup(self, item):
         self.wl_enabled = util.getUserSetting("use_watchlist", True) and item.guid and item.guid.startswith("plex://")
+        self.wl_ref = GUIDToRatingKey(item.guid)
         self.setBoolProperty("watchlist_enabled", self.wl_enabled)
 
     @wl_wrap
@@ -589,7 +629,8 @@ class WatchlistUtilsMixin(object):
                     util.LOG("Temporarily changing server source to: {}", server.name)
                     plexapp.util.APP.trigger('change:tempServer', server=server)
 
-                item_open_callback(item=rk, inherit_from_watchlist=False, server=server, is_watchlisted=True)
+                item_open_callback(item=rk, inherit_from_watchlist=False, server=server, is_watchlisted=True,
+                                   came_from=self.wl_ref)
             finally:
                 if server_differs:
                     util.LOG("Reverting to server source: {}", orig_srv.name)
@@ -602,6 +643,7 @@ class WatchlistUtilsMixin(object):
         if self.is_watchlisted and ref.isFullyWatched and util.getUserSetting('watchlist_auto_remove', True):
             self.removeFromWatchlist(ref)
             util.DEBUG_LOG("Watchlist: Item {} is fully watched, removed from watchlist", ref.ratingKey)
+            return True
         elif not ref.isFullyWatched:
             util.DEBUG_LOG("Watchlist: Item {} is not fully watched, skipping", ref.ratingKey)
 
@@ -645,6 +687,7 @@ class WatchlistUtilsMixin(object):
                 self.wl_availability += data
                 for server_name, metadata in data:
                     util.DEBUG_LOG("Watchlist availability: {}: {}", server_name, metadata)
+                    self.wl_item_children.append(metadata['rating_key'])
 
             self.setBoolProperty("wl_availability", len(self.wl_availability) == 1)
             self.setBoolProperty("wl_availability_multiple", len(self.wl_availability) > 1)

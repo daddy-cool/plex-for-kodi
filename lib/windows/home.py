@@ -502,6 +502,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         if self._ignoreReInit:
             return
 
+        if player.PLAYER.bgmPlaying:
+            player.PLAYER.stopAndWait()
+
         self._anyItemAction = False
         if self._applyTheme:
             self.closeWRecompileTpls()
@@ -1081,9 +1084,6 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             util.setGlobalBoolProperty('off.sections', '')
         elif controlID != 250 and xbmc.getCondVisibility('ControlGroup(50).HasFocus(0) + !ControlGroup(100).HasFocus(0)'):
             util.setGlobalBoolProperty('off.sections', '1')
-
-        if player.PLAYER.bgmPlaying:
-            player.PLAYER.stopAndWait()
 
     def goHome(self, **kwargs):
         self.setProperty('hub.focus', '')
