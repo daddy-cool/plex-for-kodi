@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-beta13.5"
+       version="0.8.0-beta14"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -33,12 +33,20 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Kodigui: Fix go home bind not working
-- Watchlist/Autoremove: Only run auto remove check when coming from playback; add more debug info
-- Watchlist: Don't show "mark watched" but "remove from watchlist" in context menu
-- Watchlist/Movies/Shows: Carry is_watchlisted from watchlist view over to item view; shortcuts the check
-- Watchlist/Movies: Allow selection between multiple versions, if the case, instead of only one/the first per server (ordered by bitrate)
-- Watchlist/Movies: Make availability info scrollable if too long
+- Core/ThemeMusic: Generalize and improve handling
+- Watchlist/Shows/ThemeMusic: Add awareness of "same" items with same theme (watchlist item vs actual item); re-play theme music if coming back from a related item
+- Watchlist: Only check for auto removal if coming back from playback
+- Player: Never requeue BGM if stopped
+- Core/Kodigui: Wait potentially longer for Player to stop in case of a broken XML event
+- Core/Plexnet/Plexserver: Don't crash on inexistant productVersion
+- SeekDialog: Add fast resume/pause behaviour (use OK/ENTER to quickly resume when paused or pause when playing, instead of showing the OSD)
+- Settings: Add user specific multi setting for fast resume/pause behavior
+- Core: Harden against hanging threads; use 5 seconds hard exit timer and waitForThreads optimizations to guarantee an exit within 5 seconds
+- Watchlist/Availability: Don't analyze more than one MediaPart per server item
+- Core: Fix dropdown failing to show in certain aspect/scaling ratios
+- Episodes: Show correct cast per episode, not from parent show
+- Movies/Shows/Episodes: Add Directors (up to two) to the beginning of the cast list; support searching for director's movies (currently not possible with shows/episodes)
+- AddonSettings: Add max_shutdown_wait (default: 5 seconds) after which a hard exit will be triggered
         </news>
         <assets>
             <icon>icon2.png</icon>
