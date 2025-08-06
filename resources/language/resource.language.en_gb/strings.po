@@ -2709,3 +2709,11 @@ msgstr ""
 msgctxt "#34015"
 msgid "User-specific. Use OK/ENTER button to pause instead of showing the OSD (which can then only be accessed using DOWN), or resume when paused. Only works with 'Behave like official Plex clients' enabled."
 msgstr ""
+
+msgctxt "#34016"
+msgid "Max shutdown wait"
+msgstr ""
+
+msgctxt "#34017"
+msgid "The plugin will try to hard exit once this time limit is reached (default: 5 seconds)"
+msgstr ""

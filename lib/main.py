@@ -57,7 +57,7 @@ def waitForThreads():
 
     # if the exit timer was still alive at this point, try cancelling all threads for 5 seconds
     if exit_timer_was_alive:
-        while len(threading.enumerate()) > 1 and time.time() < started + 5:
+        while len(threading.enumerate()) > 1 and time.time() < started + util.addonSettings.maxShutdownWait:
             alive_threads = [t for t in list(threading.enumerate()) if t.is_alive()]
             alive_threads_out = ", ".join(t.name for t in alive_threads)
             alive_threads_count = len(alive_threads)
@@ -81,7 +81,7 @@ def waitForThreads():
     else:
         util.DEBUG_LOG("Main: Not waiting for remaining threads as exit already took to long; hard exit")
 
-    if time.time() >= started + 5 or not exit_timer_was_alive:
+    if time.time() >= started + util.addonSettings.maxShutdownWait or not exit_timer_was_alive:
         sys.exit(0)
 
 @atexit.register
@@ -106,7 +106,7 @@ def hardExit():
     interrupt_main()
 
 
-exit_timer = threading.Timer(5, hardExit)
+exit_timer = threading.Timer(util.addonSettings.maxShutdownWait, hardExit)
 exit_timer.name = 'HARDEXIT-TIMER'
 
 
@@ -256,7 +256,7 @@ def _main():
                             restart = True
                             return
                     finally:
-                        util.DEBUG_LOG("Main: Starting hard exit timer of 5 seconds...")
+                        util.DEBUG_LOG("Main: Starting hard exit timer of {} seconds...", util.addonSettings.maxShutdownWait)
                         exit_timer.start()
                         windowutils.shutdownHome()
                         BACKGROUND.activate()
