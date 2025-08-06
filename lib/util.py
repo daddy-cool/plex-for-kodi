@@ -29,7 +29,7 @@ from . import colors
 from .exceptions import NoDataException
 from .logging import log, log_error
 # noinspection PyUnresolvedReferences
-from .i18n import T
+from .i18n import T, TRANSLATED_ROLES
 from . import aspectratio
 # noinspection PyUnresolvedReferences
 from .kodi_util import (ADDON, xbmc, xbmcvfs, xbmcaddon, xbmcgui, translatePath, KODI_VERSION_MAJOR, KODI_VERSION_MINOR,

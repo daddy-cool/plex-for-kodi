@@ -236,12 +236,6 @@ class Country(MediaTag):
     FILTER = 'country'
 
 
-class Director(MediaTag):
-    TYPE = 'Director'
-    FILTER = 'director'
-    ID = '4'
-
-
 class Genre(MediaTag):
     TYPE = 'Genre'
     FILTER = 'genre'
@@ -253,20 +247,17 @@ class Mood(MediaTag):
     FILTER = 'mood'
 
 
-class Producer(MediaTag):
-    TYPE = 'Producer'
-    FILTER = 'producer'
-
 
 class Role(MediaTag):
     TYPE = 'Role'
     FILTER = 'actor'
     ID = '6'
+    translated_role = ''
 
     def sectionRoles(self):
         hubs = self.server.hubs(count=10, search_query=self.tag)
         for hub in hubs:
-            if hub.type == 'actor':
+            if hub.type == self.FILTER:
                 break
         else:
             return None
@@ -285,9 +276,23 @@ class Similar(MediaTag):
     FILTER = 'similar'
 
 
-class Writer(MediaTag):
+class Director(Role):
+    TYPE = 'Director'
+    FILTER = 'director'
+    ID = '4'
+    translated_role = 'Director'
+
+
+class Producer(Role):
+    TYPE = 'Producer'
+    FILTER = 'producer'
+    translated_role = 'Producer'
+
+
+class Writer(Role):
     TYPE = 'Writer'
     FILTER = 'writer'
+    translated_role = 'Writer'
 
 
 class Guid(MediaTag):

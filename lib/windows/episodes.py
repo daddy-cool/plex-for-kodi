@@ -1250,6 +1250,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         if mli != self.lastItem and not mli.getProperty("is.boundary"):
             self.lastItem = mli
             self.setProgress(mli)
+            self.fillRoles(self.relatedPaginator and self.relatedPaginator.leafCount)
 
         if action in (xbmcgui.ACTION_MOVE_UP, xbmcgui.ACTION_PAGE_UP):
             if mli.getProperty('is.header'):
@@ -1583,12 +1584,17 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         items = []
         idx = 0
 
-        if not self.show_.roles:
+        ds = self.episodeListControl.getSelectedItem().dataSource
+
+        if not ds.roles:
             self.rolesListControl.reset()
             return False
 
-        for role in self.show_.roles():
-            mli = kodigui.ManagedListItem(role.tag, role.role, thumbnailImage=role.thumb.asTranscodedImageURL(*self.ROLES_DIM), data_source=role)
+        for role in ds.combined_roles:
+            mli = kodigui.ManagedListItem(role.tag, role.role or
+                                          util.TRANSLATED_ROLES[role.translated_role],
+                                          thumbnailImage=role.thumb.asTranscodedImageURL(*self.ROLES_DIM),
+                                          data_source=role)
             mli.setProperty('index', str(idx))
             items.append(mli)
             idx += 1

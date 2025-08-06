@@ -465,6 +465,15 @@ class Video(media.MediaItem, AudioCodecMixin):
     def available(self):
         return any(v.isAccessible() for v in self.media())
 
+    @property
+    def combined_roles(self):
+        roles = []
+        if self.directors():
+            roles += self.directors()[:2]
+        if self.roles():
+            roles += self.roles()
+        return roles
+
 
 class SectionOnDeckMixin(object):
     _sectionOnDeckCount = None
@@ -720,6 +729,8 @@ class Show(CachableItemsMixin, Video, media.RelatedMixin, SectionOnDeckMixin):
         Video._setData(self, data)
         if self.isFullObject():
             self._genres = plexobjects.PlexItemList(data, media.Genre, media.Genre.TYPE, server=self.server)
+            self.directors = plexobjects.PlexItemList(data, media.Director, media.Director.TYPE, server=self.server,
+                                                  container=self.container)
             self.roles = plexobjects.PlexItemList(data, media.Role, media.Role.TYPE, server=self.server, container=self.container)
             self.guids = plexobjects.PlexItemList(data, media.Guid, media.Guid.TYPE, server=self.server)
             #self.related = plexobjects.PlexItemList(data.find('Related'), plexlibrary.Hub, plexlibrary.Hub.TYPE, server=self.server, container=self)
@@ -864,6 +875,7 @@ class Episode(PlayableVideo, SectionOnDeckMixin):
         PlayableVideo._setData(self, data)
         if self.isFullObject():
             self.directors = plexobjects.PlexItemList(data, media.Director, media.Director.TYPE, server=self.server)
+            self._roles = plexobjects.PlexItemList(data, media.Role, media.Role.TYPE, server=self.server)
             self.media = plexobjects.PlexMediaItemList(data, plexmedia.PlexMedia, media.Media.TYPE, initpath=self.initpath, server=self.server, media=self)
             self.writers = plexobjects.PlexItemList(data, media.Writer, media.Writer.TYPE, server=self.server)
         else:
@@ -945,7 +957,7 @@ class Episode(PlayableVideo, SectionOnDeckMixin):
 
     @property
     def roles(self):
-        return self.show().roles
+        return self._roles or self.show().roles
 
     def getRelated(self, offset=None, limit=None, _max=36):
         return self.show().getRelated(offset=offset, limit=limit, _max=_max)
