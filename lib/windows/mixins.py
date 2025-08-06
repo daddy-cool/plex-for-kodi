@@ -474,6 +474,7 @@ class AvailabilityCheckTask(WatchlistCheckBaseTask):
                                     if _child.tag == "Media":
                                         metadata["resolution"] = _child.get("videoResolution")
                                         metadata["bitrate"] = _child.get("bitrate")
+                                        break
                             else:
                                 metadata["season_count"] = child.get("childCount")
                             metadata["available"] = child.get("originallyAvailableAt")
