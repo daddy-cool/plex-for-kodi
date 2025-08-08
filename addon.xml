@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-beta14"
+       version="0.8.0-beta15"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -33,20 +33,15 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Core/ThemeMusic: Generalize and improve handling
-- Watchlist/Shows/ThemeMusic: Add awareness of "same" items with same theme (watchlist item vs actual item); re-play theme music if coming back from a related item
-- Watchlist: Only check for auto removal if coming back from playback
-- Player: Never requeue BGM if stopped
-- Core/Kodigui: Wait potentially longer for Player to stop in case of a broken XML event
-- Core/Plexnet/Plexserver: Don't crash on inexistant productVersion
-- SeekDialog: Add fast resume/pause behaviour (use OK/ENTER to quickly resume when paused or pause when playing, instead of showing the OSD)
-- Settings: Add user specific multi setting for fast resume/pause behavior
-- Core: Harden against hanging threads; use 5 seconds hard exit timer and waitForThreads optimizations to guarantee an exit within 5 seconds
-- Watchlist/Availability: Don't analyze more than one MediaPart per server item
-- Core: Fix dropdown failing to show in certain aspect/scaling ratios
-- Episodes: Show correct cast per episode, not from parent show
-- Movies/Shows/Episodes: Add Directors (up to two) to the beginning of the cast list; support searching for director's movies (currently not possible with shows/episodes)
-- AddonSettings: Add max_shutdown_wait (default: 5 seconds) after which a hard exit will be triggered
+- Core: Only start shutdown timer when exitting or quitting (bug introduced with last beta)
+- Home: Support sections with deferred hubs (external ones)
+- Cast/Roles: Don't crash on undefined roles (bug introduced with last beta)
+- Movies: Fix custom themes leading to unplayable items (bug introduced with last beta)
+- Movies/Shows: Use "Related Media" instead of "Related Movies"/"Related Shows" when visiting a Watchlist/Discover item
+- Home/Watchlist-Hubs: Show external watchlist hubs: Continue Watching, Coming Soon, Recently Added
+- Home/Watchlist-Hubs: Show external discover hubs: Top Watchlisted, Coming Soon (services?), Trending with Friends, Trending on your Services, New on your Services
+- ThemeMusic: Honor theme.ext even if the show itself doesn't have a theme set
+- ThemeMusic: Stabilize BGM handling for movies with custom themes and Show playback from Show screen
         </news>
         <assets>
             <icon>icon2.png</icon>
