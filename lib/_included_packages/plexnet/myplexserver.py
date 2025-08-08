@@ -52,6 +52,10 @@ class PlexDiscoverServer(MyPlexServer):
         MyPlexServer.__init__(self)
         self.uuid = 'plexdiscover'
         self.name = 'discover.plex.tv'
+
+        # tell the server manager we're a synced server and it should try to use a more fitting server for photo
+        # encoding
+        self.synced = True
         conn = plexconnection.PlexConnection(plexresource.ResourceConnection.SOURCE_MYPLEX,
                                              "https://discover.provider.plex.tv", False,
                                              None, skipLocalCheck=True)
@@ -61,19 +65,6 @@ class PlexDiscoverServer(MyPlexServer):
         # inject our plextv timeout
         #self.session.request = functools.partial(self.session.request, timeout=plexserver.util.PLEXTV_TIMEOUT)
 
-    def getImageTranscodeURL(self, path, width, height, **extraOpts):
-        if not path:
-            return ''
-
-        eOpts = {"scale": 1}
-        eOpts.update(extraOpts)
-        imageUrl = path
-
-        params = ("&width=%s&height=%s" % (width, height)) + ''.join(["&%s=%s" % (key, eOpts[key]) for key in eOpts])
-
-        path = "/photo?url=" + compat.quote_plus(imageUrl) + params
-
-        return "https://images.plex.tv{}".format(path)
 
     def hubs(self, section=None, count=None, search_query=None, section_ids=None, ignore_hubs=None):
         hubs = []
