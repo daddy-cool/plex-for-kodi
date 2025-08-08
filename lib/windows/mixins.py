@@ -305,6 +305,7 @@ class ThemeMusicMixin(object):
             self.playThemeMusic(item.theme and item.theme.asURL(True) or None, item.ratingKey, locations or [loc.get("path") for loc in item.locations],
                                 item.server)
 
+
     def themeMusicReinit(self, item):
         if player.PLAYER.bgmPlaying and not self.isPlayingOurs(item):
             player.PLAYER.stopAndWait()
@@ -334,6 +335,9 @@ class ThemeMusicMixin(object):
             task = ThemeMusicTask().setup(theme_url, volume, identifier)
             backgroundthread.BGThreader.addTask(task)
             self.useBGM = True
+        else:
+            if player.PLAYER.bgmPlaying:
+                player.PLAYER.stopAndWait()
 
 
 PLEX_LEGACY_LANGUAGE_MAP = {
