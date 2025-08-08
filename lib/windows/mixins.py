@@ -292,24 +292,21 @@ class ThemeMusicMixin(object):
         return (player.PLAYER.bgmPlaying and player.PLAYER.handler.currentlyPlaying in
                          [self.wl_ref, item.ratingKey]+self.wl_item_children)
 
-    def themeMusicInit(self, item):
-        # determine bgm state
-        hasBGM =  item.theme and item.theme.asURL(True) or None
+    def themeMusicInit(self, item, locations=None):
         isPlayingOurs = self.isPlayingOurs(item)
         playBGM = False
         if not isPlayingOurs:
-            playBGM = hasBGM
+            playBGM = True
 
         if util.getSetting("slow_connection"):
             playBGM = False
 
         if playBGM:
-            self.playThemeMusic(item.theme.asURL(True), item.ratingKey, [loc.get("path") for loc in item.locations],
+            self.playThemeMusic(item.theme and item.theme.asURL(True) or None, item.ratingKey, locations or [loc.get("path") for loc in item.locations],
                                 item.server)
 
     def themeMusicReinit(self, item):
-        hasBGM = item.theme and item.theme.asURL(True) or None
-        if player.PLAYER.bgmPlaying and (not hasBGM or not self.isPlayingOurs(item)):
+        if player.PLAYER.bgmPlaying and not self.isPlayingOurs(item):
             player.PLAYER.stopAndWait()
         self.useBGM = False
 

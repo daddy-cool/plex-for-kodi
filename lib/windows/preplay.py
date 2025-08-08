@@ -103,8 +103,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.initialized = True
 
         if not util.getSetting("slow_connection") and not self.openedWithAutoPlay:
-            locations = [os.path.dirname(s.part.file) for s in self.video.videoStreams]
-            self.playThemeMusic(None, self.video.ratingKey, locations, self.video.server)
+            self.themeMusicInit(self.video, locations=[os.path.dirname(s.part.file) for s in self.video.videoStreams])
 
     def doAutoPlay(self):
         # First reload the video to get all the other info
@@ -538,7 +537,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             self.playBtnClicked = True
 
         self.fromPlayback = True
-        self.processCommand(videoplayer.play(video=self.video, resume=resume))
+        self.processCommand(videoplayer.play(video=self.video, resume=resume, bgm=self.useBGM))
         return True
 
     def openItem(self, control=None, item=None, inherit_from_watchlist=True, server=None, is_watchlisted=False, **kw):

@@ -451,7 +451,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
 
         self.playBtnClicked = True
         pl.shuffle(shuffle, first=True)
-        videoplayer.play(play_queue=pl, resume=resume)
+        videoplayer.play(play_queue=pl, resume=resume, bgm=self.useBGM)
 
     def shuffleButtonClicked(self):
         self.playButtonClicked(shuffle=True)
