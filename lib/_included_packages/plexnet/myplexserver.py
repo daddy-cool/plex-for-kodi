@@ -125,7 +125,6 @@ class PlexDiscoverServer(MyPlexServer):
 
         # fetch hub data
         for hub in hubs:
-            util.DEBUG_LOG("HUBBEI: %s" % hub.key)
             params = base_params.copy()
             params.update(wanted_hubs_dict[hub.key])
             data = self.query(hub.key, params=params)
