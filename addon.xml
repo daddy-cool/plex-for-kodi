@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-beta15"
+       version="0.8.0-beta15.1"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -33,15 +33,10 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Core: Only start shutdown timer when exitting or quitting (bug introduced with last beta)
-- Home: Support sections with deferred hubs (external ones)
-- Cast/Roles: Don't crash on undefined roles (bug introduced with last beta)
-- Movies: Fix custom themes leading to unplayable items (bug introduced with last beta)
-- Movies/Shows: Use "Related Media" instead of "Related Movies"/"Related Shows" when visiting a Watchlist/Discover item
-- Home/Watchlist-Hubs: Show external watchlist hubs: Continue Watching, Coming Soon, Recently Added
-- Home/Watchlist-Hubs: Show external discover hubs: Top Watchlisted, Coming Soon (services?), Trending with Friends, Trending on your Services, New on your Services
-- ThemeMusic: Honor theme.ext even if the show itself doesn't have a theme set
-- ThemeMusic: Stabilize BGM handling for movies with custom themes and Show playback from Show screen
+- Watchlist-Hubs: Fix background not appearing for some items
+- Watchlist: Use currently connected server to scale/transcode images instead of discover.plex.tv
+- Sections: Show loading state for external sections
+- Watchlist/Core/ThemeMusic: While traversing items of multiple types (movies and shows), properly stop or start theme music if necessary
         </news>
         <assets>
             <icon>icon2.png</icon>
