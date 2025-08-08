@@ -799,6 +799,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                     self._shuttingDown = True
                     self._ignoreTick = True
                     self.stopRetryingRequests()
+
+                    # fixme: add "update" to the list of closeOptions for which we should force quit if necessary?
                     #self.closeOption = "update"
                     self.unhookSignals()
                     self.doClose()
@@ -1950,6 +1952,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
             self.sectionHubs[section.key] = hubs
             if self.lastSection == section:
+                if section.server.DEFER_HUBS:
+                    self.setBoolProperty('loading.content', False)
                 self.showHubs(section, update=update, reselect_pos_dict=reselect_pos_dict)
 
     def updateHubCallback(self, hub, items=None, reselect_pos=None):
@@ -2117,6 +2121,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             util.DEBUG_LOG('Showing deferred hubs - Section: {0} - Update: {1}', section.key, update)
             force = True
             hubs = HubsList()
+            self.setBoolProperty('loading.content', True)
 
         if not force:
             if hubs is not None:

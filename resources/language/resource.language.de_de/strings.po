@@ -3313,3 +3313,11 @@ msgstr "Ähnliche Medien"
 msgctxt "#34019"
 msgid "Discover: {}"
 msgstr ""
+
+msgctxt "#34020"
+msgid "Loading external hubs"
+msgstr "Lade externe Hubs"
+
+msgctxt "#34021"
+msgid "Please wait ..."
+msgstr "Bitte warten ..."
