@@ -33,6 +33,7 @@ CACHE_MAP = {}
 
 class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
     TYPE = 'PLEXSERVER'
+    DEFER_HUBS = False
 
     def __init__(self, data=None):
         signalsmixin.SignalsMixin.__init__(self)

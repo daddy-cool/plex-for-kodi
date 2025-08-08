@@ -170,6 +170,7 @@ class PlexObject(Checks):
                  "_not_cachable")
     TYPE = None
     cachable = False
+    is_watchlist = False
 
     def __init__(self, data, initpath=None, server=None, container=None, **kwargs):
         self.initpath = initpath

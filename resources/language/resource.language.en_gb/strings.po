@@ -2717,3 +2717,12 @@ msgstr ""
 msgctxt "#34017"
 msgid "The plugin will try to hard exit once this time limit is reached (default: 5 seconds)"
 msgstr ""
+
+msgctxt "#34018"
+msgid "Related Media"
+msgstr ""
+
+#: watchlist discover hub title prefix
+msgctxt "#34019"
+msgid "Discover: {}"
+msgstr ""

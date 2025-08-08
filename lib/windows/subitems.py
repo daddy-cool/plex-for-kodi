@@ -143,7 +143,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
             self.setBoolProperty('watched', self.mediaItem.isWatched)
 
         self.setProperty('extras.header', T(32305, 'Extras'))
-        self.setProperty('related.header', T(32306, 'Related Shows'))
+        self.setProperty('related.header', T(32306, 'Related Shows') if not self.fromWatchlist else T(34018, 'Related Media'))
 
         if self.mediaItem.creator:
             self.setProperty('directors', u'{0}    {1}'.format(T(32418, 'Creator').upper(), self.mediaItem.creator))

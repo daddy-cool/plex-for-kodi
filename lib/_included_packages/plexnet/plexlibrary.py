@@ -661,6 +661,9 @@ class Playlist(playlist.BasePlaylist, signalsmixin.SignalsMixin):
 
 
 class BaseHub(plexobjects.PlexObject):
+    is_external = False
+    is_watchlist = False
+
     def __init__(self, *args, **kwargs):
         super(BaseHub, self).__init__(*args, **kwargs)
         self._identifier = None
@@ -688,7 +691,7 @@ class BaseHub(plexobjects.PlexObject):
 class Hub(BaseHub):
     TYPE = "Hub"
 
-    def init(self, data):
+    def init(self, data, not_cachable=False):
         self.items = []
         self._totalSize = None
 
@@ -705,8 +708,10 @@ class Hub(BaseHub):
             self.items = [media.Role(elem, initpath='/hubs', server=self.server, container=container) for elem in data]
         else:
             for elem in data:
+                if elem.tag == "Meta":
+                    continue
                 try:
-                    self.items.append(plexobjects.buildItem(self.server, elem, '/hubs', container=container, tag_fallback=True))
+                    self.items.append(plexobjects.buildItem(self.server, elem, '/hubs', container=container, tag_fallback=True, not_cachable=not_cachable or self.is_external))
                 except exceptions.UnknownType:
                     util.DEBUG_LOG('Unkown hub item type({1}): {0}', elem, elem.attrib.get('type'))
 
@@ -774,6 +779,19 @@ class Hub(BaseHub):
                 (items[0].container.offset.asInt() + items[0].container.size.asInt() < items[0].container.totalSize.asInt()) and '1' or ''
             )
         return items
+
+
+class ExternalHub(Hub):
+    TYPE = "Hub"
+    is_external = True
+
+    def init(self, data, not_cachable=False):
+        self._setData(data)
+        super(ExternalHub, self).init(data, not_cachable=not_cachable)
+
+
+class WatchlistHub(ExternalHub):
+    is_watchlist = True
 
 
 class PlaylistHub(BaseHub):

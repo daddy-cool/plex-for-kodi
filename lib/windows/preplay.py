@@ -86,6 +86,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.openedWithAutoPlay = False
         self.needs_related_divider = False
         self.fromPlayback = False
+        self.useBGM = False
 
     def doClose(self):
         self.relatedPaginator = None
@@ -634,7 +635,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             cast = u' / '.join([r.tag for r in self.video.roles()][:5])
             castLabel = 'CAST'
             self.setProperty('cast', cast and u'{0}    {1}'.format(castLabel, cast) or '')
-            self.setProperty('related.header', T(32404, 'Related Movies'))
+            self.setProperty('related.header', T(32404, 'Related Movies') if not self.fromWatchlist else T(34018, 'Related Media'))
 
         if self.fromWatchlist:
             self.setProperty('studios', u' / '.join([r.tag for r in self.video.studios()][:2]))

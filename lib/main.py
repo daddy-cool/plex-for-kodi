@@ -192,6 +192,7 @@ def _main():
                         if oldAccID and oldAccID != plexapp.ACCOUNT.ID:
                             util.setSetting('previous_user', oldAccID)
 
+                    closeOption = "exit"
                     try:
                         selectedServer = plexapp.SERVERMANAGER.selectedServer
 
@@ -256,8 +257,9 @@ def _main():
                             restart = True
                             return
                     finally:
-                        util.DEBUG_LOG("Main: Starting hard exit timer of {} seconds...", util.addonSettings.maxShutdownWait)
-                        exit_timer.start()
+                        if closeOption in ("quit", "exit", "restart"):
+                            util.DEBUG_LOG("Main: Starting hard exit timer of {} seconds...", util.addonSettings.maxShutdownWait)
+                            exit_timer.start()
                         windowutils.shutdownHome()
                         BACKGROUND.activate()
                         background.setShutdown()

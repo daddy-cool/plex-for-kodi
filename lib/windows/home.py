@@ -68,12 +68,12 @@ class SectionHubsTask(backgroundthread.Task):
         if self.isCanceled():
             return
 
-        if not plexapp.SERVERMANAGER.selectedServer:
+        if not plexapp.SERVERMANAGER.selectedServer or not self.section.server:
             # Could happen during sign-out for instance
             return
 
         try:
-            hubs = HubsList(plexapp.SERVERMANAGER.selectedServer.hubs(self.section.key, count=HUB_PAGE_SIZE,
+            hubs = HubsList(self.section.server.hubs(self.section.key, count=HUB_PAGE_SIZE,
                                                                       section_ids=self.section_keys,
                                                                       ignore_hubs=self.ignore_hubs)).init()
             if self.isCanceled():
@@ -164,7 +164,16 @@ class ExtendHubTask(backgroundthread.Task):
             util.ERROR()
 
 
-class HomeSection(object):
+class VirtualSection(object):
+    locations = []
+    isMapped = False
+
+    @property
+    def server(self):
+        return plexapp.SERVERMANAGER.selectedServer
+
+
+class HomeSection(VirtualSection):
     key = None
     type = 'home'
     title = T(32332, 'Home')
@@ -178,7 +187,7 @@ home_section = HomeSection()
 watchlist_section = None
 
 
-class PlaylistsSection(object):
+class PlaylistsSection(VirtualSection):
     key = 'playlists'
     type = 'playlists'
     title = T(32333, 'Playlists')
@@ -387,6 +396,15 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         # PLAYLISTS
         'playlists.audio': {'index': 5, 'text2lines': True, 'title': T(32048, 'Audio')},
         'playlists.video': {'index': 6, 'text2lines': True, 'ar16x9': True, 'title': T(32053, 'Video')},
+        # WATCHLIST
+        'watchlist.continueWatching': {'index': 1, 'with_progress': False, 'do_updates': True, 'text2lines': True},
+        'watchlist.coming-soon': {'index': 2, 'with_progress': False, 'do_updates': True, 'text2lines': True},
+        'watchlist.recently-added': {'index': 3, 'with_progress': False, 'do_updates': True, 'text2lines': True},
+        'home.top_watchlisted': {'index': 4, 'with_progress': False, 'do_updates': True, 'text2lines': True},
+        'home.coming-soon': {'index': 7, 'with_progress': False, 'do_updates': True, 'text2lines': True},
+        'home.trending-friends': {'index': 8, 'with_progress': False, 'do_updates': True, 'text2lines': True},
+        'home.trending-for-you': {'index': 13, 'with_progress': False, 'do_updates': True, 'text2lines': True},
+        'home.new-for-you': {'index': 14, 'with_progress': False, 'do_updates': True, 'text2lines': True},
     }
 
     THUMB_POSTER_DIM = util.scaleResolution(244, 361)
@@ -509,9 +527,6 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         if self._applyTheme:
             self.closeWRecompileTpls()
             return
-
-        if self.lastSection == watchlist_section:
-            self.go_root = True
 
         if self.go_root:
             self.setProperty('hub.focus', '')
@@ -1033,6 +1048,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                             if ex.modifier == "quit":
                                 self.closeOption = "quit"
                                 self.unhookSignals()
+                            else:
+                                self.closeOption = "exit"
                     finally:
                         self._checkingForExit = False
 
@@ -1140,7 +1157,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                 if mli.dataSource is not None and mli.dataSource != self.lastSection:
                     sections.add(mli.dataSource)
             tasks = [SectionHubsTask().setup(s, self.sectionHubsCallback, self.wantedSections, self.ignoredHubs)
-                     for s in [self.lastSection] + list(sections) if s != watchlist_section]
+                     for s in [self.lastSection] + list(sections) if not s.server.DEFER_HUBS and s != self.lastSection]
         else:
             # fetch hubs we need to update
             rp = self.getCurrentHubsPositions(self.lastSection)
@@ -1258,8 +1275,21 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         if auto_play:
             carryProps = self.carriedProps
 
+        use_ds = mli.dataSource
+        ds_changed = False
+
+        extra_kwargs = {}
+        if mli.dataSource.is_watchlist:
+            extra_kwargs['from_watchlist'] = True
+
+            if mli.dataSource.TYPE in ("season", "episode"):
+                # we need to change the datasource if someone clicks an episode in a discover hub (watchlist), to go
+                # to the corresponding show
+                use_ds = mli.dataSource.show()
+                ds_changed = True
+
         try:
-            command = opener.open(mli.dataSource, auto_play=auto_play, dialog_props=carryProps)
+            command = opener.open(use_ds, auto_play=auto_play, dialog_props=carryProps, **extra_kwargs)
             if command == "NODATA":
                 raise util.NoDataException
         except util.NoDataException:
@@ -1269,7 +1299,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         if self._restarting:
             return
 
-        self.updateListItem(mli)
+        if not ds_changed:
+            self.updateListItem(mli)
 
         if not mli:
             return
@@ -1898,9 +1929,6 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                 self.backgroundSet = False
 
             util.DEBUG_LOG('Section changed ({0}): {1}', section.key, repr(section.title))
-            if section == watchlist_section and self.lastSection != watchlist_section:
-                self.sectionChangeTimeout = None
-                return
             self.lastSection = section
             self.showHubs(section)
 
@@ -2004,7 +2032,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
         if plexapp.SERVERMANAGER.selectedServer.hasHubs():
             self.tasks = [SectionHubsTask().setup(s, self.sectionHubsCallback, self.wantedSections, self.ignoredHubs)
-                          for s in [home_section] + sections if s != watchlist_section]
+                          for s in [home_section] + sections if not s.server.DEFER_HUBS]
             backgroundthread.BGThreader.addTasks(self.tasks)
 
         show_pm_indicator = util.getSetting('path_mapping_indicators')
@@ -2076,14 +2104,19 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         if not update:
             self.clearHubs()
 
-        if not plexapp.SERVERMANAGER.selectedServer.hasHubs():
+        if not section.server.DEFER_HUBS and not plexapp.SERVERMANAGER.selectedServer.hasHubs():
             return
 
-        if section.key is False or section == watchlist_section:
+        if section.key is False:
             return
 
         hubs = self.sectionHubs.get(section.key)
         section_stale = False
+
+        if hubs is None and section.server.DEFER_HUBS:
+            util.DEBUG_LOG('Showing deferred hubs - Section: {0} - Update: {1}', section.key, update)
+            force = True
+            hubs = HubsList()
 
         if not force:
             if hubs is not None:
@@ -2366,6 +2399,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         cks = []
         urls = []
 
+        hub_is_watchlist = hub.is_watchlist
+
         for obj in hubitems or hub.items:
             if not self.backgroundSet and not use_reselect_pos:
                 if self.updateBackgroundFrom(obj):
@@ -2390,6 +2425,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                     cks += _cks
                     urls += _urls
                     hub_item_states[obj.type] = last_update
+
+            if hub_is_watchlist:
+                obj.is_watchlist = True
 
             mli = self.createListItem(obj, wide=wide)
             if mli:
