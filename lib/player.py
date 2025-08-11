@@ -254,6 +254,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.queuingNext = False
         self.queuingSpecific = False
         self.isMapped = False
+        self.creditMarkerHit = None
 
     def setup(self, duration, meta, offset, bif_url, title='', title2='', seeking=NO_SEEK, chapters=None,
               is_mapped=False):
@@ -546,7 +547,29 @@ class SeekPlayerHandler(BasePlayerHandler):
         return self.getVideoPlayedFac()
 
     def getVideoWatched(self, ref=None):
-        return self.getVideoPlayedFac(ref=ref) >= self.player.video.server.itemPlayedPerc / 100.0 or self.player.isExternal
+        """
+        0:at selected threshold percentage|1:at final credits marker position|2:at first credits marker position|3:earliest between threshold percent and first credits marker
+        :param ref:
+        :return: bool
+        """
+        playedAtBH = self.player.video.server.prefs.get("LibraryVideoPlayedAtBehaviour", 0)
+        watchedByPerc = self.getVideoPlayedFac(ref=ref) >= self.player.video.server.itemPlayedPerc / 100.0 or self.player.isExternal
+
+        # todo: re-add old settings, add new setting for behaviour; make setting server dependant
+        util.DEBUG_LOG("BRABBEL: %s %s %s" % (watchedByPerc, playedAtBH, self.creditMarkerHit))
+        if playedAtBH == 0:
+            util.DEBUG_LOG("SeekPlayerHandler: Watched item due to percentage")
+            return watchedByPerc
+        elif playedAtBH == 1 and self.creditMarkerHit == "final":
+            util.DEBUG_LOG("SeekPlayerHandler: Watched item due to final credits marker")
+            return True
+        elif playedAtBH == 2 and self.creditMarkerHit == "first":
+            util.DEBUG_LOG("SeekPlayerHandler: Watched item due to first credits marker")
+            return True
+        elif playedAtBH == 3 and (watchedByPerc or self.creditMarkerHit):
+            util.DEBUG_LOG("SeekPlayerHandler: Watched item due to percentage or credits marker")
+            return True
+        return False
 
     @property
     def videoWatched(self):
