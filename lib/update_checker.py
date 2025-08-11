@@ -97,6 +97,11 @@ def update_loop():
 
                     if update_version:
                         log("Update found: {}".format(update_version))
+                        # get github ref for update
+                        ref = updater.get_ref()
+                        if ref:
+                            log('Found remote ref for {}: {}'.format(update_version, ref))
+
                         # notify user in main app and wait for response
                         setGlobalProperty('update_is_downgrade', updater.is_downgrade and '1' or '', wait=True)
                         setGlobalProperty('update_available', update_version, wait=True)
@@ -131,7 +136,7 @@ def update_loop():
                         pd.create("Update", message="Downloading")
                         had_already = os.path.exists(updater.archive_path)
                         if not had_already:
-                            log("Update found: {}, downloading".format(update_version))
+                            log("Update found: {}, downloading (ref: {})".format(update_version, ref))
                             zip_loc = updater.download()
 
                             if zip_loc:
@@ -161,7 +166,7 @@ def update_loop():
                                     break
 
                                 do_start = True
-                                if "service" in major_changes or "language" in major_changes:
+                                if "service" in major_changes or "updater" in major_changes or "language" in major_changes:
                                     log("Major changes detected, prompting the user: {}".format(major_changes))
 
                                     kw = {}

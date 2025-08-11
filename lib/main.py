@@ -56,7 +56,7 @@ def waitForThreads():
     exit_timer_was_alive = exit_timer.is_alive()
 
     # if the exit timer was still alive at this point, try cancelling all threads for 5 seconds
-    if exit_timer_was_alive:
+    if not exit_timer_started or exit_timer_was_alive:
         while len(threading.enumerate()) > 1 and time.time() < started + util.addonSettings.maxShutdownWait:
             alive_threads = [t for t in list(threading.enumerate()) if t.is_alive()]
             alive_threads_out = ", ".join(t.name for t in alive_threads)
@@ -81,7 +81,8 @@ def waitForThreads():
     else:
         util.DEBUG_LOG("Main: Not waiting for remaining threads as exit already took to long; hard exit")
 
-    if time.time() >= started + util.addonSettings.maxShutdownWait or not exit_timer_was_alive:
+    if time.time() >= started + util.addonSettings.maxShutdownWait or (exit_timer_started and not exit_timer_was_alive):
+        util.LOG('Main: script.plexmod: threads took too long or timer hit, HARD EXITING')
         sys.exit(0)
 
 @atexit.register
@@ -100,8 +101,10 @@ def signout():
     util.DEBUG_LOG('Main: Signing out...')
     plexapp.ACCOUNT.signOut()
 
+exit_timer_started = False
+
 def hardExit():
-    util.LOG('Main: script.plexmod: timer hit, HARD EXITING')
+    util.LOG('Main: script.plexmod: timer hit, triggering hard exit...')
     xbmc.executebuiltin('StopScript(script.plexmod)')
     interrupt_main()
 
@@ -138,7 +141,7 @@ def main(force_render=False):
 
 
 def _main():
-    global quitKodi, restart
+    global quitKodi, restart, exit_timer_started
 
     # uncomment to profile code #1
     #pr = cProfile.Profile()
@@ -260,6 +263,7 @@ def _main():
                         if closeOption in ("quit", "exit", "restart"):
                             util.DEBUG_LOG("Main: Starting hard exit timer of {} seconds...", util.addonSettings.maxShutdownWait)
                             exit_timer.start()
+                            exit_timer_started = True
                         windowutils.shutdownHome()
                         BACKGROUND.activate()
                         background.setShutdown()
