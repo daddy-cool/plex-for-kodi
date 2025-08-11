@@ -3321,3 +3321,27 @@ msgstr "Lade externe Hubs"
 msgctxt "#34021"
 msgid "Please wait ..."
 msgstr "Bitte warten ..."
+
+msgctxt "#34022"
+msgid "Video play completion behaviour"
+msgstr "Verhalten für \"Video zuende abgespielt\""
+
+msgctxt "#34023"
+msgid "Decide whether to use end credits markers to determine the 'watched' state of video items. When markers are not available the selected threshold percentage will be used."
+msgstr "Wähle, ob das Video bei Erreichen der Abpann-Position als komplett \"gesehen\" betrachtet wird. Wenn keine Abspann-Position bekannt ist, wird statt dessen der gewählte Abspielfortschritt als Schwelle benutzt."
+
+msgctxt "#34024"
+msgid "at selected threshold percentage"
+msgstr "beim Erreichen der Fortschrittsgrenze"
+
+msgctxt "#34025"
+msgid "at final credits marker position"
+msgstr "an der finalen Abspannmarkierung"
+
+msgctxt "#34026"
+msgid "at first credits marker position"
+msgstr "an der ersten Abspannmarkierung"
+
+msgctxt "#34027"
+msgid "earliest between threshold percent and first credits marker"
+msgstr "frühester Wert zwischen Fortschrittsgrenze und erster Abspannmarkierung"
