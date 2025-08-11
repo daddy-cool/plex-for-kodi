@@ -73,6 +73,7 @@ class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
         self.transcodeSupport = False
         self.currentHubs = None
         self.dnsRebindingProtection = False
+        self.prefs = {}
 
         if data is None:
             return
@@ -135,6 +136,9 @@ class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
         if not assume_container:
             container = plexobjects.PlexContainer(data, initpath=key, server=self, address=key)
         return plexobjects.buildItem(self, data[0], key, container=container)
+
+    def getPrefs(self):
+        return plexobjects.listItems(self, "/:/prefs", bytag=True, cachable=False, not_cachable=True)
 
     def hubs(self, section=None, count=None, search_query=None, section_ids=None, ignore_hubs=None):
         hubs = []
@@ -242,7 +246,7 @@ class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
             util.WARN_LOG("Server connection is None, returning an empty url")
             return ""
 
-    def query(self, path, method=None, **kwargs):
+    def query(self, path, method=None, raw=False, **kwargs):
         if method and isinstance(method, six.string_types):
             method = getattr(self.session, method)
         else:
@@ -322,6 +326,8 @@ class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
         except asyncadapter.CanceledException:
             return None
 
+        if raw:
+            return data
         return ElementTree.fromstring(data) if data else None
 
     def getImageTranscodeURL(self, path, width, height, **extraOpts):

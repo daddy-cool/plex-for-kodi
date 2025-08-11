@@ -63,6 +63,12 @@ class PlexServerManager(signalsmixin.SignalsMixin):
         if not self.selectedServer or force:
             util.LOG("Setting selected server to {0}", server)
             self.selectedServer = server
+            if server.owned:
+                util.LOG("Getting and storing server prefs for {0}", server)
+                prefs = server.getPrefs()
+                for pref in prefs:
+                    if pref.get("id") in ("LibraryVideoPlayedThreshold", "LibraryVideoPlayedAtBehaviour"):
+                        server.prefs[str(pref.get("id"))] = pref.get("value").asInt()
 
             # Update our saved state.
             self.saveState(setPreferred=True)
@@ -348,6 +354,7 @@ class PlexServerManager(signalsmixin.SignalsMixin):
             server.owned = bool(serverObj.get('owned'))
             server.sameNetwork = serverObj.get('sameNetwork')
             server.dnsRebindingProtection = serverObj.get('dnsRebindingProtection')
+            server.prefs = serverObj.get('prefs', {}) or {}
 
             hasSecureConn = False
             for i in range(len(serverObj.get('connections', []))):
@@ -400,7 +407,8 @@ class PlexServerManager(signalsmixin.SignalsMixin):
                     'owned': server.owned,
                     'sameNetwork': server.sameNetwork,
                     'dnsRebindingProtection': server.dnsRebindingProtection,
-                    'connections': []
+                    'connections': [],
+                    'prefs': server.prefs
                 }
 
                 for i in range(len(server.connections)):
