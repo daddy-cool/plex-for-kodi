@@ -80,14 +80,13 @@ class PlexServerManager(signalsmixin.SignalsMixin):
                     except:
                         pass
 
-            # Update our saved state.
-            self.saveState(setPreferred=True)
+                # Update our saved state.
+                self.saveState(setPreferred=True)
 
-            # Notify anyone who might care.
-            util.APP.trigger("change:selectedServer", server=server)
+                # Notify anyone who might care.
+                util.APP.trigger("change:selectedServer", server=server)
 
-            return True
-
+                return True
         return False
 
     def getServer(self, uuid=None):
