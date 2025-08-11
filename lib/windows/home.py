@@ -1152,20 +1152,20 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
     def _updateOnDeckHubs(self, **kwargs):
         util.DEBUG_LOG('UpdateOnDeckHubs called')
         self._odHubsDirty = False
-        if util.getSetting("speedy_home_hubs2"):
-            util.DEBUG_LOG("Using alternative home hub refresh")
-            sections = set()
-            for mli in self.sectionList:
-                if mli.dataSource is not None and mli.dataSource != self.lastSection:
-                    sections.add(mli.dataSource)
-            tasks = [SectionHubsTask().setup(s, self.sectionHubsCallback, self.wantedSections, self.ignoredHubs)
-                     for s in [self.lastSection] + list(sections) if not s.server.DEFER_HUBS and s != self.lastSection]
-        else:
-            # fetch hubs we need to update
-            rp = self.getCurrentHubsPositions(self.lastSection)
-            tasks = [UpdateHubTask().setup(hub, self.updateHubCallback,
-                                           reselect_pos=rp.get(hub.getCleanHubIdentifier(self.lastSection.key is None)))
-                     for hub in self.updateHubs.values()]
+        #if util.getSetting("speedy_home_hubs2"):
+        #    util.DEBUG_LOG("Using alternative home hub refresh")
+        #    sections = set()
+        #    for mli in self.sectionList:
+        #        if mli.dataSource is not None and mli.dataSource != self.lastSection:
+        #            sections.add(mli.dataSource)
+        #    tasks = [SectionHubsTask().setup(s, self.sectionHubsCallback, self.wantedSections, self.ignoredHubs)
+        #             for s in [self.lastSection] + list(sections) if not s.server.DEFER_HUBS and s != self.lastSection]
+        #else:
+        # fetch hubs we need to update
+        rp = self.getCurrentHubsPositions(self.lastSection)
+        tasks = [UpdateHubTask().setup(hub, self.updateHubCallback,
+                                       reselect_pos=rp.get(hub.getCleanHubIdentifier(self.lastSection.key is None)))
+                 for hub in self.updateHubs.values()]
         self.tasks += tasks
         backgroundthread.BGThreader.addTasks(tasks)
 
