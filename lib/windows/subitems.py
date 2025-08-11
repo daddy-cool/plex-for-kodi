@@ -72,7 +72,8 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
         self.mediaItem = kwargs.get('media_item')
         self.parentList = kwargs.get('parent_list')
         self.cameFrom = kwargs.get('came_from')
-        self.fromWatchlist = kwargs.get('from_watchlist')
+        self.fromWatchlist = kwargs.get('from_watchlist', False)
+        self.isExternal = kwargs.get('external_item', False)
         self.directlyFromWatchlist = kwargs.get('directly_from_watchlist')
         self.is_watchlisted = kwargs.get('is_watchlisted')
         self.mediaItems = None
@@ -107,7 +108,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
         self.themeMusicReinit(self.mediaItem)
 
     def setup(self):
-        if self.fromWatchlist:
+        if self.isExternal:
             # fixme, multiple? choice?
             self.mediaItem.related_source = "more-from-credits"
         self.mediaItem.reload(includeExtras=1, includeExtrasCount=10, includeOnDeck=1)
@@ -117,7 +118,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
         self.watchlist_setup(self.mediaItem)
         if self.fromWatchlist:
             self.watchlistItemAvailable(self.mediaItem, shortcut_watchlisted=self.directlyFromWatchlist)
-        else:
+        if not self.directlyFromWatchlist:
             self.checkIsWatchlisted(self.mediaItem)
 
         self.updateProperties()

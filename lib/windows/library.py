@@ -1137,6 +1137,7 @@ class LibraryWindow(mixins.PlaybackBtnMixin, kodigui.MultiWindow, windowutils.Ut
         if sectionType == 'movies_shows':
             extra_kwargs['from_watchlist'] = True
             extra_kwargs['directly_from_watchlist'] = True
+            extra_kwargs['external_item'] = True
 
         if mli.dataSource.TYPE == 'collection':
             prevItemType = self.librarySettings.getItemType() or ITEM_TYPE

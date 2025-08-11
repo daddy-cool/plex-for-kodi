@@ -74,6 +74,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         self.video = kwargs.get('video')
         self.parentList = kwargs.get('parent_list')
         self.fromWatchlist = kwargs.get('from_watchlist', False)
+        self.isExternal = kwargs.get('external_item', False)
         self.directlyFromWatchlist = kwargs.get('directly_from_watchlist')
         self.is_watchlisted = kwargs.get('is_watchlisted', False)
         self.videos = None
@@ -572,7 +573,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         elif self.video.type == 'movie':
             self.setProperty('preview.no', '1')
 
-        if self.fromWatchlist:
+        if self.isExternal:
             # fixme, multiple? choice?
             self.video.related_source = "more-from-credits"
         self.video.reload(checkFiles=1, **VIDEO_RELOAD_KW)
@@ -584,7 +585,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
 
         if self.fromWatchlist:
             self.watchlistItemAvailable(self.video, shortcut_watchlisted=self.directlyFromWatchlist)
-        else:
+        if not self.directlyFromWatchlist:
             self.checkIsWatchlisted(self.video)
 
         self.setInfo()

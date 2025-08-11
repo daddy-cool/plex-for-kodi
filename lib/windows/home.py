@@ -1283,6 +1283,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         extra_kwargs = {}
         if mli.dataSource.is_watchlist:
             extra_kwargs['from_watchlist'] = True
+            extra_kwargs['external_item'] = True
 
             if mli.dataSource.TYPE in ("season", "episode"):
                 # we need to change the datasource if someone clicks an episode in a discover hub (watchlist), to go
