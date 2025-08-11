@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-beta15.1"
+       version="0.8.0-beta15.2"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -33,10 +33,18 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Watchlist-Hubs: Fix background not appearing for some items
-- Watchlist: Use currently connected server to scale/transcode images instead of discover.plex.tv
-- Sections: Show loading state for external sections
-- Watchlist/Core/ThemeMusic: While traversing items of multiple types (movies and shows), properly stop or start theme music if necessary
+- Home: Remove leftover handling for old "Alternative home hubs refresh" setting
+- Watchlist/Discover: Fix watchlisted items not appearing as watchlisted when visited via discover hubs
+- PlexServer: Store prefs "LibraryVideoPlayedThreshold", "LibraryVideoPlayedAtBehaviour" if the current server is owned (the current user is the owner)
+- Core/PlexServerManager: Store server prefs per server context, don't fail if server not owned; improve logging
+- Core: Get video played threshold from server (only when current user owns the server; stored when server owner user uses the server; cached; default: 90)
+- Core: Support plex markers as watched indicators
+- Core/Settings: Add should_show callback to BasicSetting to determine whether to show it or not
+- Core/Settings: Implement 'Video play completion behaviour' from Plex Server (default: "earliest between threshold percent and first credits marker")
+- Core/Settings: Only show "Video played threshold" and "Video play completion behaviour" if we didn't fetch those values from the Plex Server previously (fallback)
+- Player: Try using Plex Server settings for video played handling, if possible
+- Video/PlayableVideo: Implement "has_credit_markers" property to determine video played handling similar to Plex
+- Updater: Try finding correct commit reference for requested addon.xml version; download specific commit tree instead of the latest one, if possible
         </news>
         <assets>
             <icon>icon2.png</icon>
