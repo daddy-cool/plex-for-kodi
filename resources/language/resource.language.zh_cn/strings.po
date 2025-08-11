@@ -1457,6 +1457,11 @@ msgstr "如果可用，自动跳过片尾。不会覆盖已启用的连续播放
 "可以单独为每个电视节目禁用/启用。"
 
 #: 
+msgctxt "#33501"
+msgid "Video played threshold"
+msgstr "视频完播的阈值"
+
+#: 
 msgctxt "#33502"
 msgid "Set this to the same value as your Plex server (Settings>Library>Video played threshold) to avoid certain pitfalls, Default: 90 %"
 msgstr "将其设置为您在 Plex 服务器中设置的相同值（设置 > 资料库 > 视频完播的阈值），以避免某些问题，默认值为：90%"

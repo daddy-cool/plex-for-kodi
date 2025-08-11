@@ -1486,6 +1486,11 @@ msgstr "Automatisches Überspringen von vorhandenem Abspann. Überschreibt aktiv
 "Kann pro Serie aktiviert/deaktiviert werden."
 
 #: 
+msgctxt "#33501"
+msgid "Video played threshold"
+msgstr "Video-abgespielt-Grenzwert"
+
+#: 
 msgctxt "#33502"
 msgid "Set this to the same value as your Plex server (Settings>Library>Video played threshold) to avoid certain pitfalls, Default: 90 %"
 msgstr "Auf den selben Wert wie im Plex-Server setzen (unter Einstellungen > Mediathek zu finden), um bestimmte Fehler zu umgehen; Standardwert: 90 %"

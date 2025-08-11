@@ -268,6 +268,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.title = title
         self.title2 = title2
         self.chapters = chapters or []
+        self.playedThreshold = plexapp.util.INTERFACE.getPlayedThresholdValue()
         self.stoppedManually = False
         self.inBingeMode = False
         self.skipPostPlay = False
