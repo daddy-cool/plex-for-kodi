@@ -267,7 +267,6 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.title = title
         self.title2 = title2
         self.chapters = chapters or []
-        self.playedThreshold = plexapp.util.INTERFACE.getPlayedThresholdValue()
         self.stoppedManually = False
         self.inBingeMode = False
         self.skipPostPlay = False
@@ -547,7 +546,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         return self.getVideoPlayedFac()
 
     def getVideoWatched(self, ref=None):
-        return self.getVideoPlayedFac(ref=ref) >= self.playedThreshold or self.player.isExternal
+        return self.getVideoPlayedFac(ref=ref) >= self.player.video.server.itemPlayedPerc / 100.0 or self.player.isExternal
 
     @property
     def videoWatched(self):
@@ -597,9 +596,9 @@ class SeekPlayerHandler(BasePlayerHandler):
             if not self.queuingSpecific:
                 # show post play if possible, if an item has been watched (90% by Plex standards)
                 if self.seeking != self.SEEK_PLAYLIST and self.duration:
-                    playedFac = self.videoPlayedFac
-                    util.DEBUG_LOG("Player - played-threshold: {}/{}", playedFac, self.playedThreshold)
-                    if playedFac >= self.playedThreshold and self.next(on_end=True):
+                    util.DEBUG_LOG("Player - played-threshold: {}%/{}%",
+                                   int(self.videoPlayedFac * 100), int(self.player.video.server.itemPlayedPerc))
+                    if self.videoWatched and self.next(on_end=True):
                         return
 
         if (self.seeking not in (self.SEEK_IN_PROGRESS, self.SEEK_PLAYLIST) or

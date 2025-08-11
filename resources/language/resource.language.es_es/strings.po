@@ -1472,11 +1472,6 @@ msgstr "Salta automáticamente los créditos si están disponibles. No anula el 
 "Puede desactivarse/activarse por programa de TV."
 
 #: 
-msgctxt "#33501"
-msgid "Video played threshold"
-msgstr "Umbral de reproducción de vídeo"
-
-#: 
 msgctxt "#33502"
 msgid "Set this to the same value as your Plex server (Settings>Library>Video played threshold) to avoid certain pitfalls, Default: 90 %"
 msgstr "Ajústelo al mismo valor que su servidor Plex (Configuración>Biblioteca>Umbral de vídeo reproducido) para evitar ciertas caídas, Predeterminado: 90%"

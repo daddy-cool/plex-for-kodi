@@ -1472,11 +1472,6 @@ msgstr "Salta automaticamente i crediti se disponibili. Non annulla la modalità
 "Può essere disattivato/attivato per ogni serie TV."
 
 #: 
-msgctxt "#33501"
-msgid "Video played threshold"
-msgstr "Soglia di riproduzione dei video"
-
-#: 
 msgctxt "#33502"
 msgid "Set this to the same value as your Plex server (Settings>Library>Video played threshold) to avoid certain pitfalls, Default: 90 %"
 msgstr "Imposta questo valore allo stesso valore del tuo server Plex (Impostazioni>Libreria>Soglia di riproduzione dei video) per evitare certi problemi, Predefinito: 90%"

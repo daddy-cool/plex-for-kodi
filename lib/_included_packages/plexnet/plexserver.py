@@ -140,6 +140,10 @@ class PlexServer(plexresource.PlexResource, signalsmixin.SignalsMixin):
     def getPrefs(self):
         return plexobjects.listItems(self, "/:/prefs", bytag=True, cachable=False, not_cachable=True)
 
+    @property
+    def itemPlayedPerc(self):
+        return self.prefs.get("LibraryVideoPlayedThreshold", 90)
+
     def hubs(self, section=None, count=None, search_query=None, section_ids=None, ignore_hubs=None):
         hubs = []
 
