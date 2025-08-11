@@ -64,20 +64,21 @@ class PlexServerManager(signalsmixin.SignalsMixin):
             util.LOG("Setting selected server to {0}", server)
             self.selectedServer = server
 
-            if server.owned:
-                util.LOG("Getting and storing server prefs for {0}", server.name)
-                prefs = server.getPrefs()
-                for pref in prefs:
-                    if pref.get("id") in ("LibraryVideoPlayedThreshold", "LibraryVideoPlayedAtBehaviour"):
-                        server.prefs[str(pref.get("id"))] = pref.get("value").asInt()
-                util.INTERFACE.setRegistry("PlexServerPrefs", json.dumps(server.prefs), sec=server.uuid[-8:])
-            else:
-                util.LOG("Server isn't owned by the current user. Trying to reuse cached server prefs for {0}", server.name)
-                try:
-                    server.prefs = json.loads(util.INTERFACE.getRegistry("PlexServerPrefs", sec=server.uuid[-8:]))
-                    util.DEBUG_LOG("Cached server prefs loaded for {0}", server.name)
-                except:
-                    pass
+            if server:
+                if server.owned:
+                    util.LOG("Getting and storing server prefs for {0}", server.name)
+                    prefs = server.getPrefs()
+                    for pref in prefs:
+                        if pref.get("id") in ("LibraryVideoPlayedThreshold", "LibraryVideoPlayedAtBehaviour"):
+                            server.prefs[str(pref.get("id"))] = pref.get("value").asInt()
+                    util.INTERFACE.setRegistry("PlexServerPrefs", json.dumps(server.prefs), sec=server.uuid[-8:])
+                else:
+                    util.LOG("Server isn't owned by the current user. Trying to reuse cached server prefs for {0}", server.name)
+                    try:
+                        server.prefs = json.loads(util.INTERFACE.getRegistry("PlexServerPrefs", sec=server.uuid[-8:]))
+                        util.DEBUG_LOG("Cached server prefs loaded for {0}", server.name)
+                    except:
+                        pass
 
             # Update our saved state.
             self.saveState(setPreferred=True)
