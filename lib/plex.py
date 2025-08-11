@@ -324,7 +324,7 @@ class PlexInterface(plexapp.AppInterface):
 
     def getPlayedThresholdValue(self):
         values = list(reversed(PlayedThresholdSetting.options))
-        return int(values[self.getPreference("played_threshold", 1)].replace(" %", "")) / 100.0
+        return int(values[self.getPreference("played_threshold", 1)].replace(" %", ""))
 
 
 def onSmartDiscoverLocalChange(value=None, **kwargs):

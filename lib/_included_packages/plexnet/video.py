@@ -632,6 +632,11 @@ class PlayableVideo(CachableItemsMixin, Video, media.RelatedMixin):
     def in_progress(self):
         return bool(self.get('viewOffset').asInt())
 
+    @property
+    def has_credit_markers(self):
+        if hasattr(self, 'markers'):
+            return bool(filter(lambda m: m.type == 'credits', self.markers))
+
 
 @plexobjects.registerLibType
 class Movie(PlayableVideo):

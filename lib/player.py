@@ -268,7 +268,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.title = title
         self.title2 = title2
         self.chapters = chapters or []
-        self.playedThreshold = plexapp.util.INTERFACE.getPlayedThresholdValue()
+        self.playedThreshold = plexapp.util.INTERFACE.getPlayedThresholdValue() # percentage
         self.stoppedManually = False
         self.inBingeMode = False
         self.skipPostPlay = False
@@ -547,18 +547,27 @@ class SeekPlayerHandler(BasePlayerHandler):
     def videoPlayedFac(self):
         return self.getVideoPlayedFac()
 
+    @property
+    def playedThresholdPerc(self):
+        server_thres = self.player.video.server.prefs.get("LibraryVideoPlayedThreshold", None)
+        if server_thres is None:
+            return int(self.playedThreshold)
+        return int(server_thres)
+
     def getVideoWatched(self, ref=None):
         """
         0:at selected threshold percentage|1:at final credits marker position|2:at first credits marker position|3:earliest between threshold percent and first credits marker
         :param ref:
         :return: bool
         """
-        playedAtBH = self.player.video.server.prefs.get("LibraryVideoPlayedAtBehaviour", 0)
-        watchedByPerc = self.getVideoPlayedFac(ref=ref) >= self.player.video.server.itemPlayedPerc / 100.0 or self.player.isExternal
+        playedAtBH = self.player.video.server.prefs.get("LibraryVideoPlayedAtBehaviour", None)
+        if playedAtBH is None:
+            playedAtBH = util.getSetting("played_threshold_behaviour")
+        playedAtBH = int(playedAtBH)
 
-        # todo: re-add old settings, add new setting for behaviour; make setting server dependant
-        util.DEBUG_LOG("BRABBEL: %s %s %s" % (watchedByPerc, playedAtBH, self.creditMarkerHit))
-        if playedAtBH == 0:
+        watchedByPerc = self.getVideoPlayedFac(ref=ref) >= self.playedThresholdPerc / 100.0 or self.player.isExternal
+
+        if playedAtBH == 0 or not self.player.video.has_credit_markers:
             util.DEBUG_LOG("SeekPlayerHandler: Watched item due to percentage")
             return watchedByPerc
         elif playedAtBH == 1 and self.creditMarkerHit == "final":
@@ -621,7 +630,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                 # show post play if possible, if an item has been watched (90% by Plex standards)
                 if self.seeking != self.SEEK_PLAYLIST and self.duration:
                     util.DEBUG_LOG("Player - played-threshold: {}%/{}%",
-                                   int(self.videoPlayedFac * 100), int(self.player.video.server.itemPlayedPerc))
+                                   int(self.videoPlayedFac * 100), int(self.playedThresholdPerc))
                     if self.videoWatched and self.next(on_end=True):
                         return
 
