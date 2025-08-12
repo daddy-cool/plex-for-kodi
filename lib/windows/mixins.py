@@ -546,6 +546,7 @@ def removeFromWatchlistBlind(guid):
 
         server = pnUtil.SERVERMANAGER.getDiscoverServer()
         server.query("/actions/removeFromWatchlist", ratingKey=GUIDToRatingKey(guid), method="put")
+        pnUtil.APP.trigger("watchlist:modified")
     except:
         pass
 

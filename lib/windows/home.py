@@ -726,6 +726,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         plexapp.util.APP.on('change:use_watchlist', self.setDirty)
         plexapp.util.APP.on('change:debug', self.setDebugFlag)
         plexapp.util.APP.on('change:update_source', self.updateSourceChanged)
+        plexapp.util.APP.on('watchlist:modified', self.watchlistDirty)
         plexapp.util.APP.on('theme_relevant_setting', self.setThemeDirty)
 
         player.PLAYER.on('session.ended', self.updateOnDeckHubs)
@@ -756,6 +757,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         plexapp.util.APP.off('change:use_watchlist', self.setDirty)
         plexapp.util.APP.off('change:debug', self.setDebugFlag)
         plexapp.util.APP.off('change:update_source', self.updateSourceChanged)
+        plexapp.util.APP.off('watchlist:modified', self.watchlistDirty)
         plexapp.util.APP.off('theme_relevant_setting', self.setThemeDirty)
 
         player.PLAYER.off('session.ended', self.updateOnDeckHubs)
@@ -1176,6 +1178,14 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
     def setDirty(self, *args, **kwargs):
         self._reloadOnReinit = True
         self.cacheSpoilerSettings()
+
+    def watchlistDirty(self, *args, **kwargs):
+        # mark watchlist hub dirty
+        if watchlist_section:
+            hubs = self.sectionHubs.get(watchlist_section.key)
+            if hubs:
+                util.DEBUG_LOG("Home: Setting watchlist hubs dirty")
+                hubs.lastUpdated = time.time() - HUBS_REFRESH_INTERVAL - 1
 
     def setThemeDirty(self, *args, **kwargs):
         self._applyTheme = util.getSetting("theme")
