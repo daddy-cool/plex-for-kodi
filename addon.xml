@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-prerelease1"
+       version="0.8.0-prerelease2"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -33,11 +33,7 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- PlexServerManager: Don't try fetching preferences when currently disconnecting from all servers (crashes fast user switching)
-- PlexServerManager: Skip trying to save server state and corresponding triggers when currently switching users
-- Settings: Fix dead focus in About section
-- Core: Reensure compatibility with Kodi 18 (python 2.7)
-- Home/Watchlist: Refresh hubs if any watchlist modification has been triggered
+- Core: Refactor window mixins into separate modules to avoid circular imports and improve python 2.7 compatibility
         </news>
         <assets>
             <icon>icon2.png</icon>
