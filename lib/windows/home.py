@@ -812,7 +812,12 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                     return True
 
     def tick(self):
+        if self._shuttingDown:
+            util.DEBUG_LOG("Home: Not ticking, shutdown flag set")
+            return
+
         if self.is_active and self.service_responder():
+            util.DEBUG_LOG("Home: Not ticking, service responder signalled positive exit")
             return
 
         if self.is_active and self._updateSourceChanged:
