@@ -816,6 +816,10 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             util.DEBUG_LOG("Home: Not ticking, shutdown flag set")
             return
 
+        if self.movingSection:
+            util.DEBUG_LOG("Home: Not ticking, currently moving a section")
+            return
+
         if self.is_active and self.service_responder():
             util.DEBUG_LOG("Home: Not ticking, service responder signalled positive exit")
             return
@@ -1106,6 +1110,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
         if 399 < controlID < 500:
             self.setProperty('hub.focus', str(self.hubFocusIndexes[controlID - 400]))
+
+        if self.movingSection:
+            return
 
         if (controlID == self.SECTION_LIST_ID and not self.changingServer and not self._checkingForExit and not
         self._shuttingDown):
@@ -1781,6 +1788,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                 self.sectionList.selectItem(0)
 
             self.sectionList.moveItem(item, next_index)
+            self.sectionList.selectItem(next_index)
 
         elif action == xbmcgui.ACTION_SELECT_ITEM:
             stop_moving()
