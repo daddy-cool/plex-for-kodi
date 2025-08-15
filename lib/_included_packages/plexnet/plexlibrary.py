@@ -131,7 +131,7 @@ class LibrarySection(plexobjects.PlexObject):
             return
         section = cls(None, initpath=filter_.initpath, server=filter_.server, container=filter_.container)
         section.key = filter_.getLibrarySectionId()
-        section.title = filter_.reasonTitle
+        section.title = filter_.reasonTitle or filter_.getLibrarySectionTitle()
         section.type = cls.TYPE
         return section
 
