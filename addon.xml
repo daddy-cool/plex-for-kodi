@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-prerelease3"
+       version="0.8.0-prerelease3.1"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -33,14 +33,10 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Home: Try ensuring HomeWindow properly closes when exit/quit was requested
-- Player: Increase leeway for waiting for correct audio track from 2s to 4s
-- SeekDialog: Increase leeway for waiting for correct subtitle track from 2s to 4s
-- VideoPlayer/KodiGUI/CoreELEC: Try deferring the init procedure by 0.25s to hopefully avoid control initialization issues
-- Episodes/Shows/Movies: Make "go to section" action actually visit the section instead of the home hub
-- Episodes: When returning from "Go To Show" or "Go To SECTION", don't use reselect logic
-- Library: Use library title in title header instead of library type
-- Remove all obsolete dividers in sub views
+- Library: When visiting from media item, library title was empty
+- Home: Don't tick when we're in the middle of a shutdown
+- Episodes/Shows/Movies: Remove obsolete transitional divider line (only shortly visible on window open)
+- Home: Make moving sections more resilient (esp. when moving fast/holding left/right)
         </news>
         <assets>
             <icon>icon2.png</icon>
