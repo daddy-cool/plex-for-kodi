@@ -210,7 +210,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
                 self.manuallySelectedSeason = True
 
             elif action == xbmcgui.ACTION_CONTEXT_MENU:
-                if controlID == self.SUB_ITEM_LIST_ID:
+                if controlID == self.SUB_ITEM_LIST_ID and not self.isExternal:
                     self.optionsButtonClicked(from_item=True)
                     return
                 elif not xbmc.getCondVisibility('ControlGroup({0}).HasFocus(0)'.format(self.OPTIONS_GROUP_ID)):
