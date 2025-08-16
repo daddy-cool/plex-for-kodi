@@ -7260,6 +7260,15 @@
                     <label>[B]$INFO[Window.Property(user.avatar.letter)][/B]</label>
                 </control>
                 <control type="image">
+                    <visible>!String.IsEmpty(Window(10000).Property(script.plex.update_available))</visible>
+                    <posx>-8</posx>
+                    <posy>{{ vscale(38) }}</posy>
+                    <width>16</width>
+                    <height>{{ vscale(14) }}</height>
+                    <texture>script.plex/home/device/update_small.png</texture>
+                    <colordiffuse>FF00CC00</colordiffuse>
+                </control>
+                <control type="image">
                     <visible>!Control.HasFocus(202)</visible>
                     <posx>53</posx>
                     <posy>{{ vscale(27) }}</posy>
