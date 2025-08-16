@@ -472,7 +472,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
         self.sectionList = kodigui.ManagedControlList(self, self.SECTION_LIST_ID, 7)
         self.serverList = kodigui.ManagedControlList(self, self.SERVER_LIST_ID, 10)
-        self.userList = kodigui.ManagedControlList(self, self.USER_LIST_ID, 3)
+        self.userList = kodigui.ManagedControlList(self, self.USER_LIST_ID, 5)
 
         self.hubControls = (
             kodigui.ManagedControlList(self, self.HUB_AR16X9_00, 5),
@@ -775,9 +775,22 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         self._updateSourceChanged = value
 
 
+    def doUpdate(self):
+        self._shuttingDown = True
+        self._ignoreTick = True
+        self.stopRetryingRequests()
+
+        # fixme: add "update" to the list of closeOptions for which we should force quit if necessary?
+        # self.closeOption = "update"
+        self.unhookSignals()
+        self.doClose()
+        return True
+
+
     def service_responder(self):
-        if util.getGlobalProperty('update_available'):
+        if util.getGlobalProperty('notify_update'):
             is_downgrade = bool(util.getGlobalProperty('update_is_downgrade', consume=True))
+            self.showBusy(False)
             button = optionsdialog.show(
                 T(33670, 'Update available'),
                 T(33671, 'Current: {current_version}\nNew: {new_version}\n\nChangelog:\n{changelog}').format(
@@ -794,22 +807,14 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             else:
                 resp = "cancel"
             util.setGlobalProperty('update_response', resp, wait=True)
-            util.setGlobalProperty('update_available', '', wait=True)
+            util.setGlobalProperty('notify_update', '', wait=True)
 
             if resp == "commence":
                 # wait for it to be consumed
                 try:
                     util.waitForConsumption('update_response', timeout=200)
                 finally:
-                    self._shuttingDown = True
-                    self._ignoreTick = True
-                    self.stopRetryingRequests()
-
-                    # fixme: add "update" to the list of closeOptions for which we should force quit if necessary?
-                    #self.closeOption = "update"
-                    self.unhookSignals()
-                    self.doClose()
-                    return True
+                    return self.doUpdate()
 
     def tick(self):
         if self._shuttingDown:
@@ -902,12 +907,12 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
     def onAction(self, action):
         controlID = self.getFocusId()
-
         if self._ignoreInput or self._shuttingDown:
             return
 
         try:
             if self._skipNextAction:
+                util.DEBUG_LOG("Home: Skipping next action")
                 self._skipNextAction = False
                 return
 
@@ -2723,6 +2728,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
 
     def showUserMenu(self, mouse=False):
         items = []
+        if util.getGlobalProperty("update_available"):
+            items.append(kodigui.ManagedListItem(T(33670, 'Update available'), data_source='update'))
         if plexapp.ACCOUNT.isSignedIn:
             if not len(plexapp.ACCOUNT.homeUsers) and not util.addonSettings.cacheHomeUsers:
                 plexapp.ACCOUNT.updateHomeUsers(refreshSubscription=True)
@@ -2744,6 +2751,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             items[-1].setProperty('last', '1')
         else:
             items[0].setProperty('only', '1')
+        # somehow dynamically setting the list height here doesn't work. We need a height that's bigger than our
+        # possible available items in the template
 
         self.userList.reset()
         self.userList.addItems(items)
@@ -2774,6 +2783,11 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         if option == 'settings':
             from . import settings
             settings.openWindow()
+        elif option == 'update':
+            self.setBoolProperty('show.options', False)
+            self.showBusy()
+            self.setFocusId(self.SECTION_LIST_ID)
+            util.setGlobalProperty('update_requested', '1', wait=True)
         elif option == 'go_online':
             plexapp.ACCOUNT.refreshAccount()
         elif option == 'refresh_users':

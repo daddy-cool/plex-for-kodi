@@ -7301,7 +7301,7 @@
                         <posx>0</posx>
                         <posy>0</posy>
                         <width>300</width>
-                        <height>{{ vscale(198) }}</height>
+                        <height>{{ vscale(264) }}</height>
                         <onleft>201</onleft>
                         <onunfocus>SetProperty(show.options,)</onunfocus>
                         <scrolltime>200</scrolltime>

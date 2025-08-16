@@ -99,6 +99,9 @@ class BaseFunctions(object):
     def setBoolProperty(self, key, boolean):
         self.setProperty(key, boolean and '1' or '')
 
+    def getBoolProperty(self, key):
+        return self.getProperty(key) == '1'
+
     def waitForVisibility(self, control):
         return waitForVisibility(control)
 
