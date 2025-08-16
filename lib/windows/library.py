@@ -1369,7 +1369,8 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
         while backgroundthread.BGThreader.working() and not util.MONITOR.abortRequested():
             util.MONITOR.waitForAbort(0.1)
 
-        self.keyListControl.addItems(jitems)
+        if jitems:
+            self.keyListControl.addItems(jitems)
 
         self.showPanelControl.selectItem(0)
         self.setFocusId(self.POSTERS_PANEL_ID)
@@ -1530,6 +1531,7 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
 
                 self.firstOfKeyItems[key] = firstMli
 
+            util.DEBUG_LOG("ADDING %s BLANK ITEMS" % len(items))
             self.showPanelControl.addItems(items)
             self.lock.release()
             break

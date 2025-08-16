@@ -540,9 +540,9 @@ class Collection(media.MediaItem):
         title = self.title.replace(' ', '.')[0:20]
         return '<{0}:{1}:{2}>'.format(self.__class__.__name__, self.key, title)
 
-    def all(self, *args, **kwargs):
-        items = plexobjects.listItems(self.server, self.key)
-        items.totalSize = items.size
+    def all(self, start=None, size=None, filter_=None, sort=None, unwatched=False, type_=None, **kwargs):
+        items = plexobjects.listItems(self.server, self.key, offset=start, limit=size)
+        items.totalSize = items.get("size") if items.get("size").asInt() else items.get("totalSize") if items.get("totalSize").asInt() else 0
         return items
 
     @property
