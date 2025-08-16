@@ -177,7 +177,7 @@
                     <height>{{ vscale(34) }}</height>
                     <font>font12</font>
                     <align>center</align>
-                    <aligny>center</aligny>
+                    <aligny>top</aligny>
                     <focusedcolor>FFFFFFFF</focusedcolor>
                     <textcolor>FFFFFFFF</textcolor>
                     <textoffsetx>15</textoffsetx>
@@ -192,7 +192,7 @@
                     <height>{{ vscale(34) }}</height>
                     <font>font12</font>
                     <align>center</align>
-                    <aligny>center</aligny>
+                    <aligny>top</aligny>
                     <focusedcolor>FFFFFFFF</focusedcolor>
                     <textcolor>FFFFFFFF</textcolor>
                     <textoffsetx>15</textoffsetx>
@@ -293,7 +293,7 @@
                             <height>{{ vscale(34) }}</height>
                             <font>font12</font>
                             <align>center</align>
-                            <aligny>center</aligny>
+                            <aligny>top</aligny>
                             <focusedcolor>FFFFFFFF</focusedcolor>
                             <textcolor>FFFFFFFF</textcolor>
                             <textoffsetx>15</textoffsetx>
@@ -306,7 +306,7 @@
                             <height>{{ vscale(34) }}</height>
                             <font>font12</font>
                             <align>left</align>
-                            <aligny>center</aligny>
+                            <aligny>top</aligny>
                             <textcolor>FFFFFFFF</textcolor>
                             <label>$INFO[Window.Property(audio)]</label>
                         </control>
@@ -317,7 +317,7 @@
                             <height>{{ vscale(34) }}</height>
                             <font>font12</font>
                             <align>center</align>
-                            <aligny>center</aligny>
+                            <aligny>top</aligny>
                             <focusedcolor>FFFFFFFF</focusedcolor>
                             <textcolor>FFFFFFFF</textcolor>
                             <textoffsetx>15</textoffsetx>
@@ -331,7 +331,7 @@
                             <height>{{ vscale(34) }}</height>
                             <font>font12</font>
                             <align>left</align>
-                            <aligny>center</aligny>
+                            <aligny>top</aligny>
                             <textcolor>FFFFFFFF</textcolor>
                             <label>$INFO[Window.Property(subtitles)]</label>
                         </control>
