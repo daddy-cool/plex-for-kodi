@@ -578,8 +578,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
             # if we're set to honor dnsRebindingProtection=1 and the server has this flag at 0 or
             # if we're set to honor publicAddressMatches=1 and the server has this flag at 0, and we haven't seen the
             # server locally, skip plex.direct handling
-            if ((util.addonSettings.honorPlextvDnsrebind and not server.dnsRebindingProtection) or
-                    (util.addonSettings.honorPlextvPam and not server.sameNetwork and not server.anyLANConnection)):
+            if (((util.addonSettings.honorPlextvDnsrebind and not server.dnsRebindingProtection) or
+                    (util.addonSettings.honorPlextvPam and not server.sameNetwork and not server.anyLANConnection))
+                    and not server.anyPDHostNotResolvable):
                 util.DEBUG_LOG("Ignoring DNS handling for plex.direct connections of: {}", server)
                 continue
             hosts += [c.address for c in server.connections]
