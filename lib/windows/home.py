@@ -1986,9 +1986,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                                                     {"index": 999})["index"])
 
             self.sectionHubs[section.key] = hubs
+            self.setBoolProperty('loading.content', False)
             if self.lastSection == section:
-                if section.server.DEFER_HUBS:
-                    self.setBoolProperty('loading.content', False)
                 self.showHubs(section, update=update, reselect_pos_dict=reselect_pos_dict)
 
     def updateHubCallback(self, hub, items=None, reselect_pos=None):
