@@ -1531,7 +1531,6 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
 
                 self.firstOfKeyItems[key] = firstMli
 
-            util.DEBUG_LOG("ADDING %s BLANK ITEMS" % len(items))
             self.showPanelControl.addItems(items)
             self.lock.release()
             break
