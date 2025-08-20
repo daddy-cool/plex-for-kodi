@@ -88,12 +88,14 @@ class PlaylistWindow(kodigui.ControlledWindow, windowutils.UtilMixin, signalsmix
         self.exitCommand = None
         self.tasks = backgroundthread.Tasks()
         self.isPlaying = False
+        self.video_progress = {}
         ChunkRequestTask.WINDOW = self
 
     def onFirstInit(self):
         self.playlistListControl = kodigui.ManagedControlList(self, self.PLAYLIST_LIST_ID, 5)
         self.setProperties()
         player.PLAYER.on('new.video', self.onNewVideo)
+        player.PLAYER.on('video.progress', self.onVideoProgress)
         self.on('playlist.filled', self.onPlaylistFilled)
 
         self.fillPlaylist()
@@ -116,6 +118,14 @@ class PlaylistWindow(kodigui.ControlledWindow, windowutils.UtilMixin, signalsmix
     def onNewVideo(self, *args, **kwargs):
         video = kwargs.get("video")
         self.playlist.setCurrent(self.playlist.getPosFromItem(video))
+
+    def onVideoProgress(self, data=None, **kwargs):
+        if not data:
+            return
+
+        util.DEBUG_LOG("Storing video progress data: {}", data)
+        gprk, prk, rk, state = data
+        self.video_progress[rk] = state
 
     def onAction(self, action):
         try:
@@ -146,6 +156,7 @@ class PlaylistWindow(kodigui.ControlledWindow, windowutils.UtilMixin, signalsmix
 
     def doClose(self):
         player.PLAYER.off('new.video', self.onNewVideo)
+        player.PLAYER.off('video.progress', self.onVideoProgress)
         self.off('playlist.filled', self.onPlaylistFilled)
         kodigui.ControlledWindow.doClose(self)
         self.tasks.cancel()
@@ -240,6 +251,7 @@ class PlaylistWindow(kodigui.ControlledWindow, windowutils.UtilMixin, signalsmix
         finally:
             self.isPlaying = False
             self.restartFill()
+            self.video_progress = {}
 
     def restartFill(self):
         threading.Thread(target=self._restartFill).start()
@@ -256,7 +268,8 @@ class PlaylistWindow(kodigui.ControlledWindow, windowutils.UtilMixin, signalsmix
                 else:
                     break
             # Update the progress for videos
-            elif mli.dataSource.type in ('episode', 'movie', 'clip'):
+            elif mli.dataSource.type in ('episode', 'movie', 'clip') and mli.dataSource.ratingKey in self.video_progress:
+                mli.dataSource.clearCache()
                 mli.dataSource.reload()
                 self.updateListItem(idx, mli.dataSource)
         else:
@@ -329,8 +342,8 @@ class PlaylistWindow(kodigui.ControlledWindow, windowutils.UtilMixin, signalsmix
         mli.setThumbnailImage(episode.thumb.asTranscodedImageURL(*self.LI_AR16X9_THUMB_DIM))
         mli.setProperty('track.duration', util.durationToShortText(episode.duration.asInt()))
         mli.setProperty('video', '1')
-        mli.setProperty('watched', episode.isWatched and '1' or '')
-        mli.setProperty('unwatched', episode.isWatched and '' or '1')
+        mli.setProperty('watched', episode.isFullyWatched and '1' or '')
+        mli.setProperty('unwatched', episode.isFullyWatched and '' or '1')
 
     def createMovieListItem(self, mli, movie):
         mli.setLabel(movie.defaultTitle)
