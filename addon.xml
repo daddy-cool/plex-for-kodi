@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-prerelease4"
+       version="0.8.0-prerelease5"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -33,12 +33,22 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Movies/Episodes: Properly vertically align audio/video/subtitle labels within textures (thanks @Mitzsch)
-- Updater: Allow postponed/dismissed updates to be triggered from the UI
-- Home: Show Update Available in user dropdown when an update is available
-- Watchlist/Shows: Remove context menu handler for seasons for now
-- Collection: Fix collections repeating themselves after CHUNKSIZE hit (240 by default); Improve performance tenfold for big collections; Implement chunking in Collection.all()
-- Home: Show green arrow besides the user thumbnail if an update is available
+- SeekDialog: When showing stream info, pressing RIGHT will show playerprocessinfo, pressing LEFT will show playerdebug
+- Core: Check plex.direct dns rebind issues more thoroughly and don't completely rely on the protection flags from the Plex server registry (often false); can lead to a slightly longer bootup time
+- Home: Always remove "Loading external hubs" property indicator; it was possible to get this message stuck when moving away too quickly from the watchlist section
+- Library/listview-16x9: Reimplement item type filter
+- Playlist: Fix playlist subsequent chunking (was broken) (thanks @BrendanMyers88)
+- Playlist: Select the currently relevant item once it's been created properly
+- Playlist: Clear persistent cache when reloading playlist items after returning from watching
+- Playlist: Massively improve resource usage on big video playlists when returning from playback by only refreshing affected items
+- Episodes: Explicitly clear persistent cache on progress
+- Home: Only trigger a forced hub refresh on screensaver wake if we're the active window
+- Playlist: Correctly show and scale video progress
+- Movies: Show duration for extras
+- Player: Don't skip to next episode after final credits marker was skipped if binge mode or skip postplay for TV isn't active (thanks @Tyri0n)
+- Episodes: When returning from playback, explicitly mark items watched on the Plex API (sometimes Plex doesn't consider items watched if the actual playback time was too short; e.g.: skipped to final credits marker immediately)
+- Player/SeekDialog: Allow for immediate skipping of a counting down marker (before you had to wait 1 second for that to work) (needs the respective AddonSetting enabled as well)
+- Player: Never show postplay for movie extras, regardless of any postplay setting
         </news>
         <assets>
             <icon>icon2.png</icon>
