@@ -819,9 +819,9 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                             # behaviour
                             elif util.addonSettings.skipMarkerTimerImmediate \
                                     and action == xbmcgui.ACTION_SELECT_ITEM and \
-                                    self._currentMarker["countdown"] is not None and \
-                                    self._currentMarker["countdown_initial"] is not None and \
-                                    self._currentMarker["countdown"] < self._currentMarker["countdown_initial"]:
+                                    self._currentMarker["countdown"] is not None:
+                                    #self._currentMarker["countdown_initial"] is not None and \
+                                    #self._currentMarker["countdown"] < self._currentMarker["countdown_initial"]:
                                 self.displayMarkers(immediate=True)
                                 self.hideOSD(skipMarkerFocus=True)
                                 return
