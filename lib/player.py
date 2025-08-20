@@ -568,7 +568,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         watchedByPerc = self.getVideoPlayedFac(ref=ref) >= self.playedThresholdPerc / 100.0 or self.player.isExternal
 
         if playedAtBH == 0 or not self.player.video.has_credit_markers:
-            util.DEBUG_LOG("SeekPlayerHandler: Watched item due to percentage")
+            util.DEBUG_LOG("SeekPlayerHandler: Watched item due to percentage: {}", watchedByPerc)
             return watchedByPerc
         elif playedAtBH == 1 and self.creditMarkerHit == "final":
             util.DEBUG_LOG("SeekPlayerHandler: Watched item due to final credits marker")
