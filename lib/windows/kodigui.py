@@ -805,7 +805,11 @@ class ManagedControlList(object):
             self.control.selectItem(pos)
 
     def setSelectedItemByDataSource(self, data_source):
-        self.setSelectedItem(self.getListItemByDataSource(data_source))
+        mli = self.getListItemByDataSource(data_source)
+        if mli:
+            self.setSelectedItem(mli)
+            return True
+        return False
 
     def removeItem(self, index):
         old = self.items.pop(index)
