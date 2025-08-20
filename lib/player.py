@@ -309,6 +309,9 @@ class SeekPlayerHandler(BasePlayerHandler):
         if util.getUserSetting('post_play_never', False):
             return False
 
+        if self.player.video and self.player.video.isExtra:
+            return False
+
         if self.playlist and self.playlist.TYPE == 'playlist':
             return False
 
@@ -940,6 +943,7 @@ class SeekPlayerHandler(BasePlayerHandler):
 
             if not self.playlist or not self.playlist.hasNext():
                 if not self.shouldShowPostPlay():
+                    util.DEBUG_LOG("SeekHandler: Not showing post-play (VideoWindowClosed)")
                     self.sessionEnded()
 
     def onVideoOSD(self):
