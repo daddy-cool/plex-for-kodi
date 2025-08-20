@@ -529,6 +529,8 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
                             self.setUserItemInfo(mli)
                             set_main_progress_to = 0
 
+                        mli.dataSource.clearCache()
+
                         if self.noRatings:
                             self.populateRatings(mli.dataSource, mli, hide_ratings=self.hideSpoilers(mli.dataSource))
 
