@@ -47,6 +47,7 @@ def update_loop():
     check_immediate = getSetting('update_check_startup', True)
     branch = getSetting('update_branch', "develop_kodi21")
     mode = getSetting('update_source', 'repository')
+    setGlobalProperty("update_available", '')
 
     updater = get_updater(mode)(branch=branch if KODI_VERSION_MAJOR > 18 else 'addon_kodi18')
 
@@ -95,7 +96,7 @@ def update_loop():
                                                                                              updater.remote_version,
                                                                                              update_version))
                     else:
-                        update_version = updater.remote_version
+                        update_version = updater.remote_version if addon_version != updater.remote_version else None
 
                     last_update_check = datetime.datetime.now()
                     setSetting('last_update_check', last_update_check)
@@ -128,6 +129,7 @@ def update_loop():
                             waitForSecs = (addonSettings.requestsTimeoutConnect * addonSettings.maxRetries1
                                            + addonSettings.requestsTimeoutRead + 2)
                             log("Waiting for UI to close for: {}s".format(waitForSecs))
+                            setGlobalProperty("update_available", '', wait=True)
                             try:
                                 waitForGPEmpty('running', timeout=waitForSecs * 10)
                             except IPCTimeoutException:
