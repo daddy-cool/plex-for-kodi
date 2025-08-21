@@ -751,21 +751,21 @@
                                 <control type="image">
                                     <right>10</right>
                                     <bottom>10</bottom>
-                                    <width>60</width>
-                                    <height>22</height>
+                                    <width>64</width>
+                                    <height>26</height>
                                     <texture>script.plex/white-square-rounded.png</texture>
                                     <colordiffuse>99000000</colordiffuse>
                                 </control>
                                 <control type="label">
-                                    <animation effect="zoom" start="42" end="42" time="0" reversible="false" center="auto" condition="true">Conditional</animation>
-                                    <right>41</right>
-                                    <bottom>8</bottom>
+                                    <animation effect="zoom" start="60" end="60" time="0" reversible="false" center="auto" condition="true">Conditional</animation>
+                                    <right>42</right>
+                                    <bottom>10</bottom>
                                     <width>auto</width>
                                     <height>26</height>
                                     <font>font32_title</font>
                                     <align>center</align>
                                     <aligny>center</aligny>
-                                    <textcolor>FFFFFFFF</textcolor>
+                                    <textcolor>FFEEEEEE</textcolor>
                                     <label>$INFO[ListItem.Property(extra.duration)]</label>
                                 </control>
                             </control>
@@ -828,21 +828,21 @@
                                     <control type="image">
                                         <right>10</right>
                                         <bottom>10</bottom>
-                                        <width>60</width>
-                                        <height>22</height>
+                                        <width>64</width>
+                                        <height>26</height>
                                         <texture>script.plex/white-square-rounded.png</texture>
                                         <colordiffuse>99000000</colordiffuse>
                                     </control>
                                     <control type="label">
-                                        <animation effect="zoom" start="42" end="42" time="0" reversible="false" center="auto" condition="true">Conditional</animation>
-                                        <right>40</right>
-                                        <bottom>8</bottom>
+                                        <animation effect="zoom" start="60" end="60" time="0" reversible="false" center="auto" condition="true">Conditional</animation>
+                                        <right>42</right>
+                                        <bottom>10</bottom>
                                         <width>auto</width>
                                         <height>26</height>
                                         <font>font32_title</font>
                                         <align>center</align>
                                         <aligny>center</aligny>
-                                        <textcolor>FFFFFFFF</textcolor>
+                                        <textcolor>FFEEEEEE</textcolor>
                                         <label>$INFO[ListItem.Property(extra.duration)]</label>
                                     </control>
                                 </control>
