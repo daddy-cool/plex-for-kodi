@@ -28,6 +28,7 @@ from .mixins.ratings import RatingsMixin
 from .mixins.playbackbtn import PlaybackBtnMixin
 from .mixins.watchlist import WatchlistUtilsMixin
 from .mixins.thememusic import ThemeMusicMixin
+from .mixins.roles import RolesMixin
 
 
 class RelatedPaginator(pagination.BaseRelatedPaginator):
@@ -36,7 +37,8 @@ class RelatedPaginator(pagination.BaseRelatedPaginator):
 
 
 class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, DeleteMediaMixin, RatingsMixin,
-                 PlaybackBtnMixin, WatchlistUtilsMixin, ThemeMusicMixin, playbacksettings.PlaybackSettingsMixin):
+                 RolesMixin, PlaybackBtnMixin, WatchlistUtilsMixin, ThemeMusicMixin,
+                 playbacksettings.PlaybackSettingsMixin):
     xmlFile = 'script-plex-seasons.xml'
     path = util.ADDON.getAddonInfo('path')
     theme = 'Main'
@@ -71,6 +73,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
         kodigui.ControlledWindow.__init__(self, *args, **kwargs)
         SeasonsMixin.__init__(*args, **kwargs)
         DeleteMediaMixin.__init__(*args, **kwargs)
+        RolesMixin.__init__(self)
         PlaybackBtnMixin.__init__(self, *args, **kwargs)
         WatchlistUtilsMixin.__init__(self)
         ThemeMusicMixin.__init__(self)
@@ -272,7 +275,8 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
             self.openItem(self.relatedListControl)
         elif controlID == self.ROLES_LIST_ID:
             if not self.fromWatchlist:
-                self.roleClicked()
+                if not self.roleClicked():
+                    return
         elif controlID == self.INFO_BUTTON_ID:
             self.infoButtonClicked()
         elif controlID == self.PLAY_BUTTON_ID:
@@ -568,52 +572,16 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
             except Exception as e:
                 util.DEBUG_LOG("Couldn't clear cache: {}", e)
 
-    def roleClicked(self):
-        mli = self.rolesListControl.getSelectedItem()
-        if not mli:
-            return
-
-        sectionRoles = busy.widthDialog(mli.dataSource.sectionRoles, '')
-
-        if not sectionRoles:
-            util.DEBUG_LOG('No sections found for actor')
-            return
-
-        if len(sectionRoles) > 1:
-            x, y = self.getRoleItemDDPosition()
-
-            options = [{'role': r, 'display': r.reasonTitle} for r in sectionRoles]
-            choice = dropdown.showDropdown(options, (x, y), pos_is_bottom=True)
-
-            if not choice:
-                return
-
-            role = choice['role']
-        else:
-            role = sectionRoles[0]
-
-        self.processCommand(opener.open(role))
-
-    def getRoleItemDDPosition(self):
+    def getRoleItemDDPosition(self, *args, **kwargs):
         y = 980
         if xbmc.getCondVisibility('Control.IsVisible(500)'):
             y += 380
         if xbmc.getCondVisibility('!String.IsEmpty(Window.Property(on.extras))'):
             y -= 200
         if xbmc.getCondVisibility('Integer.IsGreater(Window.Property(hub.focus),0) + Control.IsVisible(500)'):
-            y -= 500
+            y -= 650
 
-        tries = 0
-        focus = xbmc.getInfoLabel('Container(401).Position')
-        while tries < 2 and focus == '':
-            focus = xbmc.getInfoLabel('Container(401).Position')
-            xbmc.sleep(250)
-            tries += 1
-
-        focus = int(focus)
-
-        x = ((focus + 1) * 304) - 100
-        return x, y
+        return super(ShowWindow, self).getRoleItemDDPosition(y=y, container_id="401")
 
     def updateItems(self):
         self.fill(update=True)

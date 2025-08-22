@@ -31,6 +31,7 @@ from .mixins.playbackbtn import PlaybackBtnMixin
 from .mixins.thememusic import ThemeMusicMixin
 from .mixins.watchlist import WatchlistUtilsMixin
 from .mixins.ratings import RatingsMixin
+from .mixins.roles import RolesMixin
 
 VIDEO_RELOAD_KW = dict(includeExtras=1, includeExtrasCount=10, includeChapters=1)
 
@@ -195,7 +196,8 @@ class RedirectToEpisode(Exception):
 VIDEO_PROGRESS = OrderedDict()
 
 class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, RatingsMixin, SpoilersMixin,
-                     PlaybackBtnMixin, ThemeMusicMixin, WatchlistUtilsMixin, playbacksettings.PlaybackSettingsMixin):
+                     RolesMixin, PlaybackBtnMixin, ThemeMusicMixin, WatchlistUtilsMixin,
+                     playbacksettings.PlaybackSettingsMixin):
     xmlFile = 'script-plex-episodes.xml'
     path = util.ADDON.getAddonInfo('path')
     theme = 'Main'
@@ -240,6 +242,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         windowutils.UtilMixin.__init__(self)
         SpoilersMixin.__init__(self, *args, **kwargs)
         PlaybackBtnMixin.__init__(self, *args, **kwargs)
+        RolesMixin.__init__(self)
         WatchlistUtilsMixin.__init__(self)
         self.episode = None
         self.reset(kwargs.get('episode'), kwargs.get('season'), kwargs.get('show'))
@@ -639,7 +642,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
                     return
 
             elif controlID == self.RELATED_LIST_ID:
-                if self.relatedPaginator.boundaryHit:
+                if self.relatedPaginator and self.relatedPaginator.boundaryHit:
                     self.relatedPaginator.paginate()
                     return
                 elif action in (xbmcgui.ACTION_MOVE_LEFT, xbmcgui.ACTION_MOVE_RIGHT):
@@ -763,7 +766,8 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         elif controlID == self.ROLES_LIST_ID:
             if self.fromWatchlist:
                 return
-            self.roleClicked()
+            if not self.roleClicked():
+                return
         elif controlID == self.EXTRA_LIST_ID:
             self.openItem(self.extraListControl)
         elif controlID == self.RELATED_LIST_ID:
@@ -801,32 +805,9 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         if self.fromWatchlist:
             return
 
-        mli = self.rolesListControl.getSelectedItem()
-        if not mli:
-            return
+        return super(EpisodesWindow, self).roleClicked()
 
-        sectionRoles = busy.widthDialog(mli.dataSource.sectionRoles, '')
-
-        if not sectionRoles:
-            util.DEBUG_LOG('No sections found for actor')
-            return
-
-        if len(sectionRoles) > 1:
-            x, y = self.getRoleItemDDPosition()
-
-            options = [{'role': r, 'display': r.reasonTitle} for r in sectionRoles]
-            choice = dropdown.showDropdown(options, (x, y), pos_is_bottom=False)
-
-            if not choice:
-                return
-
-            role = choice['role']
-        else:
-            role = sectionRoles[0]
-
-        self.processCommand(opener.open(role))
-
-    def getRoleItemDDPosition(self):
+    def getRoleItemDDPosition(self, *args, **kwargs):
         y = 900
         if xbmc.getCondVisibility('Control.IsVisible(500)'):
             y += 380
@@ -839,17 +820,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         if xbmc.getCondVisibility('Integer.IsGreater(Window.Property(hub.focus),1) + Control.IsVisible(501)'):
             y -= 500
 
-        tries = 0
-        focus = xbmc.getInfoLabel('Container(402).Position')
-        while tries < 2 and focus == '':
-            focus = xbmc.getInfoLabel('Container(402).Position')
-            xbmc.sleep(250)
-            tries += 1
-
-        focus = int(focus)
-
-        x = ((focus + 1) * 304) - 100
-        return x, y
+        return super(EpisodesWindow, self).getRoleItemDDPosition(y=y, container_id="402")
 
     def getSeasons(self):
         if not self.seasons:

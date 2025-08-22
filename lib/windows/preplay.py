@@ -24,6 +24,7 @@ from .mixins.ratings import RatingsMixin
 from .mixins.playbackbtn import PlaybackBtnMixin
 from .mixins.thememusic import ThemeMusicMixin
 from .mixins.watchlist import WatchlistUtilsMixin
+from .mixins.roles import RolesMixin
 
 VIDEO_RELOAD_KW = dict(includeExtras=1, includeExtrasCount=10, includeChapters=1, includeReviews=1)
 
@@ -34,7 +35,7 @@ class RelatedPaginator(pagination.BaseRelatedPaginator):
 
 
 class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixin, PlaybackBtnMixin, ThemeMusicMixin,
-                    WatchlistUtilsMixin):
+                    RolesMixin, WatchlistUtilsMixin):
     xmlFile = 'script-plex-pre_play.xml'
     path = util.ADDON.getAddonInfo('path')
     theme = 'Main'
@@ -73,6 +74,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
     def __init__(self, *args, **kwargs):
         kodigui.ControlledWindow.__init__(self, *args, **kwargs)
         PlaybackBtnMixin.__init__(self)
+        RolesMixin.__init__(self)
         WatchlistUtilsMixin.__init__(self)
         self.video = kwargs.get('video')
         self.parentList = kwargs.get('parent_list')
@@ -215,7 +217,8 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         elif controlID == self.ROLES_LIST_ID:
             if self.fromWatchlist:
                 return
-            self.roleClicked()
+            if not self.roleClicked():
+                return
         elif controlID == self.PLAY_BUTTON_ID:
             self.playVideo()
         elif controlID in self.WL_RELEVANT_BTNS and self.fromWatchlist and self.wl_availability:
@@ -392,32 +395,6 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         util.LOG('Media DELETE: {0} - {1}', self.video, success and 'SUCCESS' or 'FAILED')
         return success
 
-    def roleClicked(self):
-        mli = self.rolesListControl.getSelectedItem()
-        if not mli:
-            return
-
-        sectionRoles = busy.widthDialog(mli.dataSource.sectionRoles, '')
-
-        if not sectionRoles:
-            util.DEBUG_LOG('No sections found for actor')
-            return
-
-        if len(sectionRoles) > 1:
-            x, y = self.getRoleItemDDPosition()
-
-            options = [{'role': r, 'display': r.reasonTitle} for r in sectionRoles]
-            choice = dropdown.showDropdown(options, (x, y), pos_is_bottom=False)
-
-            if not choice:
-                return
-
-            role = choice['role']
-        else:
-            role = sectionRoles[0]
-
-        self.processCommand(opener.open(role))
-
     def getVideos(self):
         if not self.videos:
             if self.video.TYPE == 'episode':
@@ -495,21 +472,6 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
             self.video = self.videos[pos]
 
         return True
-
-    def getRoleItemDDPosition(self):
-        y = util.vscale(600)
-
-        tries = 0
-        focus = xbmc.getInfoLabel('Container(400).Position')
-        while tries < 2 and focus == '':
-            focus = xbmc.getInfoLabel('Container(400).Position')
-            xbmc.sleep(250)
-            tries += 1
-
-        focus = int(focus)
-
-        x = ((focus + 1) * 304) - 100
-        return x, y
 
     def playVideo(self, from_auto_play=False):
         if self.playBtnClicked:
