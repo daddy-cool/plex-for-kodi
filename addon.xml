@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-prerelease5.1"
+       version="0.8.0-prerelease5.1b"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -33,8 +33,7 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Updater: Properly reset update_available and don't reoffer the same update
-- Movies: Extras: Slightly increase extra duration display size
+- SeekDialog: Fix post play auto play timer not showing when video ended with final marker skip; introduced in prerelease5
         </news>
         <assets>
             <icon>icon2.png</icon>
