@@ -2279,14 +2279,19 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.sendTimeline(state=self.player.STATE_STOPPED, t=self.duration - 1000)
 
         # go to next video immediately (post play or next episode on bingeMode)
-        if self.handler.playlist and self.handler.playlist.hasNext() and (self.bingeMode or self.skipPostPlay):
-            if not self.handler.queuingNext:
-                # skip final marker
-                util.DEBUG_LOG("{}: {} final marker, going to next video", context,
-                    immediate and "Immediately skipping" or "Skipping")
-                self.prepareNewPlayback(queuing_next=True, ignore_tick=True, ignore_input=True, with_timeline=False)
+        if self.handler.playlist and self.handler.playlist.hasNext():
+            if self.bingeMode or self.skipPostPlay:
+                if not self.handler.queuingNext:
+                    # skip final marker
+                    util.DEBUG_LOG("{}: {} final marker, going to next video", context,
+                        immediate and "Immediately skipping" or "Skipping")
+                    self.prepareNewPlayback(queuing_next=True, ignore_tick=True, ignore_input=True, with_timeline=False)
+                    self.player.stop()
+                return True
+            else:
+                util.DEBUG_LOG("{}: Skipping final marker in episode, stopping", context)
                 self.player.stop()
-            return True
+                return True
         else:
             util.DEBUG_LOG("{}: Skipping final marker, stopping", context)
             self.stop()
