@@ -262,6 +262,9 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
 
     def toggleWatched(self, item, state=None, **kw):
         watched = super(PrePlayWindow, self).toggleWatched(item, state=state, **kw)
+        if watched is None:
+            return
+
         if watched:
             self.wl_auto_remove(self.video)
             self.checkIsWatchlisted(self.video)

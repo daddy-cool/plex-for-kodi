@@ -1186,7 +1186,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
                 return
             item = mli.dataSource
 
-        super(HomeWindow, self).toggleWatched(item, state=state)
+        if super(HomeWindow, self).toggleWatched(item, state=state) is None:
+            return
+
         if item.isFullyWatched:
             guid = item.show().guid if item.TYPE in ('episode', 'season') else item.guid
             removeFromWatchlistBlind(guid)

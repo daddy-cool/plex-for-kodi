@@ -317,6 +317,9 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
 
     def toggleWatched(self, item, state=None, **kw):
         watched = super(ShowWindow, self).toggleWatched(item, state=state, **kw)
+        if watched is None:
+            return
+
         if watched:
             self.wl_auto_remove(self.mediaItem)
             self.checkIsWatchlisted(self.mediaItem)

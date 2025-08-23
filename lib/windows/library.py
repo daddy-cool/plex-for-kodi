@@ -600,6 +600,9 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
         item = mli.dataSource
         guid = item.show().guid if item.TYPE in ('episode', 'season') else item.guid
         watched = super(LibraryWindow, self).toggleWatched(item)
+        if watched is None:
+            return
+
         if watched:
             removeFromWatchlistBlind(guid)
         self.updateUnwatchedAndProgress(mli)

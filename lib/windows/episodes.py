@@ -805,6 +805,9 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
 
         item = item or mli.dataSource
         watched = super(EpisodesWindow, self).toggleWatched(item, state=state, **VIDEO_RELOAD_KW)
+        if watched is None:
+            return
+
         self.show_ = (self.episode or self.season).show().reload(includeExtras=1, includeExtrasCount=10,
                                                                  includeOnDeck=1)
         if watched:

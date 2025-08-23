@@ -2,6 +2,8 @@
 
 from kodi_six import xbmcgui
 from lib import util
+from .. import optionsdialog
+from lib.i18n import T
 
 
 class CommonMixin(object):
@@ -19,6 +21,21 @@ class CommonMixin(object):
         """
         if state is None:
             state = not item.isFullyWatched
+
+        if util.getSetting('home_confirm_actions') and item.TYPE in ('season', 'show'):
+            if item.TYPE == 'season':
+                title = u"{} - {}".format(item.parentTitle, item.title)
+            else:
+                title = item.title
+            button = optionsdialog.show(
+                T(32319, "Mark Played") if state else T(32318, "Mark Unplayed"),  title,
+                T(32328, 'Yes'),
+                T(32329, 'No'),
+                dialog_props=getattr(self, "carriedProps", getattr(self, "dialogProps", None))
+            )
+
+            if button != 0:
+                return
 
         util.DEBUG_LOG("Toggling watched for {} to: {}", item, state)
 
