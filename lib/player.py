@@ -227,6 +227,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.waitingForSOS = False
         self.chapters = None
         self.stoppedManually = False
+        self.endedManually = False
         self.inBingeMode = False
         self.skipPostPlay = False
         self.prePlayWitnessed = False
@@ -249,6 +250,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         self._subtitleStreamOffset = None
         self.mode = self.MODE_RELATIVE
         self.ended = False
+        self.endedManually = False
         self.stoppedManually = False
         self.prePlayWitnessed = False
         self.queuingNext = False
@@ -315,7 +317,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         if self.playlist and self.playlist.TYPE == 'playlist':
             return False
 
-        if not self.stoppedManually and self.skipPostPlay:
+        if not (self.stoppedManually or self.endedManually) and self.skipPostPlay:
             return False
 
         if (not util.addonSettings.postplayAlways and self._lastDuration <= FIVE_MINUTES_MILLIS)\
@@ -356,7 +358,7 @@ class SeekPlayerHandler(BasePlayerHandler):
             if self.showPostPlay():
                 return True
 
-        if not self.playlist or self.stoppedManually or (self.playlist and not hasNext):
+        if not self.playlist or self.stoppedManually or self.endedManually or (self.playlist and not hasNext):
             return False
 
         self.player.playVideoPlaylist(self.playlist, handler=self, resume=False)
@@ -638,7 +640,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                         return
 
         if (self.seeking not in (self.SEEK_IN_PROGRESS, self.SEEK_PLAYLIST) or
-                (self.seeking == self.SEEK_PLAYLIST and self.stoppedManually)):
+                (self.seeking == self.SEEK_PLAYLIST and (self.stoppedManually or self.endedManually))):
             self.hideOSD(delete=True)
             self.sessionEnded()
 

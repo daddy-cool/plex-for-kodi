@@ -2290,6 +2290,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                 return True
             else:
                 util.DEBUG_LOG("{}: Skipping final marker in episode, stopping", context)
+                self.handler.endedManually = True
                 self.player.stop()
                 return True
         else:
