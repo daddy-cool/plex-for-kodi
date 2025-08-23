@@ -982,9 +982,6 @@ class _MWBackground(ControlledWindow):
 
 
 class MultiWindow(object):
-    __slots__ = ("_windows", "_next", "_properties", "_current", "_allClosed", "exitCommand", "_currentOnAction",
-                 "_closeSignalled")
-
     def __init__(self, windows=None, default_window=None, **kwargs):
         self._windows = windows
         self._next = default_window or self._windows[0]
