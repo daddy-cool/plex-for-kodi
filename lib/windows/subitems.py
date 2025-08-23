@@ -29,6 +29,7 @@ from .mixins.playbackbtn import PlaybackBtnMixin
 from .mixins.watchlist import WatchlistUtilsMixin
 from .mixins.thememusic import ThemeMusicMixin
 from .mixins.roles import RolesMixin
+from .mixins.common import CommonMixin
 
 
 class RelatedPaginator(pagination.BaseRelatedPaginator):
@@ -37,7 +38,7 @@ class RelatedPaginator(pagination.BaseRelatedPaginator):
 
 
 class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, DeleteMediaMixin, RatingsMixin,
-                 RolesMixin, PlaybackBtnMixin, WatchlistUtilsMixin, ThemeMusicMixin,
+                 RolesMixin, PlaybackBtnMixin, WatchlistUtilsMixin, ThemeMusicMixin, CommonMixin,
                  playbacksettings.PlaybackSettingsMixin):
     xmlFile = 'script-plex-seasons.xml'
     path = util.ADDON.getAddonInfo('path')
@@ -73,7 +74,6 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
         kodigui.ControlledWindow.__init__(self, *args, **kwargs)
         SeasonsMixin.__init__(*args, **kwargs)
         DeleteMediaMixin.__init__(*args, **kwargs)
-        RolesMixin.__init__(self)
         PlaybackBtnMixin.__init__(self, *args, **kwargs)
         WatchlistUtilsMixin.__init__(self)
         ThemeMusicMixin.__init__(self)
@@ -226,6 +226,14 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
                         self.lastNonOptionsFocusID = None
                         return
 
+            elif controlID == self.SUB_ITEM_LIST_ID and self.isWatchedAction(action):
+                item = self.subItemListControl.getSelectedItem()
+                if not item.dataSource:
+                    return
+
+                self.toggleWatched(item.dataSource)
+                return
+
             elif action in (xbmcgui.ACTION_NAV_BACK, xbmcgui.ACTION_CONTEXT_MENU):
                 if not xbmc.getCondVisibility('ControlGroup({0}).HasFocus(0)'.format(
                         self.OPTIONS_GROUP_ID)) and \
@@ -306,6 +314,15 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
             self.setProperty('on.extras', '')
         elif xbmc.getCondVisibility('ControlGroup(50).HasFocus(0) + !ControlGroup(300).HasFocus(0)'):
             self.setProperty('on.extras', '1')
+
+    def toggleWatched(self, item, state=None, **kw):
+        watched = super(ShowWindow, self).toggleWatched(item, state=state, **kw)
+        if watched:
+            self.wl_auto_remove(self.mediaItem)
+            self.checkIsWatchlisted(self.mediaItem)
+        self.updateItems()
+        self.updateProperties()
+        util.MONITOR.watchStatusChanged()
 
     def getMediaItems(self):
         return False
@@ -530,17 +547,9 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
         if choice['key'] == 'play_next':
             xbmc.executebuiltin('PlayerControl(Next)')
         elif choice['key'] == 'mark_watched':
-            item.markWatched()
-            self.wl_auto_remove(self.mediaItem)
-            self.checkIsWatchlisted(self.mediaItem)
-            self.updateItems()
-            self.updateProperties()
-            util.MONITOR.watchStatusChanged()
+            self.toggleWatched(item, state=True)
         elif choice['key'] == 'mark_unwatched':
-            item.markUnwatched()
-            self.updateItems()
-            self.updateProperties()
-            util.MONITOR.watchStatusChanged()
+            self.toggleWatched(item, state=False)
         elif choice['key'] == 'to_section':
             self.cameFrom = "library"
             section = plexlibrary.LibrarySection.fromFilter(self.mediaItem)

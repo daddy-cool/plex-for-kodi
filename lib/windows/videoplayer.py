@@ -112,7 +112,6 @@ class VideoPlayerWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RolesMi
     def __init__(self, *args, **kwargs):
         kodigui.ControlledWindow.__init__(self, *args, **kwargs)
         windowutils.UtilMixin.__init__(self)
-        RolesMixin.__init__(self)
         SpoilersMixin.__init__(self, *args, **kwargs)
         self.playQueue = kwargs.get('play_queue')
         self.video = kwargs.get('video')

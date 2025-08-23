@@ -25,6 +25,7 @@ from .mixins.playbackbtn import PlaybackBtnMixin
 from .mixins.thememusic import ThemeMusicMixin
 from .mixins.watchlist import WatchlistUtilsMixin
 from .mixins.roles import RolesMixin
+from .mixins.common import CommonMixin
 
 VIDEO_RELOAD_KW = dict(includeExtras=1, includeExtrasCount=10, includeChapters=1, includeReviews=1)
 
@@ -35,7 +36,7 @@ class RelatedPaginator(pagination.BaseRelatedPaginator):
 
 
 class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixin, PlaybackBtnMixin, ThemeMusicMixin,
-                    RolesMixin, WatchlistUtilsMixin):
+                    RolesMixin, CommonMixin, WatchlistUtilsMixin):
     xmlFile = 'script-plex-pre_play.xml'
     path = util.ADDON.getAddonInfo('path')
     theme = 'Main'
@@ -60,6 +61,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
     HOME_BUTTON_ID = 201
     SEARCH_BUTTON_ID = 202
 
+    MAIN_BUTTON_GROUP_ID = 300
     INFO_BUTTON_ID = 304
     PLAY_BUTTON_ID = 302
     TRAILER_BUTTON_ID = 303
@@ -74,7 +76,6 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
     def __init__(self, *args, **kwargs):
         kodigui.ControlledWindow.__init__(self, *args, **kwargs)
         PlaybackBtnMixin.__init__(self)
-        RolesMixin.__init__(self)
         WatchlistUtilsMixin.__init__(self)
         self.video = kwargs.get('video')
         self.parentList = kwargs.get('parent_list')
@@ -180,12 +181,16 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
                         self.setFocusId(self.OPTIONS_GROUP_ID)
                         return
 
-            elif action == xbmcgui.ACTION_LAST_PAGE and xbmc.getCondVisibility('ControlGroup(300).HasFocus(0)'):
+            elif self.isWatchedAction(action) and xbmc.getCondVisibility('ControlGroup({}).HasFocus(0)'.format(self.MAIN_BUTTON_GROUP_ID)):
+                self.toggleWatched(self.video)
+                return
+
+            elif action == xbmcgui.ACTION_LAST_PAGE and xbmc.getCondVisibility('ControlGroup({}).HasFocus(0)'.format(self.MAIN_BUTTON_GROUP_ID)):
                 next(self)
             elif action == xbmcgui.ACTION_NEXT_ITEM:
                 self.setFocusId(300)
                 next(self)
-            elif action == xbmcgui.ACTION_FIRST_PAGE and xbmc.getCondVisibility('ControlGroup(300).HasFocus(0)'):
+            elif action == xbmcgui.ACTION_FIRST_PAGE and xbmc.getCondVisibility('ControlGroup({}).HasFocus(0)'.format(self.MAIN_BUTTON_GROUP_ID)):
                 self.prev()
             elif action == xbmcgui.ACTION_PREV_ITEM:
                 self.setFocusId(300)
@@ -255,6 +260,14 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         elif xbmc.getCondVisibility('ControlGroup(50).HasFocus(0) + !ControlGroup(300).HasFocus(0)'):
             self.setProperty('on.extras', '1')
 
+    def toggleWatched(self, item, state=None, **kw):
+        watched = super(PrePlayWindow, self).toggleWatched(item, state=state, **kw)
+        if watched:
+            self.wl_auto_remove(self.video)
+            self.checkIsWatchlisted(self.video)
+        self.refreshInfo()
+        util.MONITOR.watchStatusChanged()
+
     def searchButtonClicked(self):
         self.processCommand(search.dialog(self, section_id=self.video.getLibrarySectionId() or None))
 
@@ -322,15 +335,9 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         if choice['key'] == 'play_next':
             xbmc.executebuiltin('PlayerControl(Next)')
         elif choice['key'] == 'mark_watched':
-            self.video.markWatched(**VIDEO_RELOAD_KW)
-            self.wl_auto_remove(self.video)
-            self.refreshInfo()
-            self.checkIsWatchlisted(self.video)
-            util.MONITOR.watchStatusChanged()
+            self.toggleWatched(self.video, state=True, **VIDEO_RELOAD_KW)
         elif choice['key'] == 'mark_unwatched':
-            self.video.markUnwatched(**VIDEO_RELOAD_KW)
-            self.refreshInfo()
-            util.MONITOR.watchStatusChanged()
+            self.toggleWatched(self.video, state=False, **VIDEO_RELOAD_KW)
         elif choice['key'] == 'to_season':
             self.processCommand(opener.open(self.video.parentRatingKey))
         elif choice['key'] == 'to_show':

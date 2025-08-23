@@ -32,6 +32,7 @@ from .mixins.thememusic import ThemeMusicMixin
 from .mixins.watchlist import WatchlistUtilsMixin
 from .mixins.ratings import RatingsMixin
 from .mixins.roles import RolesMixin
+from .mixins.common import CommonMixin
 
 VIDEO_RELOAD_KW = dict(includeExtras=1, includeExtrasCount=10, includeChapters=1)
 
@@ -196,7 +197,7 @@ class RedirectToEpisode(Exception):
 VIDEO_PROGRESS = OrderedDict()
 
 class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, RatingsMixin, SpoilersMixin,
-                     RolesMixin, PlaybackBtnMixin, ThemeMusicMixin, WatchlistUtilsMixin,
+                     RolesMixin, PlaybackBtnMixin, ThemeMusicMixin, WatchlistUtilsMixin, CommonMixin,
                      playbacksettings.PlaybackSettingsMixin):
     xmlFile = 'script-plex-episodes.xml'
     path = util.ADDON.getAddonInfo('path')
@@ -242,7 +243,6 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         windowutils.UtilMixin.__init__(self)
         SpoilersMixin.__init__(self, *args, **kwargs)
         PlaybackBtnMixin.__init__(self, *args, **kwargs)
-        RolesMixin.__init__(self)
         WatchlistUtilsMixin.__init__(self)
         self.episode = None
         self.reset(kwargs.get('episode'), kwargs.get('season'), kwargs.get('show'))
@@ -637,6 +637,13 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             elif controlID == self.EPISODE_LIST_ID:
                 if self.checkForHeaderFocus(action):
                     return
+                elif self.isWatchedAction(action):
+                    mli = self.episodeListControl.getSelectedItem()
+                    if not mli or mli.getProperty("is.boundary"):
+                        return
+                    self.toggleWatched(mli)
+                    self.selectEpisode()
+                    return
                 elif action == xbmcgui.ACTION_CONTEXT_MENU:
                     self.optionsButtonClicked(from_item=True)
                     return
@@ -791,6 +798,20 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             self.setProperty('on.extras', '')
         elif xbmc.getCondVisibility('ControlGroup(50).HasFocus(0) + !ControlGroup(300).HasFocus(0) + !ControlGroup(1300).HasFocus(0)'):
             self.setProperty('on.extras', '1')
+
+    def toggleWatched(self, mli=None, item=None, state=None, **kw):
+        if not mli and not item:
+            return
+
+        item = item or mli.dataSource
+        watched = super(EpisodesWindow, self).toggleWatched(item, state=state, **VIDEO_RELOAD_KW)
+        self.show_ = (self.episode or self.season).show().reload(includeExtras=1, includeExtrasCount=10,
+                                                                 includeOnDeck=1)
+        if watched:
+            self.wl_auto_remove(self.show_)
+            self.checkIsWatchlisted(self.show_)
+        self.updateItems(mli)
+        util.MONITOR.watchStatusChanged()
 
     def openItem(self, control=None, item=None, came_from=None):
         if not item:
@@ -1099,29 +1120,13 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         if choice['key'] == 'play_next':
             xbmc.executebuiltin('PlayerControl(Next)')
         elif choice['key'] == 'mark_watched':
-            mli.dataSource.markWatched(**VIDEO_RELOAD_KW)
-            self.show_ = (self.episode or self.season).show().reload(includeExtras=1, includeExtrasCount=10,
-                                                                     includeOnDeck=1)
-            self.wl_auto_remove(self.show_)
-            self.updateItems(mli)
-            self.checkIsWatchlisted(self.show_)
-            util.MONITOR.watchStatusChanged()
+            self.toggleWatched(mli, state=True)
         elif choice['key'] == 'mark_unwatched':
-            mli.dataSource.markUnwatched(**VIDEO_RELOAD_KW)
-            self.updateItems(mli)
-            util.MONITOR.watchStatusChanged()
+            self.toggleWatched(mli, state=False)
         elif choice['key'] == 'mark_season_watched':
-            self.season.markWatched(**VIDEO_RELOAD_KW)
-            self.show_ = (self.episode or self.season).show().reload(includeExtras=1, includeExtrasCount=10,
-                                                                     includeOnDeck=1)
-            self.wl_auto_remove(self.show_)
-            self.updateItems()
-            self.checkIsWatchlisted(self.show_)
-            util.MONITOR.watchStatusChanged()
+            self.toggleWatched(item=self.season, state=True)
         elif choice['key'] == 'mark_season_unwatched':
-            self.season.markUnwatched(**VIDEO_RELOAD_KW)
-            self.updateItems()
-            util.MONITOR.watchStatusChanged()
+            self.toggleWatched(item=self.season, state=False)
         elif choice['key'] == 'to_show':
             self.cameFrom = "show"
             self.processCommand(opener.open(

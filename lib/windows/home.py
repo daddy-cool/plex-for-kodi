@@ -27,6 +27,7 @@ from . import search
 from . import background
 from .mixins.spoilers import SpoilersMixin
 from .mixins.watchlist import removeFromWatchlistBlind
+from .mixins.common import CommonMixin
 
 
 HUBS_REFRESH_INTERVAL = 300  # 5 Minutes
@@ -286,7 +287,7 @@ class ServerListItem(kodigui.ManagedListItem):
         self.unHookSignals()
 
 
-class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
+class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMixin):
     xmlFile = 'script-plex-home.xml'
     path = util.ADDON.getAddonInfo('path')
     theme = 'Main'
@@ -996,6 +997,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                     _continue = self.checkHubItem(controlID, action=action)
                     if not _continue:
                         return
+                elif self.isWatchedAction(action):
+                    self.toggleWatched(controlID)
+                    return
                 elif action == xbmcgui.ACTION_PLAYER_PLAY:
                     self.hubItemClicked(controlID, auto_play=True)
                     return
@@ -1167,6 +1171,27 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
         ret.button = button
 
         return ret
+
+    def toggleWatched(self, controlID=None, item=None, state=None):
+        if not controlID and not item:
+            return
+
+        if controlID:
+            control = self.hubControls[controlID - 400]
+            mli = control.getSelectedItem()
+            if not mli:
+                return
+
+            if mli.dataSource is None:
+                return
+            item = mli.dataSource
+
+        super(HomeWindow, self).toggleWatched(item, state=state)
+        if item.isFullyWatched:
+            guid = item.show().guid if item.TYPE in ('episode', 'season') else item.guid
+            removeFromWatchlistBlind(guid)
+        self._updateOnDeckHubs()
+
 
     def searchButtonClicked(self):
         self.processCommand(search.dialog(self))
@@ -1696,12 +1721,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, SpoilersMixin):
                     return
 
             if choice["key"] == "mark_watched":
-                mli.dataSource.markWatched()
-                if mli.dataSource.isFullyWatched:
-                    guid = mli.dataSource.show().guid if mli.dataSource.TYPE in ('episode',
-                                                                                 'season') else mli.dataSource.guid
-                    removeFromWatchlistBlind(guid)
-                self._updateOnDeckHubs()
+                self.toggleWatched(item=mli.dataSource, state=True)
 
             elif choice["key"] == "mark_unwatched":
                 mli.dataSource.markUnwatched()
