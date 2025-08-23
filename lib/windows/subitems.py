@@ -65,6 +65,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
 
     PROGRESS_IMAGE_ID = 250
 
+    MAIN_BUTTON_GROUP_ID = 300
     INFO_BUTTON_ID = 301
     PLAY_BUTTON_ID = 302
     SHUFFLE_BUTTON_ID = 303
@@ -252,6 +253,9 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
             elif action == xbmcgui.ACTION_PREV_ITEM:
                 self.setFocusId(300)
                 self.prev()
+            elif self.isWatchedAction(action) and xbmc.getCondVisibility('ControlGroup({}).HasFocus(0)'.format(self.MAIN_BUTTON_GROUP_ID)):
+                self.toggleWatched(self.mediaItem)
+                return
 
             if action == xbmcgui.ACTION_MOVE_UP and (controlID == self.SUB_ITEM_LIST_ID or
                     self.INFO_BUTTON_ID <= controlID <= self.OPTIONS_BUTTON_ID):
