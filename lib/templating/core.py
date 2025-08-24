@@ -62,7 +62,11 @@ class TemplateEngine(object):
 
     def init(self, target_dir, template_dir, custom_template_dir):
         self.target_dir = target_dir
-        if not os.access(target_dir, os.W_OK):
+
+
+        # Alternative to checking env var: automatically set if dir isn't
+        # writable with `if not os.access(path, os.W_OK):`
+        if os.getenv("INSTALLATION_DIR_AVOID_WRITE"):
             # Use the user addon data directory in installations where the extension installation directory is not writable, for example when the addon is installed through the system package manager
             # Redirect template write target_dir to writable addon_data
             writable_base = os.path.join(PROFILE, "resources/skins/Main/1080i")

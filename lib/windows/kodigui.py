@@ -43,7 +43,7 @@ class BaseFunctions(object):
     @classmethod
     def open(cls, **kwargs):
         path = cls.path
-        if not os.access(path, os.W_OK):
+        if os.getenv("INSTALLATION_DIR_AVOID_WRITE"):
             path = util.PROFILE
         window = cls(xmlFile=cls.xmlFile, path=path, theme=cls.theme, res=cls.res, **kwargs)
         window.modal()
@@ -53,7 +53,7 @@ class BaseFunctions(object):
     def create(cls, show=True, **kwargs):
         # Use the user addon data directory in installations where the extension installation directory is not writable
         path = cls.path
-        if not os.access(path, os.W_OK):
+        if os.getenv("INSTALLATION_DIR_AVOID_WRITE"):
             path = util.PROFILE
         window = cls(xmlFile=cls.xmlFile, path=path, theme=cls.theme, res=cls.res, **kwargs)
 
