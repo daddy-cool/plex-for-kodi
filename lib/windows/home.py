@@ -1305,8 +1305,9 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
         with self.lock:
             self.setProperty('hub.focus', '')
             self.displayServerAndUser()
-            self.loadLibrarySettings()
-            self.loadHubSettings()
+            if plexapp.SERVERMANAGER.selectedServer:
+                self.loadLibrarySettings()
+                self.loadHubSettings()
             if not plexapp.SERVERMANAGER.selectedServer:
                 self.setFocusId(self.USER_BUTTON_ID)
                 return False
@@ -2677,7 +2678,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
                 item = ServerListItem(s.name, not s.owned and s.owner or '', data_source=s)
                 item.uuid = s.uuid
                 item.onUpdate()
-                item.setProperty('current', plexapp.SERVERMANAGER.selectedServer.uuid == s.uuid and '1' or '')
+                if plexapp.SERVERMANAGER.selectedServer:
+                    item.setProperty('current', plexapp.SERVERMANAGER.selectedServer.uuid == s.uuid and '1' or '')
                 items.append(item)
 
             if len(items) > 1:
