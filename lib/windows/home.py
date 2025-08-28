@@ -2726,22 +2726,23 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
 
         self.changingServer = True
 
-        # this is broken
-        with busy.BusySignalContext(plexapp.util.APP, "change:selectedServer") as bc:
-            self.setFocusId(self.SECTION_LIST_ID)
+        self.setFocusId(self.SECTION_LIST_ID)
 
-            # fixme: this might still trigger a dialog, re-triggering the previously opened windows
-            if not self._shuttingDown and not server.isReachable():
-                if server.pendingReachabilityRequests > 0:
-                    util.messageDialog(T(32339, 'Server is not accessible'), T(32340, 'Connection tests are in '
-                                                                                      'progress. Please wait.'))
-                else:
-                    util.messageDialog(
-                        T(32339, 'Server is not accessible'), T(32341, 'Server is not accessible. Please sign into '
-                                                                       'your server and check your connection.')
-                    )
-                bc.ignoreSignal = True
-                return
+        # fixme: this might still trigger a dialog, re-triggering the previously opened windows
+        if not self._shuttingDown and not server.isReachable():
+            if server.pendingReachabilityRequests > 0:
+                util.messageDialog(T(32339, 'Server is not accessible'), T(32340, 'Connection tests are in '
+                                                                                  'progress. Please wait.'))
+            else:
+                util.messageDialog(
+                    T(32339, 'Server is not accessible'), T(32341, 'Server is not accessible. Please sign into '
+                                                                   'your server and check your connection.')
+                )
+            self.changingServer = False
+            return
+
+
+        with busy.BusySignalContext(plexapp.util.APP, "change:selectedServer") as bc:
 
             changed = plexapp.SERVERMANAGER.setSelectedServer(server, force=True)
             if not changed:
