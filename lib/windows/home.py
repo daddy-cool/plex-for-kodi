@@ -593,7 +593,13 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
 
         newHosts = set(pdHosts) - set(knownHosts)
         if newHosts:
-            pdm.newHosts(newHosts, source=source)
+            force_mapping = None
+            # even for docker hosts we might want to force the mapping if it's the active connection and it didn't
+            # resolve
+            if server.activeConnection and not server.activeConnection.pdHostnameResolved:
+                force_mapping = server.activeConnection.address
+                util.DEBUG_LOG("Forcing mapping for active connection via: {}", server.activeConnection.address)
+            pdm.newHosts(newHosts, source=source, force_mapping=force_mapping)
         diffLen = len(pdm.diff)
 
         # there are situations where the myPlexManager's resources are ready earlier than
