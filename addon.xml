@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-prerelease7"
+       version="0.8.0-prerelease7.1"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -33,13 +33,11 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Movies: Context menu/OK/ENTER longpress opens resume menu (as with episodes)
-- Core: PlexServer: Don't fail on large rawVersion numbers of mobile clients
-- Core: PlexServerManager: Partially revert 2023 changes for local connections
-- Main: Use dynamic timeouts for finding available servers; don't insist on preferredServer when local connection is defined
-- Home: Don't fail hard when no currently selected server is available (thanks @Leystryku)
-- Home: After selecting an unavailable server from the dropdown, shutdown wasn't possible (thanks @Leystryku)
-- Home: When selecting an unavailable server from the dropdown, and we still have connection tests in progress, don't overlay with loading state
+- Core: Write templates to user directory instead of plugin directory when env var INSTALLATION_DIR_AVOID_WRITE is set (useful when plugin directory isn't writable) (thanks @bluedrink)
+- Core: Re-gain python 2.7 compatibility with recent changes
+- Core/plex.direct: Fix plex.direct host mapping not being triggered in certain situations (local docker IP mapped to VM for example) (thanks @Baniel__ for the hint)
+- Core/plex.direct: Don't consider a resolved plex.direct domain with IP 0.0.0.0 as "successfully resolved"
+- Postplay: Scroll titles (instead of cutting them off + ellipsis); scroll multiline summaries
         </news>
         <assets>
             <icon>icon2.png</icon>
