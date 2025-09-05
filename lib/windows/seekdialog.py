@@ -1009,6 +1009,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                 if delete:
                     del self.playlistDialog
                     self.playlistDialog = None
+                    self.playlistDialogVisible = False
                     util.garbageCollect()
 
             self.killTimeKeeper()
@@ -2541,10 +2542,11 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.playlistDialogVisible = True
         self.playlistDialog.doModal()
         self.resetTimeout()
-        self.playlistDialog.doClose()
+        if self.playlistDialog:
+            self.playlistDialog.doClose()
+            self.setFocusId(self.PLAYLIST_BUTTON_ID)
         self.playlistDialog = None
         self.playlistDialogVisible = False
-        self.setFocusId(self.PLAYLIST_BUTTON_ID)
 
     def osdVisible(self):
         return xbmc.getCondVisibility('Control.IsVisible(801)')
