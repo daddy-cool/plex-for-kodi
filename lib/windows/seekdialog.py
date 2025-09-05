@@ -2590,6 +2590,7 @@ class PlaylistDialog(kodigui.BaseDialog, SpoilersMixin):
     LI_SQUARE_THUMB_DIM = (100, 100)
 
     PLAYLIST_LIST_ID = 101
+    PLAYLIST_SCROLLBAR_ID = 152
 
     def __init__(self, *args, **kwargs):
         kodigui.BaseDialog.__init__(self, *args, **kwargs)
@@ -2620,6 +2621,16 @@ class PlaylistDialog(kodigui.BaseDialog, SpoilersMixin):
     def onClick(self, controlID):
         if controlID == self.PLAYLIST_LIST_ID:
             self.playlistListClicked()
+
+    def onAction(self, action):
+        controlID = self.getFocusId()
+        if action == xbmcgui.ACTION_MOVE_LEFT:
+            if controlID == self.PLAYLIST_LIST_ID:
+                self.doClose()
+                return
+            elif controlID == self.PLAYLIST_SCROLLBAR_ID:
+                self.setFocusId(self.PLAYLIST_LIST_ID)
+        super(PlaylistDialog, self).onAction(action)
 
     def playlistListClicked(self):
         mli = self.playlistListControl.getSelectedItem()
