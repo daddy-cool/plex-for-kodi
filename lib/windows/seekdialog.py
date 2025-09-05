@@ -1761,9 +1761,9 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                             preparedMarkers.append((marker.startTimeOffset, label, True))
 
                 # add staggered virtual markers
-                preparedMarkers.append((int(self.duration * 0.25), "25 %", False))
-                preparedMarkers.append((int(self.duration * 0.50), "50 %", False))
-                preparedMarkers.append((int(self.duration * 0.75), "75 %", False))
+                #preparedMarkers.append((int(self.duration * 0.25), "25 %", False))
+                #preparedMarkers.append((int(self.duration * 0.50), "50 %", False))
+                #preparedMarkers.append((int(self.duration * 0.75), "75 %", False))
 
                 credCnt = 1
                 for offset, label, credits in sorted(preparedMarkers):
