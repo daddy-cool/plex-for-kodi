@@ -1034,8 +1034,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.setProperty('ppi.Status', 'Loading ...')
 
         def getVideoSession(currentVideo):
-            return currentVideo.server.findVideoSession(currentVideo.settings.getGlobal("clientIdentifier"),
-                                                        currentVideo.ratingKey)
+            return currentVideo.server.findVideoSession(self.handler.sessionID, currentVideo.ratingKey)
 
         if util.KODI_BUILD_NUMBER < 2090821:
             try:
@@ -1099,6 +1098,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                 util.ERROR()
 
         except NotFound:
+            util.DEBUG_LOG("PPI: Couldn't find session: {}", self.handler.sessionID)
             self.setProperty('ppi.Status', 'Info not available (session not found)')
 
         except:

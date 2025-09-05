@@ -6,6 +6,7 @@ import six
 import re
 import os
 import random
+import uuid
 
 from kodi_six import xbmc
 from kodi_six import xbmcgui
@@ -37,6 +38,7 @@ class BasePlayerHandler(object):
         self.queuingSpecific = False
         self.playQueue = None
         self.sessionID = session_id
+        self.playbackID = None
         self.isMapped = False
         self.currentlyPlaying = None
 
@@ -171,7 +173,15 @@ class BasePlayerHandler(object):
             "guid": str(item.guid),
             "url": str(item.url),
             "duration": item.duration.asInt(),
-            "containerKey": str(item.container.address)
+            "additional_params": {
+                'hasMDE': 1,
+                'X-Plex-Client-Profile-Name': 'Generic',
+                'X-Plex-Client-Identifier': item.settings.getGlobal('clientIdentifier'),
+                'X-Plex-Session-Identifier': self.sessionID,
+                'X-Plex-Session-Id': self.sessionID,
+                'X-Plex-Playback-Id': self.playbackID
+                #"containerKey": str(item.container.address)
+            }
         })
 
         new_time_stored = plexapp.util.APP.nowplayingmanager.updatePlaybackState(
@@ -277,6 +287,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.prePlayWitnessed = False
         self._subtitleStreamOffset = None
         self.isMapped = is_mapped
+        self.playbackID = str(uuid.uuid4())
         self.getDialog(setup=True)
         self.dialog.setup(self.duration, meta, int(self.baseOffset * 1000), self.bifURL, self.title, self.title2,
                           chapters=self.chapters, keepMarkerDef=seeking == self.SEEK_IN_PROGRESS)
@@ -1019,7 +1030,7 @@ class AudioPlayerHandler(BasePlayerHandler):
             track = plexobjects.PlexObject.deSerialize(base64.urlsafe_b64decode(data.encode('utf-8')))
             track.softReload()
             self.media = track
-            pobj = plexplayer.PlexAudioPlayer(track)
+            pobj = plexplayer.PlexAudioPlayer(track, session_id=self.sessionID)
             self.player.playerObject = pobj
             self.updatePlayQueueTrack(track)
             util.setGlobalProperty('track.ID', track.ratingKey)  # This is used in the skins to match a listitem
@@ -1477,6 +1488,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
         return cleaned_path
 
     def _playVideo(self, offset=0, seeking=0, force_update=False, playerObject=None, session_id=None):
+        self.sessionID = session_id or self.sessionID
         self.trigger('new.video', video=self.video)
         self.trigger(
             'change.background',
@@ -1484,7 +1496,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
         )
         try:
             if not playerObject:
-                self.playerObject = plexplayer.PlexPlayer(self.video, offset, forceUpdate=force_update)
+                self.playerObject = plexplayer.PlexPlayer(self.video, offset, forceUpdate=force_update, session_id=self.sessionID)
                 self.playerObject.build()
             self.playerObject = self.playerObject.getServerDecision()
         except plexplayer.DecisionFailure as e:
@@ -1508,7 +1520,6 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
             util.MONITOR.waitForAbort(util.addonSettings.consecutiveVideoPbWait)
 
         self.ignoreStopEvents = False
-        self.sessionID = session_id or self.sessionID
 
         # fixme: this handler might be accessing a new playerObject, not the one it's expecting to access,
         #        especially when .next() is used
@@ -1557,7 +1568,9 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
 
             url = util.addURLParams(url, {
                 'X-Plex-Client-Profile-Name': 'Generic',
-                'X-Plex-Client-Identifier': plexapp.util.INTERFACE.getGlobal('clientIdentifier')
+                'X-Plex-Client-Identifier': self.video.settings.getGlobal('clientIdentifier'),
+                'X-Plex-Session-Identifier': self.sessionID,
+                'X-Plex-Session-Id': self.sessionID
             })
         li = xbmcgui.ListItem(self.video.title, path=url)
         vtype = self.video.type if self.video.type in ('movie', 'episode', 'musicvideo') else 'video'

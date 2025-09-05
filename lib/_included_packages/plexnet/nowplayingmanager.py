@@ -156,6 +156,9 @@ class NowPlayingManager(object):
         params["url"] = timeline.itemData.url
         params["key"] = timeline.itemData.key
         params["containerKey"] = timeline.itemData.containerKey
+        if timeline.itemData.additional_params:
+            params.update(timeline.itemData.additional_params)
+
         if timeline.playQueue:
             params["playQueueItemID"] = timeline.playQueue.selectedId
 
