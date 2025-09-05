@@ -298,7 +298,7 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
             self.setFocusId(focus)
 
     def updateBackgroundFrom(self, ds):
-        if util.addonSettings.dynamicBackgrounds:
+        if util.addonSettings.dynamicBackgrounds and ds:
             return self.windowSetBackground(util.backgroundFromArt(ds.get('art', ds.get('parentArt', ds.get('grandparentArt', None))), width=self.width, height=self.height))
 
     def windowSetBackground(self, value):

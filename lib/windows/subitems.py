@@ -262,7 +262,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
                 self.updateBackgroundFrom(self.mediaItem)
 
             if controlID == self.RELATED_LIST_ID:
-                if self.relatedPaginator.boundaryHit:
+                if self.relatedPaginator and self.relatedPaginator.boundaryHit:
                     self.relatedPaginator.paginate()
                     return
                 elif action in (xbmcgui.ACTION_MOVE_LEFT, xbmcgui.ACTION_MOVE_RIGHT):
