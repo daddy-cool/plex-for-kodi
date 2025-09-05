@@ -265,8 +265,9 @@ def _main():
                             return
                     finally:
                         if closeOption in ("quit", "exit", "restart"):
-                            util.DEBUG_LOG("Main: Starting hard exit timer of {} seconds...", util.addonSettings.maxShutdownWait)
-                            exit_timer.start()
+                            if not exit_timer.is_alive():
+                                util.DEBUG_LOG("Main: Starting hard exit timer of {} seconds...", util.addonSettings.maxShutdownWait)
+                                exit_timer.start()
                             exit_timer_started = True
                         windowutils.shutdownHome()
                         BACKGROUND.activate()

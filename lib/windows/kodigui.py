@@ -214,7 +214,7 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
 
     def onCloseSignal(self, *args, **kwargs):
         self._closeSignalled = True
-        self.doClose()
+        self.doClose(force=True)
 
     def _onInit(self):
         global LAST_BG_URL
@@ -329,9 +329,11 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
         LAST_BG_URL = value
         return value
 
-    def doClose(self):
+    def doClose(self, **kw):
+        force = kw.get('force', False)
         plexapp.util.APP.off('close.windows', self.onCloseSignal)
-        if not self.isOpen:
+        util.DEBUG_LOG("{}: doClose called, force: {}", self.__class__.__name__, force)
+        if not self.isOpen and not force:
             return
         self._closing = True
         self.isOpen = False

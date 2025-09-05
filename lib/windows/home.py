@@ -853,14 +853,13 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
             util.DEBUG_LOG("Home: Ticking, section stale, calling showHubs(update=True)")
             self.showHubs(self.lastSection, update=True)
 
-    def doClose(self):
+    def doClose(self, force=True):
         util.DEBUG_LOG("Home: doClose called, triggering close.windows")
         plexapp.util.APP.trigger('close.windows')
         #if self.sectionChangeThread and self.sectionChangeThread.isAlive():
         #    self.sectionChangeThread.join(timeout=2.0)
 
-        util.DEBUG_LOG("Home: doClose called, calling super")
-        super(HomeWindow, self).doClose()
+        super(HomeWindow, self).doClose(force=force)
 
     def stopRetryingRequests(self):
         util.DEBUG_LOG("Stopping request retries")
