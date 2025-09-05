@@ -167,12 +167,17 @@ class BasePlayerHandler(object):
         if refreshQueue and self.playQueue:
             self.playQueue.refreshOnTimeline = True
 
+        playbackTime = 0
+        if hasattr(self, "dialog") and self.dialog.playbackTime:
+            playbackTime = self.dialog.playbackTime
+
         data = plexnetUtil.AttributeDict({
             "key": str(item.key),
             "ratingKey": str(item.ratingKey),
             "guid": str(item.guid),
             "url": str(item.url),
             "duration": item.duration.asInt(),
+            "playbackTime": str(playbackTime),
             "additional_params": {
                 'hasMDE': 1,
                 'X-Plex-Client-Profile-Name': 'Generic',

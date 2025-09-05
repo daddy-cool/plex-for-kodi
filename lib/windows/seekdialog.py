@@ -160,6 +160,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.baseOffset = 0
         self._duration = 0
         self.offset = 0
+        self.playbackTime = 0
         self.selectedOffset = 0
         self.bigSeekOffset = 0
         self.bigSeekChanged = False  # attention, with chapters this can become an integer for the True state
@@ -500,6 +501,8 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.setProperty('theme', 'modern')
 
         self.killTimeKeeper()
+
+        self.playbackTime = 0
 
         if not self.getProperty('nav.playlist'):
             self.subtitleButtonLeft += self.NAVBAR_BTN_SIZE
@@ -2234,6 +2237,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         # the external player is open and report that to the PMS
         if tick and (xbmc.getCondVisibility('Player.HasVideo + Player.Playing') or force_tick):
             self.timeKeeperTime += 1000
+            self.playbackTime += 1000
 
         if force_tick:
             return
