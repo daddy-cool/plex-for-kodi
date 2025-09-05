@@ -2480,6 +2480,9 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                 self.pausedAt = None
                 return
 
+            if self.player.playState == self.player.STATE_PLAYING:
+                self.idleTime = None
+
             # invisibly sync low-drift timer to current playback every X seconds, as Player.getTime() can be wildly off
             if self.ldTimer and not self.osdVisible() and self.timeKeeper and self.timeKeeper.ticks >= 60:
                 self.syncTimeKeeper()
