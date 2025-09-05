@@ -687,7 +687,7 @@ class PlexPlayer(BasePlayer):
 
             builder.addParam("offset", str(startOffset))
 
-        builder.addParam("session", str(self.sessionID))
+        builder.addParam("session", self.sessionID)
         builder.addParam("directStream", directStream and "1" or "0")
         #builder.addParam("directStreamAudio", directStream and "1" or "0")
         builder.addParam("directPlay", "0")
@@ -697,6 +697,10 @@ class PlexPlayer(BasePlayer):
         maxVideoResolution = "allow_4k" in features and "3840x2160" or "1920x1080"
         builder.addParam("videoResolution", str(maxVideoResolution))
         builder.addParam("maxVideoBitrate", self.item.settings.getGlobal("transcodeVideoBitrates")[qualityIndex])
+
+        builder.addParam("X-Plex-Session-Id", self.sessionID)
+        builder.addParam("X-Plex-Session-Identifier", self.sessionID)
+        builder.addParam('X-Plex-Client-Identifier', self.item.settings.getGlobal('clientIdentifier'))
 
         builder.extras.append(
             "add-limitation(scope=videoCodec&scopeName=*&context=streaming&protocol=http&"
@@ -776,7 +780,7 @@ class PlexAudioPlayer(BasePlayer):
         builder = http.HttpRequest(transcodeServer.buildUrl(obj.transcodeEndpoint, True))
         builder.addParam("protocol", "http")
         builder.addParam("path", item.getAbsolutePath("key"))
-        builder.addParam("session", self.sessionID and str(self.sessionID) or item.getGlobal("clientIdentifier"))
+        builder.addParam("session", self.sessionID and self.sessionID or item.getGlobal("clientIdentifier"))
         builder.addParam("directPlay", "0")
         builder.addParam("directStream", "0")
 
