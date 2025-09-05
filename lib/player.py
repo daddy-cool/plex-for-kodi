@@ -995,8 +995,8 @@ class SeekPlayerHandler(BasePlayerHandler):
 
 
 class AudioPlayerHandler(BasePlayerHandler):
-    def __init__(self, player):
-        BasePlayerHandler.__init__(self, player)
+    def __init__(self, player, session_id=None):
+        BasePlayerHandler.__init__(self, player, session_id=session_id)
         self.timelineType = 'music'
         util.setGlobalProperty('track.ID', '')
         self.extractTrackInfo()
@@ -1735,14 +1735,14 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
             self.stopAndWait()
 
         self.ignoreStopEvents = True
-        self.handler = AudioPlayerHandler(self)
-        self.playerObject = plexplayer.PlexAudioPlayer(track)
+        self.sessionID = "AUD%s" % track.ratingKey
+        self.handler = AudioPlayerHandler(self, session_id=self.sessionID)
+        self.playerObject = plexplayer.PlexAudioPlayer(track, session_id=self.sessionID)
         url, li = self.createTrackListItem(track, fanart)
         self.stopAndWait()
         self.ignoreStopEvents = False
 
         # maybe fixme: once started, self.sessionID will never be None for Audio
-        self.sessionID = "AUD%s" % track.ratingKey
         self.trigger('starting.audio')
         self.play(url, li, **kwargs)
 
@@ -1751,8 +1751,9 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
             self.stopAndWait()
 
         self.ignoreStopEvents = True
-        self.handler = AudioPlayerHandler(self)
-        self.playerObject = plexplayer.PlexAudioPlayer()
+        self.sessionID = "ALB%s" % album.ratingKey
+        self.handler = AudioPlayerHandler(self, session_id=self.sessionID)
+        self.playerObject = plexplayer.PlexAudioPlayer(session_id=self.sessionID)
         plist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
         plist.clear()
         index = 1
@@ -1763,7 +1764,6 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
         xbmc.executebuiltin('PlayerControl(RandomOff)')
         self.stopAndWait()
         self.ignoreStopEvents = False
-        self.sessionID = "ALB%s" % album.ratingKey
         self.trigger('starting.audio')
         self.play(plist, startpos=startpos, **kwargs)
 
@@ -1772,8 +1772,9 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
             self.stopAndWait()
 
         self.ignoreStopEvents = True
-        self.handler = AudioPlayerHandler(self)
-        self.playerObject = plexplayer.PlexAudioPlayer()
+        self.sessionID = "PLS%s" % getattr(playlist, "ratingKey", getattr(playlist, "id", random.randint(0, 1000)))
+        self.handler = AudioPlayerHandler(self, session_id=self.sessionID)
+        self.playerObject = plexplayer.PlexAudioPlayer(session_id=self.sessionID)
         plist = xbmc.PlayList(xbmc.PLAYLIST_MUSIC)
         plist.clear()
         index = 1
@@ -1792,7 +1793,6 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
                 xbmc.executebuiltin('PlayerControl(RandomOff)')
         self.stopAndWait()
         self.ignoreStopEvents = False
-        self.sessionID = "PLS%s" % getattr(playlist, "ratingKey", getattr(playlist, "id", random.randint(0, 1000)))
         self.trigger('starting.audio')
         self.play(plist, startpos=startpos, **kwargs)
 
