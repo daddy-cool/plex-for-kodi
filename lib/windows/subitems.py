@@ -92,6 +92,7 @@ class ShowWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMixin, 
         self.manuallySelectedSeason = False
         self.initialized = False
         self.relatedPaginator = None
+        self.useBGM = False
 
     def doClose(self):
         self.relatedPaginator = None
