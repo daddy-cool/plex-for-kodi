@@ -523,6 +523,8 @@ class PlexServerManager(signalsmixin.SignalsMixin):
                 server = self.serversByUuid.get(pServ, None)
                 if server and server.isReachable():
                     self.selectedServer = server
+                    self.transcodeServer = None
+                    self.channelServer = None
                     util.DEBUG_LOG("Found connectable server for home user, fast switching")
                     return
 
