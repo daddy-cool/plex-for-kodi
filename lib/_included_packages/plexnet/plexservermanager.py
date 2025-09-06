@@ -518,6 +518,13 @@ class PlexServerManager(signalsmixin.SignalsMixin):
         if reallyChanged:
             # AudioPlayer().Cleanup()
             # PhotoPlayer().Cleanup()
+            if account.isSignedIn and account.homeUsers and list(filter(lambda x: account.ID == x.id, account.homeUsers)):
+                pServ = util.INTERFACE.getPreference("lastServerId.{}".format(account.ID), '')
+                server = self.serversByUuid.get(pServ, None)
+                if server and server.isReachable():
+                    self.selectedServer = server
+                    util.DEBUG_LOG("Found connectable server for home user, fast switching")
+                    return
 
             util.DEBUG_LOG("Account really changed, clearing all servers")
 
@@ -543,7 +550,7 @@ class PlexServerManager(signalsmixin.SignalsMixin):
             self.updateFromConnectionType([], plexresource.ResourceConnection.SOURCE_DISCOVERED)
             self.updateFromConnectionType([], plexresource.ResourceConnection.SOURCE_MANUAL)
 
-            self.startSelectedServerSearch(True, ID=account.ID)
+            self.startSelectedServerSearch(False, ID=account.ID)
 
             if reallyChanged:
                 util.DEBUG_LOG("User really changed, refreshing resources now")
