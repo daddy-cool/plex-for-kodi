@@ -552,7 +552,7 @@ class PlexServerManager(signalsmixin.SignalsMixin):
             self.updateFromConnectionType([], plexresource.ResourceConnection.SOURCE_DISCOVERED)
             self.updateFromConnectionType([], plexresource.ResourceConnection.SOURCE_MANUAL)
 
-            self.startSelectedServerSearch(False, ID=account.ID)
+            self.startSelectedServerSearch(True, ID=account.ID)
 
             if reallyChanged:
                 util.DEBUG_LOG("User really changed, refreshing resources now")
