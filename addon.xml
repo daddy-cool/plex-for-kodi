@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-prerelease7.1"
+       version="0.8.0-prerelease8"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -34,11 +34,21 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Core: Write templates to user directory instead of plugin directory when env var INSTALLATION_DIR_AVOID_WRITE is set (useful when plugin directory isn't writable) (thanks @bluedrink)
-- Core: Re-gain python 2.7 compatibility with recent changes
-- Core/plex.direct: Fix plex.direct host mapping not being triggered in certain situations (local docker IP mapped to VM for example) (thanks @Baniel__ for the hint)
-- Core/plex.direct: Don't consider a resolved plex.direct domain with IP 0.0.0.0 as "successfully resolved"
-- Postplay: Scroll titles (instead of cutting them off + ellipsis); scroll multiline summaries
+- SeekDialog: Make sure to reset idleTime whenever we're in state_playing
+- Shows: Fix rare crash on inexistant relatedPaginator
+- Home: Force doClose by default (on exit and on close.windows event)
+- AddonSettings: Use 850ms as new default for the Alternate seek fix (was: 500ms)
+- PlayerVideoCurrentPlaylist: Scroll titles if they're too long; allow vertical round-robining at the top boundary; allow closing the playlist by pressing LEFT
+- Bring back screensaver. (thanks @gbooker)
+- Player: Use uuid4() as session ID; keep session ID when switching streams; report session ID when sending timeline requests
+- SeekDialog: Don't crash if we're trying to close playlistDialog while closing SeekDialog
+- AudioPlayer: Use session identifier
+- ShowWindow: Fix regression, play button not doing anything
+- PlexPlayer: Add session and client identifiers to transcode decision endpoint requests
+- Player: Report playbackTime (time spent in current session, non-paused) in timeline requests to the Plex server
+- ServerTimeline: Increase timeline requests to every 10 seconds (was 15), to adhere to PlexWeb behaviour
+- SeekDialog: Remove artificial percentage-based virtual chapters (intro/outro are still generated if necessary)
+- Core: Implement faster account switching for users in PlexHome (skip server refresh/reachability tests if preferred server is connectable)
         </news>
         <assets>
             <icon>icon2.png</icon>
