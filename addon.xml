@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-prerelease8"
+       version="0.8.0-prerelease8.1"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -34,21 +34,11 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- SeekDialog: Make sure to reset idleTime whenever we're in state_playing
-- Shows: Fix rare crash on inexistant relatedPaginator
-- Home: Force doClose by default (on exit and on close.windows event)
-- AddonSettings: Use 850ms as new default for the Alternate seek fix (was: 500ms)
-- PlayerVideoCurrentPlaylist: Scroll titles if they're too long; allow vertical round-robining at the top boundary; allow closing the playlist by pressing LEFT
-- Bring back screensaver. (thanks @gbooker)
-- Player: Use uuid4() as session ID; keep session ID when switching streams; report session ID when sending timeline requests
-- SeekDialog: Don't crash if we're trying to close playlistDialog while closing SeekDialog
-- AudioPlayer: Use session identifier
-- ShowWindow: Fix regression, play button not doing anything
-- PlexPlayer: Add session and client identifiers to transcode decision endpoint requests
-- Player: Report playbackTime (time spent in current session, non-paused) in timeline requests to the Plex server
-- ServerTimeline: Increase timeline requests to every 10 seconds (was 15), to adhere to PlexWeb behaviour
-- SeekDialog: Remove artificial percentage-based virtual chapters (intro/outro are still generated if necessary)
-- Core: Implement faster account switching for users in PlexHome (skip server refresh/reachability tests if preferred server is connectable)
+- Core: Support Kodi hard exit (e.g. force closing or closing the Kodi window on Windows); try to properly send stopped state to Plex Server when this happens (fixes "dangling" sessions)
+- Core/CoreELEC/LG WebOS: Only default to Alternate seek if superviseaudiodelay is not set in advancedsettings.xml (thanks @MikeTeavee)
+- Player: Fix rare error on playbackTime
+- Home: Add context menu option to start playback from beginning for in progress items
+- Revert "Core: Implement faster account switching for users in PlexHome (skip server refresh/reachability tests if preferred server is connectable)"
         </news>
         <assets>
             <icon>icon2.png</icon>
