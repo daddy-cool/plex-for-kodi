@@ -574,17 +574,26 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
 
         hosts = []
         for server in servers:
-            # only check stored or myplex servers
-            if server.sourceType not in (None, plexresource.ResourceConnection.SOURCE_MYPLEX):
-                continue
-            # if we're set to honor dnsRebindingProtection=1 and the server has this flag at 0 or
-            # if we're set to honor publicAddressMatches=1 and the server has this flag at 0, and we haven't seen the
-            # server locally, skip plex.direct handling
-            if (((util.addonSettings.honorPlextvDnsrebind and not server.dnsRebindingProtection) or
-                    (util.addonSettings.honorPlextvPam and not server.sameNetwork and not server.anyLANConnection))
-                    and not server.anyPDHostNotResolvable):
-                util.DEBUG_LOG("Ignoring DNS handling for plex.direct connections of: {}", server)
-                continue
+            force_check = False
+            # we might have an active connection that's marked as local but a combination of settings doesn't allow us
+            # to connect insecurely; force plex.direct handling in this case
+            if server.activeConnection and ".plex.direct:" in server.activeConnection.address and \
+                    not server.activeConnection.pdHostnameResolved:
+                util.DEBUG_LOG("Forcing check for plex.direct connections of: {}", server)
+                force_check = True
+
+            if not force_check:
+                # only check stored or myplex servers
+                if server.sourceType not in (None, plexresource.ResourceConnection.SOURCE_MYPLEX):
+                    continue
+                # if we're set to honor dnsRebindingProtection=1 and the server has this flag at 0 or
+                # if we're set to honor publicAddressMatches=1 and the server has this flag at 0, and we haven't seen the
+                # server locally, skip plex.direct handling
+                if (((util.addonSettings.honorPlextvDnsrebind and not server.dnsRebindingProtection) or
+                        (util.addonSettings.honorPlextvPam and not server.sameNetwork and not server.anyLANConnection))
+                        and not server.anyPDHostNotResolvable):
+                    util.DEBUG_LOG("Ignoring DNS handling for plex.direct connections of: {}", server)
+                    continue
             hosts += [c.address for c in server.connections]
 
         knownHosts = pdm.getHosts()
