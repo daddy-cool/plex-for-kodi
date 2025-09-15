@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-prerelease8.1"
+       version="0.8.0-rc1"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -34,11 +34,19 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Core: Support Kodi hard exit (e.g. force closing or closing the Kodi window on Windows); try to properly send stopped state to Plex Server when this happens (fixes "dangling" sessions)
-- Core/CoreELEC/LG WebOS: Only default to Alternate seek if superviseaudiodelay is not set in advancedsettings.xml (thanks @MikeTeavee)
-- Player: Fix rare error on playbackTime
-- Home: Add context menu option to start playback from beginning for in progress items
-- Revert "Core: Implement faster account switching for users in PlexHome (skip server refresh/reachability tests if preferred server is connectable)"
+- AudioCodecMixin: Don't consider EAC3 >= 640kbit as possible atms
+- Core/Home: Force plex.direct connectivity check if the current connection has hostname issues (should fix certain setups with manual connections/LAN connections without allowing insecure local connections, falling back to plex.direct)
+- Settings: Make "Auto-Sync Subtitles" a user setting (was a global one; might need an initial re-toggle)
+- TV Shows/PlaybackSettings: Allow toggling "Auto-Sync Subtitles" per TV Show (overrides global setting)
+- Player/Movies: Allow toggling "Auto-Sync Subtitles" during playback
+- Dropdown: Correctly place shadow
+- Home/ServerList: Use correct texture for last item (bottom rounded corners)
+- README: Clarify repository installation instructions
+- KodiGUI: Be more resilient against timing issues with active dialogs; try reactivating a window if it wasn't activated properly due to active dialogs
+- Episodes: Fix rare hanging/no-exit state when BGM and playback request ran into a timing issue; this also could lead to the plugin not exiting at all afterwards
+- Episodes: Allow immediate playback as soon as the current item is loaded
+- Episodes: Don't block play button in certain rare scenarios
+- i18n: Update translations for Spanish (100%), French (75%), Chinese (90%), Hungarian (100%), Italian (63%)
         </news>
         <assets>
             <icon>icon2.png</icon>
