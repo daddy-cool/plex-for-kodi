@@ -330,7 +330,7 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
         return value
 
     def doClose(self, **kw):
-        force = kw.get('force', False)
+        force = kw.get('force', True)
         plexapp.util.APP.off('close.windows', self.onCloseSignal)
         util.DEBUG_LOG("{}: doClose called, force: {}", self.__class__.__name__, force)
         if not self.isOpen and not force:
@@ -341,8 +341,31 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
 
     def show(self):
         self._closing = False
+        # can we activate?
+        ct = 0
+        while xbmcgui.getCurrentWindowDialogId() > 9999 and ct < 20:
+            util.MONITOR.waitForAbort(0.1)
+            ct += 1
+
+        lastWinID = BaseFunctions.lastWinID
+
         #self.isOpen = True
         xbmcgui.WindowXML.show(self)
+
+        # our current window ID _has_ to be different to the last one, if it isn't, handle.
+        # kodi doesn't throw an exception in case of a still active modal dialog, but instead just logs:
+        # Activate of window 'xxxxxx' refused because there are active modal dialogs
+        if xbmcgui.getCurrentWindowId() == lastWinID:
+            util.DEBUG_LOG('{} not yet active, retrying', self.__class__.__name__)
+
+        ct = 0
+        while xbmcgui.getCurrentWindowId() == lastWinID and ct < 20:
+            util.MONITOR.waitForAbort(0.1)
+            ct += 1
+            # we might have run into an active dialog, which happens sometimes, so we didn't really activate the window
+            # retry
+            xbmcgui.WindowXML.show(self)
+
         self.isOpen = xbmcgui.getCurrentWindowId() >= 13000
 
     @property

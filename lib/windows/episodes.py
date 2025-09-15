@@ -725,7 +725,8 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         VIDEO_PROGRESS[gprk][prk][rk] = state
 
     def onBGMStarted(self, **kwargs):
-        self.playBtnClicked = True
+        #self.playBtnClicked = True
+        pass
 
     def checkOptionsAction(self, action):
         if action == xbmcgui.ACTION_MOVE_UP:
@@ -1000,10 +1001,20 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
 
     def episodeListClicked(self, force_episode=None, from_auto_play=False, force_resume_menu=False,
                            start_over=False):
-        if (not self.currentItemLoaded or self.playBtnClicked) and not from_auto_play:
+        if self.playBtnClicked and not from_auto_play:
             util.DEBUG_LOG("Not honoring play action: currentItemLoaded: {0}, "
                            "playBtnClicked: {1}, from_auto_play: {2}",
                            self.currentItemLoaded, self.playBtnClicked, from_auto_play)
+            return
+
+        # wait for current item to be loaded
+        amount = 0
+        while not self.currentItemLoaded and amount < 30:
+            util.MONITOR.waitForAbort(0.1)
+            amount += 1
+
+        if not self.currentItemLoaded:
+            util.DEBUG_LOG("Not honoring play action: currentItemLoaded: False")
             return
 
         if not force_episode:
@@ -1055,9 +1066,11 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
 
                 pl.setCurrent(episode)
                 self.processCommand(videoplayer.play(play_queue=pl, resume=resume, bgm=self.useBGM))
+                self.playBtnClicked = False
                 return True
 
             self.processCommand(videoplayer.play(video=episode, resume=resume, bgm=self.useBGM))
+            self.playBtnClicked = False
             return True
         except util.NoDataException:
             util.ERROR("No data - disconnected?", notify=True, time_ms=5000)
@@ -1484,7 +1497,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             self.tasks.add(task)
             tasks.append(task)
 
-        backgroundthread.BGThreader.addTasks(tasks)
+        backgroundthread.BGThreader.addTasksToFront(tasks)
 
     def getPlayButtonID(self, mli, base=None):
         return (base and base or self.PLAY_BUTTON_ID) + (mli.getProperty('media.multiple') and 1000 or 0)

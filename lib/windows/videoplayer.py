@@ -352,6 +352,7 @@ class VideoPlayerWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RolesMi
         video.clearCache()
 
     def play(self, resume=False, handler=None):
+        util.DEBUG_LOG("VideoPlayerWindow: play() called")
         self.hidePostPlay()
 
         player.PLAYER.dontRequeueBGM = True
@@ -379,16 +380,25 @@ class VideoPlayerWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RolesMi
 
         # wait for BGM to end if it's playing or queued
         if self.handleBGM:
-            while not player.PLAYER.bgmPlaying and player.PLAYER.bgmStarting:
+            util.DEBUG_LOG("Checking BGM")
+            ct = 0
+            while not player.PLAYER.bgmPlaying and player.PLAYER.bgmStarting and ct < 20:
                 util.DEBUG_LOG("Waiting for BGM to start as it has been queued")
                 util.MONITOR.waitForAbort(0.1)
+                ct += 1
 
             if player.PLAYER.bgmPlaying:
                 util.DEBUG_LOG("Stopping BGM before starting playback")
                 player.PLAYER.stopAndWait()
 
-            while player.PLAYER.bgmPlaying or player.PLAYER.isPlayingAudio():
+            if player.PLAYER.isPlayingAudio():
+                player.PLAYER.stopAndWait()
+
+            ct = 0
+            while (player.PLAYER.bgmPlaying or player.PLAYER.isPlayingAudio()) and ct < 20:
                 util.MONITOR.waitForAbort(0.1)
+                ct += 1
+            util.DEBUG_LOG("BGM check done")
 
         self.setBackground()
 
