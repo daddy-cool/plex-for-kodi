@@ -111,7 +111,9 @@ class PlexPlayer(BasePlayer):
 
         # Add soft subtitle info
         if self.choice.subtitleDecision == self.choice.SUBTITLES_SOFT_ANY:
-            obj.subtitleUrl = server.buildUrl(self.choice.subtitleStream.getSubtitlePath(), True)
+            # add sub autosync settings per item
+            auto_sync = self.item.playbackSettings.auto_sync
+            obj.subtitleUrl = server.buildUrl(self.choice.subtitleStream.getSubtitlePath(auto_sync=auto_sync), True)
         elif self.choice.subtitleDecision == self.choice.SUBTITLES_SOFT_DP:
             obj.subtitleConfig = {'TrackName': "mkv/" + str(self.choice.subtitleStream.index.asInt() + 1)}
 
@@ -649,8 +651,9 @@ class PlexPlayer(BasePlayer):
         builder.addParam("path", path)
 
         if self.choice.subtitleStream and self.choice.subtitleStream.should_auto_sync:
-            builder.addParam("autoAdjustSubtitle",
-                             util.INTERFACE.getPreference('auto_sync', True) and '1' or '0')
+            # add sub autosync settings per item
+            auto_sync = self.item.playbackSettings.auto_sync
+            builder.addParam("autoAdjustSubtitle", auto_sync and '1' or '0')
 
         part = self.media.parts[partIndex]
         seekOffset = int(self.seekValue / 1000)

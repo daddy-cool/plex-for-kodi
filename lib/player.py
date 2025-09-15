@@ -874,7 +874,10 @@ class SeekPlayerHandler(BasePlayerHandler):
             if do_sleep:
                 xbmc.sleep(100)
 
-            path = subs.getSubtitleServerPath()
+            # the subtitle stream might not have had the correct amount of data set to properly determine auto sync
+            # reinit the auto sync state with our current video
+            subs.init_auto_sync(video=self.player.video)
+            path = subs.getSubtitleServerPath(auto_sync=subs.should_auto_sync)
             if self.isDirectPlay:
                 self.player.showSubtitles(False)
                 if path:

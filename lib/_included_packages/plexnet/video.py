@@ -115,6 +115,10 @@ class Video(media.MediaItem, AudioCodecMixin):
     def audioStreams(self):
         return []
 
+    @property
+    def playbackSettings(self):
+        return util.INTERFACE.playbackManager(self)
+
     def selectedVideoStream(self, fallback=False):
         if self.videoStreams:
             for stream in self.videoStreams:
@@ -756,10 +760,6 @@ class Show(CachableItemsMixin, Video, media.RelatedMixin, SectionOnDeckMixin):
     @property
     def isFullyWatched(self):
         return self.isWatched
-
-    @property
-    def playbackSettings(self):
-        return util.INTERFACE.playbackManager(self)
 
     def seasons(self):
         path = self.key

@@ -128,11 +128,11 @@ class PlexInterface(plexapp.AppInterface):
 
     bingeModeManager = None
 
-    def getPreference(self, pref, default=UNDEF):
+    def getPreference(self, pref, default=UNDEF, user=False):
         if pref == 'manual_connections':
             return self.getManualConnections()
         else:
-            return util.getSetting(pref, default=default)
+            return util.getSetting(pref, default=default) if not user else util.getUserSetting(pref, default=default)
 
     def getPlaybackFeatures(self):
         return self.getPreference("playback_features",

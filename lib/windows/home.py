@@ -2710,6 +2710,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
 
             if len(items) > 1:
                 items[0].setProperty('first', '1')
+                items[-1].setProperty('last', '1')
             elif items:
                 items[0].setProperty('only', '1')
 

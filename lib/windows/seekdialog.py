@@ -1366,6 +1366,9 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
 
             if subsEnabled:
                 if sss and sss.canAutoSync.asBool():
+                    if sss.force_auto_sync is None:
+                        auto_sync = self.player.video.playbackSettings.auto_sync
+                        sss.should_auto_sync = auto_sync
                     options.append(
                         {
                             'key': 'auto_sync',
@@ -1484,9 +1487,19 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
             enabled = self.toggleSubtitles()
             self.lastSubtitleNavAction = "forward"
         elif choice['key'] == 'auto_sync':
-            sss.should_auto_sync = not sss.should_auto_sync
+            should_auto_sync = not sss.should_auto_sync_unforced
+
+            # force auto sync for session
+            if sss.force_auto_sync is not None:
+                sss.force_auto_sync = not sss.force_auto_sync
+            else:
+                sss.force_auto_sync = should_auto_sync
+            sss.should_auto_sync = should_auto_sync
+            util.DEBUG_LOG("Setting subtitle auto-sync for session to: {}".format(sss.should_auto_sync))
+
             # self.player.video isn't the same as the mediachoice representation
             self.player.playerObject.choice.subtitleStream.should_auto_sync = sss.should_auto_sync
+            self.player.playerObject.choice.subtitleStream.force_auto_sync = sss.force_auto_sync
             if self.player.playState == self.player.STATE_PLAYING:
                 self.hideOSD()
             if self.isDirectPlay:
