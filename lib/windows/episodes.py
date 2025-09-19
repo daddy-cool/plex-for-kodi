@@ -1074,7 +1074,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             self.playBtnClicked = False
             return True
         except util.NoDataException:
-            util.ERROR("No data - disconnected?", notify=True, time_ms=5000)
+            util.ERROR("No data - deleted or server disconnected?", notify=True, time_ms=5000)
             self.doClose()
 
     def optionsButtonClicked(self, from_item=False):
@@ -1522,7 +1522,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
                     if set_item_info:
                         self.setUserItemInfo(mli)
                 except:
-                    util.ERROR("No data - disconnected?", notify=True, time_ms=5000)
+                    util.ERROR("No data - deleted or server disconnected?", notify=True, time_ms=5000)
                     self.doClose()
 
                 if with_progress:

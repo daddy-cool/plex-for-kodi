@@ -87,7 +87,7 @@ class SectionHubsTask(backgroundthread.Task):
             hubs.invalid = True
             self.callback(self.section, hubs)
         except:
-            util.ERROR("No data - disconnected?", notify=True, time_ms=5000)
+            util.ERROR("No data - deleted or server disconnected?", notify=True, time_ms=5000)
             util.DEBUG_LOG('Generic exception when fetching section: {0}', repr(self.section.title))
             hubs = HubsList().init()
             hubs.invalid = True
@@ -117,7 +117,7 @@ class UpdateHubTask(backgroundthread.Task):
         except plexnet.exceptions.BadRequest:
             util.DEBUG_LOG('404 on hub: {0}', repr(self.hub.hubIdentifier))
         except util.NoDataException:
-            util.ERROR("No data - disconnected?", notify=True, time_ms=5000)
+            util.ERROR("No data - deleted or server disconnected?", notify=True, time_ms=5000)
         except:
             util.DEBUG_LOG('Something went wrong when updating hub: {0}', repr(self.hub.hubIdentifier))
 
@@ -160,7 +160,7 @@ class ExtendHubTask(backgroundthread.Task):
             if self.canceledCallback:
                 self.canceledCallback(self.hub)
         except util.NoDataException:
-            util.ERROR("No data - disconnected?", notify=True, time_ms=5000)
+            util.ERROR("No data - deleted or server disconnected?", notify=True, time_ms=5000)
         except:
             util.DEBUG_LOG('Something went wrong when extending hub: {0}', repr(self.hub.hubIdentifier))
             util.ERROR()
@@ -1372,7 +1372,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
             if command == "NODATA":
                 raise util.NoDataException
         except util.NoDataException:
-            util.ERROR("No data - disconnected?", notify=True, time_ms=5000)
+            util.ERROR("No data - deleted or server disconnected?", notify=True, time_ms=5000)
             return
 
         if self._restarting:
@@ -1774,7 +1774,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
                 if command == "NODATA":
                     raise util.NoDataException
             except util.NoDataException:
-                util.ERROR("No data - disconnected?", notify=True, time_ms=5000)
+                util.ERROR("No data - deleted or server disconnected?", notify=True, time_ms=5000)
                 return
 
         elif choice["key"] == "to_item":
@@ -1783,7 +1783,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
                 if command == "NODATA":
                     raise util.NoDataException
             except util.NoDataException:
-                util.ERROR("No data - disconnected?", notify=True, time_ms=5000)
+                util.ERROR("No data - deleted or server disconnected?", notify=True, time_ms=5000)
                 return
 
         elif choice["key"] == "start_over":
@@ -1792,7 +1792,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
                 if command == "NODATA":
                     raise util.NoDataException
             except util.NoDataException:
-                util.ERROR("No data - disconnected?", notify=True, time_ms=5000)
+                util.ERROR("No data - deleted or server disconnected?", notify=True, time_ms=5000)
                 return
             return
 
@@ -1802,7 +1802,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
                 if command == "NODATA":
                     raise util.NoDataException
             except util.NoDataException:
-                util.ERROR("No data - disconnected?", notify=True, time_ms=5000)
+                util.ERROR("No data - deleted or server disconnected?", notify=True, time_ms=5000)
                 return
             return
 

@@ -552,7 +552,7 @@ class VideoPlayerWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RolesMi
         try:
             self.hubs = self.prev.postPlay()
         except:
-            util.ERROR("No data - disconnected?", notify=True, time_ms=5000)
+            util.ERROR("No data - deleted or server disconnected?", notify=True, time_ms=5000)
             self.doClose()
             return
 
