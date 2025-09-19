@@ -1646,7 +1646,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
         if not mli:
             return
 
-        if mli.dataSource is None:
+        if mli.dataSource is None or mli.dataSource == kodigui.DUMMY_DATA_SOURCE:
             return
 
         ds = mli.dataSource
