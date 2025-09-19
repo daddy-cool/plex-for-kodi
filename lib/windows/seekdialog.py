@@ -195,6 +195,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self._ignoreTick = False
         self._abortBufferWait = False
         self._playerDebugActive = False
+        self._item_states = {}
         self.no_spoilers = util.getSetting('no_episode_spoilers4')
         self.no_time_no_osd_spoilers = util.getSetting('no_osd_time_spoilers')
         self.clientLikePlex = util.getSetting('player_official')
@@ -420,6 +421,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         if self.handler.playlist:
             self.handler.playlist.on('change', self.updateProperties)
             self.handler.playlist.on('current.changed', self.updateProperties)
+            self.player.on('video.progress', self.storePlaylistProgress)
 
         self.seekbarControl = self.getControl(self.SEEK_IMAGE_ID)
         self.positionControl = self.getControl(self.POSITION_IMAGE_ID)
@@ -985,6 +987,10 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         elif controlID == self.SKIP_FORWARD_BUTTON_ID:
             self.skipForward(immediate=not self.useAutoSeek)
 
+    def storePlaylistProgress(self, data, **kw):
+        gprk, prk, rk, state = data
+        self._item_states[rk] = state
+
     def stop(self):
         self._ignoreTick = True
         self.doClose()
@@ -1007,6 +1013,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         if self.handler.playlist:
             self.handler.playlist.off('change', self.updateProperties)
             self.handler.playlist.off('current.changed', self.updateProperties)
+            self.player.off('video.progress', self.storePlaylistProgress)
 
         try:
             if self.playlistDialog:
@@ -2561,7 +2568,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.setProperty('playlist.visible', '1' if value else '')
 
     def showPlaylistDialog(self):
-        self.playlistDialog = PlaylistDialog.create(show=False, handler=self.handler)
+        self.playlistDialog = PlaylistDialog.create(show=False, handler=self.handler, item_states=self._item_states)
         self.playlistDialogVisible = True
         self.playlistDialog.doModal()
         self.resetTimeout()
@@ -2621,6 +2628,7 @@ class PlaylistDialog(kodigui.BaseDialog, SpoilersMixin):
         kodigui.BaseDialog.__init__(self, *args, **kwargs)
         SpoilersMixin.__init__(self, *args, **kwargs)
         self.handler = kwargs.get('handler')
+        self.item_states = kwargs.get('item_states', {})
         self.playlist = self.handler.playlist
 
     def onFirstInit(self):
@@ -2744,9 +2752,16 @@ class PlaylistDialog(kodigui.BaseDialog, SpoilersMixin):
         items = []
         idx = 1
         for pi in self.playlist.items():
+            # mark watched items in playlist during current playback session
+            if self.item_states.get(pi.ratingKey, None) is True:
+                pi.set('viewCount',pi.get('viewCount', 0).asInt() + 1)
+                pi.set('viewOffset', 0)
+
             mli = self.createListItem(pi)
             if mli:
                 mli.setProperty('track.number', str(idx))
+                mli.setProperty('progress', util.getProgressImage(mli.dataSource,
+                                                      view_offset=self.handler.getProgressForItem(str(pi.ratingKey), None)))
                 items.append(mli)
                 idx += 1
 

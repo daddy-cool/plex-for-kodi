@@ -1176,7 +1176,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             mli.dataSource.refresh()
             self.updateItems(mli)
         elif choice['key'] == 'play_startover':
-            self.episodeListClicked(force_startover=True)
+            self.episodeListClicked(start_over=True)
         elif choice["key"] == "cache_reset":
             try:
                 util.DEBUG_LOG('Clearing requests cache for {}...', mli.dataSource)

@@ -650,6 +650,9 @@ class SeekPlayerHandler(BasePlayerHandler):
             ref=self._progressHld[rk] if self._progressHld[rk] > self.trueTime * 1000 else None) else True))
         self._progressHld = {}
 
+    def getProgressForItem(self, rk, default=0):
+        return self._progressHld.get(rk, default)
+
     def onPlayBackStopped(self):
         util.DEBUG_LOG('SeekHandler: onPlayBackStopped - '
                        'Seeking={0}, QueueingNext={1}, BingeMode={2}, StoppedManually={3}, SkipPostPlay={4}'
