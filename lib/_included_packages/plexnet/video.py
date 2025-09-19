@@ -153,6 +153,8 @@ class Video(media.MediaItem, AudioCodecMixin):
             for stream in self.subtitleStreams:
                 if stream.isSelected():
                     if force_from_plex:
+                        if stream != force_from_plex:
+                            continue
                         util.DEBUG_LOG("Subtitle stream requested to be the Plex decision, returning: {}", stream)
                         return stream
 
