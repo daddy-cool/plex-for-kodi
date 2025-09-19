@@ -1498,8 +1498,9 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
             util.DEBUG_LOG("Setting subtitle auto-sync for session to: {}".format(sss.should_auto_sync))
 
             # self.player.video isn't the same as the mediachoice representation
-            self.player.playerObject.choice.subtitleStream.should_auto_sync = sss.should_auto_sync
-            self.player.playerObject.choice.subtitleStream.force_auto_sync = sss.force_auto_sync
+            if self.player.playerObject.choice.subtitleStream:
+                self.player.playerObject.choice.subtitleStream.should_auto_sync = sss.should_auto_sync
+                self.player.playerObject.choice.subtitleStream.force_auto_sync = sss.force_auto_sync
             if self.player.playState == self.player.STATE_PLAYING:
                 self.hideOSD()
             if self.isDirectPlay:
