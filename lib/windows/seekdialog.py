@@ -2240,6 +2240,8 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
             if self.stopPlaybackOnIdle:
                 if self.idleTime and time.time() - self.idleTime >= self.stopPlaybackOnIdle:
                     util.LOG("Player has been idle for {}s, stopping.", int(time.time() - self.idleTime))
+                    self.handler.stoppedManually = True
+                    self.sendTimeline(state=self.player.STATE_STOPPED)
                     self.handler.player.stopAndWait()
                     return
 
