@@ -1008,14 +1008,15 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             return
 
         # wait for current item to be loaded
-        amount = 0
-        while not self.currentItemLoaded and amount < 30:
-            util.MONITOR.waitForAbort(0.1)
-            amount += 1
+        if not from_auto_play:
+            amount = 0
+            while not self.currentItemLoaded and amount < 50:
+                util.MONITOR.waitForAbort(0.1)
+                amount += 1
 
-        if not self.currentItemLoaded:
-            util.DEBUG_LOG("Not honoring play action: currentItemLoaded: False")
-            return
+            if not self.currentItemLoaded:
+                util.DEBUG_LOG("Not honoring play action: currentItemLoaded: False")
+                return
 
         if not force_episode:
             mli = self.episodeListControl.getSelectedItem()
