@@ -41,6 +41,7 @@ class BasePlayerHandler(object):
         self.playbackID = None
         self.isMapped = False
         self.currentlyPlaying = None
+        self.reused = False
 
     def onAVChange(self):
         pass
@@ -263,6 +264,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.useAlternateSeek = util.getSetting('use_alternate_seek2')
         self.useResumeFix = self.useAlternateSeek
         self.isMapped = False
+        self.reused = False
         self.reset()
 
     def reset(self):
@@ -571,6 +573,9 @@ class SeekPlayerHandler(BasePlayerHandler):
         #if not self.prePlayWitnessed and self.isDirectPlay:
         if self.isDirectPlay:
             self.setSubtitles(do_sleep=False)
+            if self.reused:
+                util.DEBUG_LOG("SeekHandler: This handler was reused, make sure the right audio track is set.")
+                self.setAudioTrack()
 
     def onPlayBackResumed(self):
         util.DEBUG_LOG('SeekHandler: onPlayBackResumed, DP: {}', self.isDirectPlay)
@@ -930,9 +935,13 @@ class SeekPlayerHandler(BasePlayerHandler):
                     if currIdx == track.typeIndex:
                         util.DEBUG_LOG('Audio track is correct index: {0}', track.typeIndex)
                         return
-                    util.DEBUG_LOG('Switching audio track - index: {0} (try: {1})', track.typeIndex, tries + 1)
-                    util.MONITOR.waitForAbort(0.1)
-                    self.player.setAudioStream(track.typeIndex)
+
+                    if currIdx is not None:
+                        util.DEBUG_LOG('Switching audio track - index: {0} to {1} (try: {1})', currIdx, track.typeIndex, tries + 1)
+                        util.MONITOR.waitForAbort(0.1)
+                        self.player.setAudioStream(track.typeIndex)
+                    else:
+                        util.MONITOR.waitForAbort(0.1)
                     tries += 1
 
 
@@ -1507,8 +1516,11 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
         if self.bgmPlaying:
             self.stopAndWait()
 
-        self.handler = handler if handler and isinstance(handler, SeekPlayerHandler) \
-            else SeekPlayerHandler(self, session_id or self.sessionID)
+        if handler and isinstance(handler, SeekPlayerHandler):
+            self.handler = handler
+            self.handler.reused = True
+        else:
+            self.handler = SeekPlayerHandler(self, session_id or self.sessionID)
 
         self.video = video
         self.resume = resume
@@ -1730,6 +1742,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
         if handler and isinstance(handler, SeekPlayerHandler):
             util.DEBUG_LOG("PlayVideoPlaylist: Reusing old handler: {}", handler)
             self.handler = handler
+            self.handler.reused = True
             #self.handler.queuingNext = True
             #self.handler.seekOnStart = 0
             #self.handler.baseOffset = 0
