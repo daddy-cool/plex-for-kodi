@@ -1649,6 +1649,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
         if mli.dataSource is None:
             return
 
+        ds = mli.dataSource
+
         section_hub_key = "{}:{}".format(self.lastSection.key, hub.hubIdentifier)
 
         hub_title = section_hub_key
@@ -1664,7 +1666,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
             options.append({'key': 'hide', 'display': T(33659, "Hide Hub: {}").format(hub_title)})
             has_prev = True
 
-        if mli.dataSource.TYPE in ('episode', 'season', 'movie', 'show'):
+        if ds.TYPE in ('episode', 'season', 'movie', 'show'):
             if has_prev:
                 options.append(dropdown.SEPARATOR)
 
@@ -1674,13 +1676,12 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
                 select_base = has_prev and 1 or 0
                 has_mp = True
 
-            if (mli.dataSource.isFullyWatched or mli.dataSource.isWatched or
-                    mli.dataSource.viewedLeafCount.asInt() > 0):
+            if ds.isFullyWatched or ds.isWatched or ds.viewedLeafCount.asInt() > 0:
                 options.append({'key': 'mark_unwatched', 'display': T(32318, "Mark Unplayed")})
                 select_base = has_prev and 1 or has_mp and 0
                 has_mp = True
 
-            if mli.dataSource.TYPE in ('episode', 'movie'):
+            if ds.TYPE in ('episode', 'movie'):
                     #hub.hubIdentifier == "continueWatching"):
                 if hub.hubIdentifier in ("home.continue", "continueWatching", "home.ondeck"):
                     # allow removing items from CW
@@ -1688,18 +1689,22 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
                     options.append({'key': 'remove_cw', 'display': T(33662, "Remove from Continue Watching")})
                     if not has_mp:
                         select_base = 1
-                if util.getSetting('home_inprogress_resume') and mli.dataSource.in_progress:
+                if util.getSetting('home_inprogress_resume') and ds.in_progress:
                     # this is an in progress item that would be auto resumed; add specific entry to visit media instead
                     options.insert(0, dropdown.SEPARATOR)
                     options.insert(1, {'key': 'start_over', 'display': T(32317, 'Play from beginning')})
                     options.insert(2, {'key': 'to_item', 'display': T(33019, "Visit media item")})
                     select_base = 1
+                elif ds.in_progress:
+                    options.insert(0, dropdown.SEPARATOR)
+                    options.insert(1, {'key': 'start_over', 'display': T(32317, 'Play from beginning')})
+                    options.insert(2, {'key': 'resume', 'display': T(32429, "Resume from {}").format(util.timeDisplay(ds.viewOffset.asInt()).lstrip('0').lstrip(':'))})
 
 
-            if mli.dataSource.TYPE in ('episode', 'season'):
+            if ds.TYPE in ('episode', 'season'):
                 options.append(dropdown.SEPARATOR)
                 options.append({'key': 'to_show', 'display': T(32323, "Go To Show")})
-                if mli.dataSource.TYPE == 'episode':
+                if ds.TYPE == 'episode':
                     options.append({'key': 'to_season', 'display': T(32400, "Go To Season")})
 
             if 'items' in util.getSetting('cache_requests'):
@@ -1740,7 +1745,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
                     return
 
             if choice["key"] == "mark_watched":
-                self.toggleWatched(item=mli.dataSource, state=True)
+                self.toggleWatched(item=ds, state=True)
 
             elif choice["key"] == "mark_unwatched":
                 mli.dataSource.markUnwatched()
@@ -1759,11 +1764,11 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
                 if button != 0:
                     return
 
-            mli.dataSource.removeFromContinueWatching()
+            ds.removeFromContinueWatching()
             self._updateOnDeckHubs()
 
         elif choice["key"] in ("to_season", "to_show"):
-            target = mli.dataSource.show() if choice["key"] == "to_show" else mli.dataSource.season()
+            target = ds.show() if choice["key"] == "to_show" else ds.season()
             try:
                 command = opener.open(target, dialog_props=self.carriedProps)
                 if command == "NODATA":
@@ -1774,7 +1779,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
 
         elif choice["key"] == "to_item":
             try:
-                command = opener.open(mli.dataSource, dialog_props=self.carriedProps)
+                command = opener.open(ds, dialog_props=self.carriedProps)
                 if command == "NODATA":
                     raise util.NoDataException
             except util.NoDataException:
@@ -1783,7 +1788,17 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
 
         elif choice["key"] == "start_over":
             try:
-                command = opener.open(mli.dataSource, auto_play=True, start_over=True, dialog_props=self.carriedProps)
+                command = opener.open(ds, auto_play=True, start_over=True, dialog_props=self.carriedProps)
+                if command == "NODATA":
+                    raise util.NoDataException
+            except util.NoDataException:
+                util.ERROR("No data - disconnected?", notify=True, time_ms=5000)
+                return
+            return
+
+        elif choice["key"] == "resume":
+            try:
+                command = opener.open(ds, auto_play=True, dialog_props=self.carriedProps)
                 if command == "NODATA":
                     raise util.NoDataException
             except util.NoDataException:
@@ -1793,8 +1808,8 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
 
         elif choice["key"] == "cache_reset":
             try:
-                util.DEBUG_LOG('Clearing requests cache for {}...', mli.dataSource)
-                mli.dataSource.clearCache()
+                util.DEBUG_LOG('Clearing requests cache for {}...', ds)
+                ds.clearCache()
             except Exception as e:
                 util.DEBUG_LOG("Couldn't clear cache: {}", e)
 
