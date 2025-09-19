@@ -419,6 +419,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
 
         if self.handler.playlist:
             self.handler.playlist.on('change', self.updateProperties)
+            self.handler.playlist.on('current.changed', self.updateProperties)
 
         self.seekbarControl = self.getControl(self.SEEK_IMAGE_ID)
         self.positionControl = self.getControl(self.POSITION_IMAGE_ID)
@@ -1005,6 +1006,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         util.DEBUG_LOG("SeekDialog: Closing")
         if self.handler.playlist:
             self.handler.playlist.off('change', self.updateProperties)
+            self.handler.playlist.off('current.changed', self.updateProperties)
 
         try:
             if self.playlistDialog:
