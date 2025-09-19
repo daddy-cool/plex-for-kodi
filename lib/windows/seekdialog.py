@@ -2131,10 +2131,12 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
 
     def seekBehind(self):
         to = self.trueOffset()
+        # make sure we're at least seeking behind 1500ms when we're using alternate seek
+        amount = max(self.resumeSeekBehind, 1500) if self.useAlternateSeek else self.resumeSeekBehind
         if ((not self.resumeSeekBehindOnlyDP or self.isDirectPlay)
-                and self.resumeSeekBehind and to > self.resumeSeekBehind):
-            util.DEBUG_LOG("SeekDialog: Seeking back from {} to {}", to, to - self.resumeSeekBehind)
-            self.doSeek(to - self.resumeSeekBehind)
+                and self.resumeSeekBehind and to > amount):
+            util.DEBUG_LOG("SeekDialog: Seeking back from {} to {}", to, to - amount)
+            self.doSeek(to - amount)
 
     def onPlayBackResumed(self):
         util.DEBUG_LOG("SeekDialog: OnPlaybackResumed")
