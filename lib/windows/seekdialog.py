@@ -1561,7 +1561,8 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                 waited += 1
 
             if waited < 40:
-                self.doSeek(max(self.trueOffset() - 100, 100))
+                seekBack = 1500 if self.useAlternateSeek else 100
+                self.doSeek(max(self.trueOffset() - seekBack, seekBack))
                 return
             util.LOG("Tried switching embedded subtitle stream to the correct one, but we've waited too long for "
                       "seekOnStart.")
@@ -1598,7 +1599,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                         if not xbmc.getCondVisibility('Player.Paused'):
                             self.videoPausedForAudioStreamChange = True
                             self.handler.player.control('pause')
-                        self.doSeek(offset=((self.handler.player.getTime() * 1000) - 1000))
+                        self.doSeek(offset=max(self.handler.player.getTime() * 1000 - 1500, 1500))
                     return True
 
             util.LOG("Media settings have changed and are not directly applicable, restarting video: {}", changed)
