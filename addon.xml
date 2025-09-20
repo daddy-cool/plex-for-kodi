@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-rc1"
+       version="0.8.0-rc2"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -34,19 +34,36 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- AudioCodecMixin: Don't consider EAC3 >= 640kbit as possible atms
-- Core/Home: Force plex.direct connectivity check if the current connection has hostname issues (should fix certain setups with manual connections/LAN connections without allowing insecure local connections, falling back to plex.direct)
-- Settings: Make "Auto-Sync Subtitles" a user setting (was a global one; might need an initial re-toggle)
-- TV Shows/PlaybackSettings: Allow toggling "Auto-Sync Subtitles" per TV Show (overrides global setting)
-- Player/Movies: Allow toggling "Auto-Sync Subtitles" during playback
-- Dropdown: Correctly place shadow
-- Home/ServerList: Use correct texture for last item (bottom rounded corners)
-- README: Clarify repository installation instructions
-- KodiGUI: Be more resilient against timing issues with active dialogs; try reactivating a window if it wasn't activated properly due to active dialogs
-- Episodes: Fix rare hanging/no-exit state when BGM and playback request ran into a timing issue; this also could lead to the plugin not exiting at all afterwards
-- Episodes: Allow immediate playback as soon as the current item is loaded
-- Episodes: Don't block play button in certain rare scenarios
-- i18n: Update translations for Spanish (100%), French (75%), Chinese (90%), Hungarian (100%), Italian (63%)
+- Home/Episodes: Fix regression when "Home: Resume in-progress items" active, playback from home won't work
+- Home: Allow directly resuming/starting over an item from Home via context menu if "Home: Resume in-progress items" is not active
+- Item/AudioSettings: Don't trim secondary title, scroll it
+- Movies: When returning from related movies list and that list was paginated, don't move selection back to first page item
+- Player: When stopping playback after idle, don't start playback of next episode/playlist item
+- SeekHandler/Player/AlternateSeek: Add more logging to Alternate seek method
+- SeekHandler/Player/AlternateSeek: Clamp the seek on start range to have also an upper bounds of +5s (might reduce double seeks)
+- SeekHandler/Player/AlternateSeek: Reset seekOnStart to 0 if the requested seek offset is too small (should fix certain situations with no timeline reported to Plex; can be triggered by embedded subtitles)
+- SeekHandler/Player/AlternateSeek: Seek() in Kodi only seems to work with full seconds, starting at 1, drop any seek attempt lower than that to avoid timeline reporting issues
+- AddonSettings: Set minimum of '\"Use alternate seek\" wait for seek' to 500ms
+- SeekHandler/Player/AlternateSeek: Clamp alternate seek wait for seek value to 500ms at least (default: 850ms)
+- SeekDialog/StreamInfo: Show subtitle Plex auto-sync state; increase width of right-side textboxes slightly
+- Revert "Core/CoreELEC/LG WebOS: Only default to Alternate seek if superviseaudiodelay is not set in advancedsettings.xml (thanks @MikeTeavee)"
+- Player/TVShows/Playlists/SeekDialog: Fix rare occasion where immediately going to next item in playlist/season would keep the "skip prev" button disabled, when the playlist/season was started at episode 1
+- SubtitleDownload: (at least with caching enabled), fix downloading more than one subtitle in a row not represented in playback
+- SubtitleDownload: Make sure we actually select the right stream after downloading multiple subtitles
+- SubtitleDownload: Hammer Plex server less while waiting for subtitle download
+- SeekHandler: Ensure correct audio track was set after a handler was reused (skip to next video was pressed in player)
+- SeekDialog/CurrentPlaylist: Mark previous episodes/items as watched in current playlist during a multi-item playback session
+- SeekDialog/CurrentPlaylist: Show progress indicators for items in playlist; "live" snapshot of current video progress when opened as well
+- Episodes: Fix play from beginning not working for context menu of episode list items
+- SeekDialogAlternateSeek: When using alternate seek, clamp seek_behind to at least 1500ms, regardless of the setting, if enabled
+- Home: HubMenu: Don't produce an error on an invalidated DUMMY_DATA_SOURCE (please report back if you see issues with context menu actions on hub items starting from now) (thanks @peaceoutt32)
+- SeasonsMixin: Don't error out on deleted items
+- Core: Adjust NoDataException to be less specific to connection issues
+- SeekDialog/Core: Fix extremely rare unspecific edge case
+- CoreELEC: When switching audio track don't trigger progress events
+- Watchlist/Seasons: Allow clicking seasons in watchlist; visits available shows (thanks @peaceoutt32)
+- Watchlist: Include library name when multiple versions/servers are available (thanks @peaceoutt32)
+- DropdownWHeader: Slow down label scrolling and make sure we actually scroll
         </news>
         <assets>
             <icon>icon2.png</icon>
