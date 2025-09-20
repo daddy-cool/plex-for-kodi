@@ -43,7 +43,8 @@ class AvailabilityCheckTask(WatchlistCheckBaseTask):
                         rk = child.get("ratingKey")
                         if rk:
                             metadata = {"rating_key": rk, "resolution": None, "bitrate": None, "season_count": None,
-                                        "available": None, "server_uuid": str(self.server_uuid), "type": self.media_type}
+                                        "available": None, "server_uuid": str(self.server_uuid), "type": self.media_type,
+                                        "library_title": child.get("librarySectionTitle")}
 
                             # find resolution for movies
                             if self.media_type == "movie":
@@ -174,7 +175,7 @@ class WatchlistUtilsMixin(object):
                 server, meta = tup
                 verbose = self.wl_item_verbose(meta)
                 options.append({'key': idx,
-                                'display': '{}, {}'.format(server, verbose)
+                                'display': '{0}/{2}, {1} '.format(server, verbose, meta["library_title"])
                               })
 
             choice = dropdown.showDropdown(
