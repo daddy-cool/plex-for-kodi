@@ -578,8 +578,13 @@ class SeekPlayerHandler(BasePlayerHandler):
                 self.setAudioTrack()
 
     def onPlayBackResumed(self):
-        util.DEBUG_LOG('SeekHandler: onPlayBackResumed, DP: {}', self.isDirectPlay)
-        self.updateNowPlaying()
+        vpsc = False
+        if self.dialog and self.dialog.videoPausedForAudioStreamChange:
+            vpsc = True
+
+        util.DEBUG_LOG('SeekHandler: onPlayBackResumed, DP: {}, ignoring (VPSC): {}', self.isDirectPlay, vpsc)
+        if not vpsc:
+            self.updateNowPlaying()
         if self.dialog:
             self.dialog.onPlayBackResumed()
 
@@ -725,8 +730,13 @@ class SeekPlayerHandler(BasePlayerHandler):
                 self.sessionEnded()
 
     def onPlayBackPaused(self):
-        util.DEBUG_LOG('SeekHandler: onPlayBackPaused, DP: {}', self.isDirectPlay)
-        self.updateNowPlaying()
+        vpsc = False
+        if self.dialog and self.dialog.videoPausedForAudioStreamChange:
+            vpsc = True
+
+        util.DEBUG_LOG('SeekHandler: onPlayBackPaused, DP: {}, ignoring (VPSC): {}', self.isDirectPlay, vpsc)
+        if not vpsc:
+            self.updateNowPlaying()
         if self.dialog:
             self.dialog.onPlayBackPaused()
 
