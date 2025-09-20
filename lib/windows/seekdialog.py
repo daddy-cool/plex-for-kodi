@@ -312,9 +312,9 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
 
     def trueOffset(self):
         if self.isDirectPlay:
-            return self.DPPlayerOffset + self.offset
+            return self.DPPlayerOffset + (self.offset if self.offset is not None else 0)
         else:
-            return self.baseOffset + self.offset
+            return self.baseOffset + (self.offset if self.offset is not None else 0)
 
     @property
     def markers(self):
