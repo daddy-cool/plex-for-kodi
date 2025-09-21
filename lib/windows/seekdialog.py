@@ -2522,7 +2522,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
 
             cancelTick = False
             # don't auto skip while we're initializing and waiting for the handler to seek on start
-            if offset is None and not self.handler.seekOnStart:
+            if offset is None and not self.handler.seekOnStart and not self.handler.waitingForSOS:
                 cancelTick = self.displayMarkers()
 
             if cancelTick:
