@@ -373,7 +373,8 @@ class Video(media.MediaItem, AudioCodecMixin):
             'mediaIndex': params.get('mediaIndex', 0),
             'directStream': '1',
             'directPlay': '0',
-            'X-Plex-Platform': params.get('platform', ''),
+            'X-Plex-Platform': params.get('platform', util.X_PLEX_PLATFORM),
+            'X-Plex-Platform-Version': params.get('platformVersion', util.X_PLEX_PLATFORM_VERSION),
             # 'X-Plex-Platform': params.get('platform', util.INTERFACE.getGlobal('platform')),
             'maxVideoBitrate': max(mvb, 64) if mvb else None,
             'videoResolution': '{0}x{1}'.format(*vr) if vr else None

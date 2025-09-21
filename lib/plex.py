@@ -95,7 +95,7 @@ class PlexInterface(plexapp.AppInterface):
         'platform': 'Kodi',
         'appVersionStr': util.ADDON.getAddonInfo('version'),
         'clientIdentifier': CLIENT_ID,
-        'platformVersion': xbmc.getInfoLabel('System.BuildVersion'),
+        'platformVersion': plexnet_util.X_PLEX_PLATFORM_VERSION,
         'product': 'PM4K',
         'provides': 'player',
         'device': util.getPlatform() or plexapp.PLATFORM,
