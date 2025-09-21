@@ -204,7 +204,8 @@ class BasePlayerHandler(object):
 
         new_time_stored = plexapp.util.APP.nowplayingmanager.updatePlaybackState(
             self.timelineType, data, state, _time, self.playQueue, duration=self.currentDuration(),
-            force=overrideChecks, force_time=force_time, server=item.server
+            force=overrideChecks, force_time=force_time, server=item.server,
+            continuing=self.queuingNext or self.queuingSpecific
         )
 
         if new_time_stored:
