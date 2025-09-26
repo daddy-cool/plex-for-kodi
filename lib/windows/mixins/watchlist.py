@@ -1,4 +1,6 @@
 # coding=utf-8
+import traceback
+
 from lib import backgroundthread, util
 from lib.i18n import T
 from lib.windows import kodigui
@@ -118,6 +120,7 @@ def removeFromWatchlistBlind(guid):
     if not util.getUserSetting("use_watchlist", True):
         return
 
+    util.DEBUG_LOG("Watchlist: Trying to blindly remove {}", guid)
     try:
         if not guid or not guid.startswith("plex://"):
             return
@@ -125,7 +128,10 @@ def removeFromWatchlistBlind(guid):
         server = pnUtil.SERVERMANAGER.getDiscoverServer()
         server.query("/actions/removeFromWatchlist", ratingKey=GUIDToRatingKey(guid), method="put")
     except:
-        pass
+        exc = traceback.format_exc()
+        util.DEBUG_LOG("Watchlist: Failed to blindly remove {}: {}", guid, exc)
+    else:
+        util.DEBUG_LOG("Watchlist: Removed {}", guid)
 
 
 class WatchlistUtilsMixin(object):

@@ -29,7 +29,7 @@ from .mixins.seasons import SeasonsMixin
 from .mixins.spoilers import SpoilersMixin
 from .mixins.playbackbtn import PlaybackBtnMixin
 from .mixins.thememusic import ThemeMusicMixin
-from .mixins.watchlist import WatchlistUtilsMixin
+from .mixins.watchlist import WatchlistUtilsMixin, removeFromWatchlistBlind
 from .mixins.ratings import RatingsMixin
 from .mixins.roles import RolesMixin
 from .mixins.common import CommonMixin
@@ -206,6 +206,8 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
     width = 1920
     height = 1080
 
+    supportsAutoPlay = True
+
     THUMB_AR16X9_DIM = util.scaleResolution(657, 393)
     POSTER_DIM = util.scaleResolution(420, 630)
     RELATED_DIM = util.scaleResolution(268, 402)
@@ -294,6 +296,18 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         except KeyError:
             pass
 
+    def onBlindClose(self):
+        if self.openedWithAutoPlay and not self.started:
+            vp = None
+            if self.show_.ratingKey in VIDEO_PROGRESS:
+                # access progress data for current show only
+                vp = copy.deepcopy(VIDEO_PROGRESS[self.show_.ratingKey]).get(self.season.ratingKey, {})
+
+            if vp:
+                self.show_.reload(checkFiles=1, **VIDEO_RELOAD_KW)
+                if self.show_.isFullyWatched:
+                    removeFromWatchlistBlind(self.show_.guid)
+
     @busy.dialog()
     def _onFirstInit(self):
         self.episodeListControl = kodigui.ManagedControlList(self, self.EPISODE_LIST_ID, 5)
@@ -312,12 +326,12 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         self._setup()
         self.postSetup()
 
-    def doAutoPlay(self):
+    def doAutoPlay(self, blind=False):
         # First reload the video to get all the other info
         self.initialEpisode.reload(checkFiles=1, **VIDEO_RELOAD_KW)
 
         # We're not hitting onFirstInit when autoplaying from home, setup hooks here, so we can grab video progress
-        #self._setup_hooks()
+        self._setup_hooks()
         self.openedWithAutoPlay = True
         return self.playButtonClicked(force_episode=self.initialEpisode, from_auto_play=True, start_over=self.startOver)
 

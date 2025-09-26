@@ -196,6 +196,7 @@ class XMLBase(object):
 class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
     __slots__ = ("_closing", "_winID", "started", "finishedInit", "dialogProps", "isOpen", "_errored",
                  "_closeSignalled")
+    supportsAutoPlay = False
 
     def __init__(self, *args, **kwargs):
         BaseFunctions.__init__(self)
@@ -264,6 +265,12 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
         xbmcgui.WindowXML.onAction(self, action)
 
     def onReInit(self):
+        pass
+
+    def doAutoPlay(self, blind=False):
+        pass
+
+    def onBlindClose(self):
         pass
 
     def waitForOpen(self, base_win_id=None):

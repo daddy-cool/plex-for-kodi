@@ -23,7 +23,7 @@ from . import windowutils
 from .mixins.ratings import RatingsMixin
 from .mixins.playbackbtn import PlaybackBtnMixin
 from .mixins.thememusic import ThemeMusicMixin
-from .mixins.watchlist import WatchlistUtilsMixin
+from .mixins.watchlist import WatchlistUtilsMixin, removeFromWatchlistBlind
 from .mixins.roles import RolesMixin
 from .mixins.common import CommonMixin
 
@@ -43,6 +43,8 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
     res = '1080i'
     width = 1920
     height = 1080
+
+    supportsAutoPlay = True
 
     THUMB_POSTER_DIM = util.scaleResolution(347, 518)
     RELATED_DIM = util.scaleResolution(268, 402)
@@ -114,7 +116,7 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         if not util.getSetting("slow_connection") and not self.openedWithAutoPlay:
             self.themeMusicInit(self.video, locations=[os.path.dirname(s.part.file) for s in self.video.videoStreams])
 
-    def doAutoPlay(self):
+    def doAutoPlay(self, blind=False):
         # First reload the video to get all the other info
         self.video.reload(checkFiles=1, **VIDEO_RELOAD_KW)
         self.openedWithAutoPlay = True
@@ -138,6 +140,12 @@ class PrePlayWindow(kodigui.ControlledWindow, windowutils.UtilMixin, RatingsMixi
         if not removed_from_wl:
             self.checkIsWatchlisted(self.video)
         self.initialized = True
+
+    def onBlindClose(self):
+        if self.fromPlayback and self.openedWithAutoPlay and not self.started:
+            self.video.reload(checkFiles=1, fromMediaChoice=self.video.mediaChoice is not None, **VIDEO_RELOAD_KW)
+            if self.video.isFullyWatched:
+                removeFromWatchlistBlind(self.video.guid)
 
     def refreshInfo(self, from_reinit=False):
         oldFocusId = self.getFocusId()
