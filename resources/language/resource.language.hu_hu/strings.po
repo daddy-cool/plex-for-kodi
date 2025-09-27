@@ -190,7 +190,7 @@ msgstr "Videó"
 #: 
 msgctxt "#32054"
 msgid "Addon Version"
-msgstr "Addon verzió"
+msgstr "Kiegészítő verziója"
 
 #: 
 msgctxt "#32055"
@@ -2743,7 +2743,7 @@ msgstr "Automatikusan kihagyja az epizódok főcímeit, a stáblistát és megpr
 #: 
 msgctxt "#33052"
 msgid "Which CA certificate bundle to use for request HTTPS verification. \"system\" uses the system-provided certificate bundle. \"ACME\" uses an extremely small bundle provided with the addon, which includes root certificates for Letsencrypt (plex.direct) and ZeroSSL. \"custom\" allows for a ca-certificate bundle in userdata/addon_data/script.plexmod/custom_bundle.crt"
-msgstr "Melyik hitelesítésszolgáltatói tanúsítványcsomagot használja a HTTPS-ellenőrzéshez. A „rendszer” a rendszer által biztosított tanúsítványcsomagot használja. Az „ACME” a kiegészítővel biztosított rendkívül kis csomagot használja, amely a Letsencrypt (plex.direct) és a ZeroSSL gyökértanúsítványait tartalmazza. Az „egyéni” lehetővé teszi a CA-tanúsítványköteg használatát a userdata/addon_data/script.plexmod/custom_bundle.crt fájlban."
+msgstr "Melyik CA tanúsítványcsomagot használja a HTTPS-ellenőrzéshez. A „rendszer” az általa biztosított tanúsítványcsomagot használja. Az „ACME” a kiegészítővel biztosított rendkívül kis csomagot használja, amely a Letsencrypt (plex.direct) és a ZeroSSL gyökértanúsítványait tartalmazza. Az „egyéni” lehetővé teszi a CA-tanúsítványköteg használatát a userdata/addon_data/script.plexmod/custom_bundle.crt fájlban."
 
 #: 
 msgctxt "#33054"
@@ -2768,7 +2768,7 @@ msgstr "Háttérkép felbontás méretezése %"
 #: 
 msgctxt "#33654"
 msgid "In percent, based on 1080p. Scales the resolution of all backgrounds for better image quality. May impact PMS/PM4K performance, will increase the cache usage accordingly. Can lead to crashes if your hardware is low on RAM. Needs addon restart. Use 400% for 4K. ATTENTION: In order for this to work you need to add <fanartres>2160</fanartres> and <imageres>2160</imageres> to your advancedsettings.xml."
-msgstr "Százalékban, 1080p alapján. A jobb képminőség érdekében méretezi az összes háttér felbontását. Befolyásolhatja a PMS/PM4K teljesítményét, ennek megfelelően növeli a gyorsítótár használatát. Összeomlásokhoz vezethet, ha a hardveren kevés a RAM. A kiegészítő újraindítását igényli. 4K esetén 400%-ot használjon. FIGYELEM: Ahhoz, hogy ez működjön, hozzá kell adnod a <fanartres>2160</fanartres> és <imageres>2160</imageres> elemeket az advancedsettings.xml fájlodhoz."
+msgstr "Százalékban, 1080p alapján. A jobb képminőség érdekében az összes háttér felbontását átméretezi. Befolyásolhatja a PMS/PM4K teljesítményét, ennek megfelelően növeli a gyorsítótár használatát. Összeomlásokhoz vezethet, ha kevés a RAM. Kiegészítő újraindítása szükséges. 4K esetén 400%-ot használjon. FIGYELEM: Ahhoz, hogy ez működjön, hozzá kell adni a <fanartres>2160</fanartres> és <imageres>2160</imageres> elemeket az advancedsettings.xml fájlhoz."
 
 #: 
 msgctxt "#33655"
@@ -2968,7 +2968,7 @@ msgstr "Szolgáltatás frissítve"
 #: 
 msgctxt "#33682"
 msgid "The update {} has had changes to the updater itself. In order for the updated updater service to work, a Kodi restart is necessary. The addon will work normally, though. Do you still want to run the addon?"
-msgstr "A frissítés {} magának a frissítőnek a módosítása. Ahhoz, hogy a frissített frissítő szolgáltatás működjön, a Kodi újraindítása szükséges. A kiegészítő azonban normálisan fog működni. Még mindig szeretné futtatni a kiegészítőt?"
+msgstr "A frissítés {} magának a frissítőnek a módosítása. A szolgáltatás működéséhez, a Kodi újraindítása szükséges. Ennek ellenére a kiegészítő normálisan fog működni. Még mindig szeretné futtatni a kiegészítőt?"
 
 #: 
 msgctxt "#33685"
