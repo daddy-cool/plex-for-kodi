@@ -247,7 +247,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
 
         self.player.video.server.on("np:timelineResponse", self.timelineResponseCallback)
 
-        if util.kodiSkipSteps and util.addonSettings.kodiSkipStepping:
+        if util.kodiSkipSteps and util.addonSettings.kodiSkipStepping and not self.handler.useAlternateSeek:
             self.skipSteps = {"negative": [], "positive": []}
             for step in util.kodiSkipSteps:
                 key = "negative" if step < 0 else "positive"
@@ -2554,8 +2554,10 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                 self.resetAutoSeekTimer(None)
                 #off = offset is not None and offset or None
                 #self.doSeek(off)
-                self.doSeek()
-                return True
+                if self.selectedOffset and abs(self.selectedOffset - self.offset) >= 10000 and not self.handler.waitingForSOS:
+                    util.DEBUG_LOG("SeekDialog: Tick: Seek: {}, {}", self.offset, self.selectedOffset)
+                    self.doSeek()
+                    return True
 
             if self.isDirectPlay or not self.ldTimer:
                 self.updateCurrent(update_position_control=not self._seeking and not self._applyingSeek)
