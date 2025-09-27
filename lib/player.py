@@ -858,6 +858,9 @@ class SeekPlayerHandler(BasePlayerHandler):
                 util.DEBUG_LOG("SeekHandler: onPlayBackSeek: SeekOnStart not successful: {}", origSOS)
             self.waitingForSOS = False
             self.seekOnStart = 0
+            if self.useResumeFix:
+                self.dialog.update(offset=appliedOffset, from_seek=True)
+                return
 
         self.updateOffset()
         # self.showOSD(from_seek=True)
