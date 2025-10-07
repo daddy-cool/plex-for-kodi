@@ -276,12 +276,16 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
     def waitForOpen(self, base_win_id=None):
         tries = 0
         while ((not base_win_id and not self.isOpen) or
-               (base_win_id and xbmcgui.getCurrentWindowId() <= base_win_id)) \
-                and not util.MONITOR.waitForAbort(1) and tries < 120:
+               (base_win_id and xbmcgui.getCurrentWindowId() <= base_win_id)) and tries < 120:
             if tries == 0:
                 util.LOG("Couldn't open window {}, other dialog open? Retrying for 120s.", self)
+            if util.MONITOR.abortRequested():
+                util.LOG("Couldn't open window {}, abort requested", self)
+                break
             self.show()
-            tries += 1
+            if not self.isOpen:
+                tries += 1
+                util.MONITOR.waitForAbort(1.0)
 
         util.DEBUG_LOG("Window {} opened: {}", self, self.isOpen)
 
@@ -366,7 +370,7 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
             util.DEBUG_LOG('{} not yet active, retrying', self.__class__.__name__)
 
         ct = 0
-        while xbmcgui.getCurrentWindowId() == lastWinID and ct < 20:
+        while xbmcgui.getCurrentWindowId() == lastWinID and ct < 20 and not util.MONITOR.abortRequested():
             util.MONITOR.waitForAbort(0.1)
             ct += 1
             # we might have run into an active dialog, which happens sometimes, so we didn't really activate the window
