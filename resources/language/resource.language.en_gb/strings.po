@@ -2766,3 +2766,7 @@ msgstr ""
 msgctxt "#34029"
 msgid "When \"Use alternate seek\" is enabled, any seek amount outside of this threshold window will be applied, otherwise the seek attempt will be ignored. If you encounter any seek issues, play with this value (ms, default: 2000)"
 msgstr ""
+
+msgctxt "#34030"
+msgid "Unlock Direct Play for above 4K"
+msgstr ""

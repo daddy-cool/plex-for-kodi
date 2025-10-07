@@ -28,6 +28,11 @@
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="unlock_res" type="boolean" label="34030">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
                 <setting id="poster_resolution_scale_perc" type="integer" label="32956" help="32957">
                     <level>0</level>
                     <default>100</default>

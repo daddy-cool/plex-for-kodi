@@ -71,6 +71,7 @@ class AddonSettings(object):
         ("requests_cache_expiry", 168),
         ("playlist_max_size", 500),
         ("max_shutdown_wait", 5),
+        ("unlock_res", False),
     )
 
     def __init__(self):
