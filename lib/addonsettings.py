@@ -65,6 +65,7 @@ class AddonSettings(object):
         ("honor_plextv_dnsrebind", True),
         ("honor_plextv_pam", True),
         ("coreelec_resume_seek_wait", 850),
+        ("altseek_valid_seek_window", 2000),
         ("background_resolution_scale_perc", 100),
         ("osd_hide_delay", 4.0),
         ("requests_cache_expiry", 168),

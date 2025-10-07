@@ -175,6 +175,18 @@
                         <popup>false</popup>
                     </control>
                 </setting>
+                <setting id="altseek_valid_seek_window" type="integer" label="34028" help="34029">
+                    <level>0</level>
+                    <default>2000</default>
+                    <constraints>
+                        <minimum>500</minimum>
+                        <step>100</step>
+                        <maximum>15000</maximum>
+                    </constraints>
+                    <control type="slider" format="integer">
+                        <popup>false</popup>
+                    </control>
+                </setting>
                 <setting id="show_media_ends_info" type="boolean" label="32540" help="32541">
                     <level>0</level>
                     <default>true</default>

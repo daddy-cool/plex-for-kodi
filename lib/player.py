@@ -500,7 +500,7 @@ class SeekPlayerHandler(BasePlayerHandler):
             if self.useAlternateSeek:
                 currentTime = self.player.getTime()
                 relativeSeekSeconds = seekSeconds - currentTime
-                if seekSeconds > 1.0 and abs(relativeSeekSeconds) > 1.0:
+                if abs(relativeSeekSeconds) > 1.0:
                     util.DEBUG_LOG("SeekAbsolute: Relative-seeking to offset: {0}, current time: {1}, relative seek: {2}".format(
                         seekSeconds, currentTime, relativeSeekSeconds))
                     xbmc.executebuiltin('Seek({})'.format(relativeSeekSeconds))
@@ -754,8 +754,10 @@ class SeekPlayerHandler(BasePlayerHandler):
             self.dialog.onPlayBackSeek(stime, offset)
 
         if self.dialog and self.isDirectPlay and origSOS:
-            withinSOSLow = origSOS - 10000
-            withinSOSHigh = origSOS + 10000
+            seekWindow = util.addonSettings.altseekValidSeekWindow
+            withinSOSLow = origSOS - seekWindow
+            # allow the upper bounds to move because we might be playing (and moving forward)
+            withinSOSHigh = origSOS + seekWindow + min(seekWindow, 2000)
 
             tries = 0
             while not self.player.isPlayingVideo() and tries < 50 and not util.MONITOR.abortRequested():
@@ -847,10 +849,10 @@ class SeekPlayerHandler(BasePlayerHandler):
             appliedOffset = None
             if self.dialog:
                 if SOSSuccess and ((self.useResumeFix and origSOS > 500) or not self.useResumeFix):
-                    util.DEBUG_LOG("SeekHandler: onPlayBackSeek: Setting dialog offset to {}", origSOS)
-                    # set to current time if we succeesed, as seekOnStart could've been set to 0 in the meantime by the relative seek
-                    self.dialog.offset = int(self.player.getTime() * 1000) if self.useResumeFix else origSOS
-                    appliedOffset = self.dialog.offset
+                    appliedOffset = int(self.player.getTime() * 1000) if self.useResumeFix else origSOS
+                    util.DEBUG_LOG("SeekHandler: onPlayBackSeek: Setting dialog offset to {}", appliedOffset)
+                    # set to current time if we succeeded, as seekOnStart could've been set to 0 in the meantime by the relative seek
+                    self.dialog.offset = appliedOffset
 
             if SOSSuccess:
                 util.DEBUG_LOG("SeekHandler: onPlayBackSeek: SeekOnStart applied: {}", appliedOffset)
@@ -859,8 +861,9 @@ class SeekPlayerHandler(BasePlayerHandler):
             self.waitingForSOS = False
             self.seekOnStart = 0
             if self.useResumeFix:
-                self.dialog.update(offset=appliedOffset, from_seek=True)
-                return
+                self.dialog.offset = appliedOffset
+                self.dialog.selectedOffset = appliedOffset
+                self.dialog.update()
 
         self.updateOffset()
         # self.showOSD(from_seek=True)
