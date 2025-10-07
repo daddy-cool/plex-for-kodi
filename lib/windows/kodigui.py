@@ -273,7 +273,7 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
     def onBlindClose(self):
         pass
 
-    def waitForOpen(self, base_win_id=None):
+    def waitForOpen(self, base_win_id=None, aggressive=False):
         tries = 0
         while ((not base_win_id and not self.isOpen) or
                (base_win_id and xbmcgui.getCurrentWindowId() <= base_win_id)) and tries < 120:
@@ -282,7 +282,7 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
             if util.MONITOR.abortRequested():
                 util.LOG("Couldn't open window {}, abort requested", self)
                 break
-            self.show()
+            self.show(aggressive=aggressive)
             if not self.isOpen:
                 tries += 1
                 util.MONITOR.waitForAbort(1.0)
@@ -350,7 +350,7 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
         self.isOpen = False
         self.close()
 
-    def show(self):
+    def show(self, aggressive=True):
         self._closing = False
         # can we activate?
         ct = 0
@@ -363,19 +363,26 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
         #self.isOpen = True
         xbmcgui.WindowXML.show(self)
 
-        # our current window ID _has_ to be different to the last one, if it isn't, handle.
-        # kodi doesn't throw an exception in case of a still active modal dialog, but instead just logs:
-        # Activate of window 'xxxxxx' refused because there are active modal dialogs
-        if xbmcgui.getCurrentWindowId() == lastWinID:
-            util.DEBUG_LOG('{} not yet active, retrying', self.__class__.__name__)
+        if aggressive:
+            cid = xbmcgui.getCurrentWindowId()
+            util.DEBUG_LOG("{}: checking window state (ID: {}, last: {}, current: {})", self, self._winID, lastWinID, cid)
+            if(self._winID and cid != self._winID) or not self._winID or xbmcgui.getCurrentWindowId() == lastWinID:
+                # our current window ID _has_ to be different to the last one, if it isn't, handle.
+                # kodi doesn't throw an exception in case of a still active modal dialog, but instead just logs:
+                # Activate of window 'xxxxxx' refused because there are active modal dialogs
+                if xbmcgui.getCurrentWindowId() == lastWinID:
+                    util.DEBUG_LOG('{}: not yet active, retrying', self.__class__.__name__)
+                    util.MONITOR.waitForAbort(0.1)
 
-        ct = 0
-        while xbmcgui.getCurrentWindowId() == lastWinID and ct < 20 and not util.MONITOR.abortRequested():
-            util.MONITOR.waitForAbort(0.1)
-            ct += 1
-            # we might have run into an active dialog, which happens sometimes, so we didn't really activate the window
-            # retry
-            xbmcgui.WindowXML.show(self)
+                ct = 0
+                while xbmcgui.getCurrentWindowId() == lastWinID and ct < 4 and not util.MONITOR.abortRequested():
+                    ct += 1
+                    # we might have run into an active dialog, which happens sometimes, so we didn't really activate the window
+                    # retry
+                    xbmcgui.WindowXML.show(self)
+                    util.MONITOR.waitForAbort(0.5)
+
+                util.DEBUG_LOG("{}: activation state (ID: {}, last: {}, current: {})", self, self._winID, lastWinID, cid)
 
         self.isOpen = xbmcgui.getCurrentWindowId() >= 13000
 
