@@ -601,6 +601,9 @@ class SeekPlayerHandler(BasePlayerHandler):
 
     @property
     def playedThresholdPerc(self):
+        if not self.player.video:
+            return 90
+
         server_thres = self.player.video.server.prefs.get("LibraryVideoPlayedThreshold", None)
         if server_thres is None:
             return int(self.playedThreshold)
@@ -612,6 +615,9 @@ class SeekPlayerHandler(BasePlayerHandler):
         :param ref:
         :return: bool
         """
+        if not self.player.video:
+            return False
+
         playedAtBH = self.player.video.server.prefs.get("LibraryVideoPlayedAtBehaviour", None)
         if playedAtBH is None:
             playedAtBH = util.getSetting("played_threshold_behaviour")
