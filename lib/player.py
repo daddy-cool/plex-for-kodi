@@ -823,7 +823,7 @@ class SeekPlayerHandler(BasePlayerHandler):
 
                     tries = 0
                     max_tries = int(5000 / seekWait)
-                    while (self.player.getTime() * 1000 < withinSOSLow or self.player.getTime() * 1000 > withinSOSHigh) and tries < max_tries:
+                    while (self.player.isPlayingVideo() and self.player.getTime() * 1000 < withinSOSLow or self.player.getTime() * 1000 > withinSOSHigh) and tries < max_tries:
                         util.DEBUG_LOG("OnPlayBackSeek: SeekOnStart: Not there, yet, "
                                        "seeking again ({}, range: {}, {})", origSOS, withinSOSHigh - withinSOSLow, self.player.getTime())
                         if util.MONITOR.abortRequested():
@@ -832,8 +832,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                             break
                         elif not self.player.isPlayingVideo():
                             util.DEBUG_LOG("OnPlayBackSeek: SeekOnStart: Player not playing video while waiting for seek")
-                            SOSSuccess = False
-                            break
+                            return
 
                         withinSOSHigh += 250
                         util.MONITOR.waitForAbort(0.25)
@@ -866,7 +865,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                 util.DEBUG_LOG("SeekHandler: onPlayBackSeek: SeekOnStart not successful: {}", origSOS)
             self.waitingForSOS = False
             self.seekOnStart = 0
-            if self.useResumeFix:
+            if self.useResumeFix and self.dialog:
                 self.dialog.offset = appliedOffset
                 self.dialog.selectedOffset = appliedOffset
                 self.dialog.update()

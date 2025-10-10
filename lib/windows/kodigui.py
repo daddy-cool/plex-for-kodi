@@ -43,10 +43,11 @@ class BaseFunctions(object):
     @classmethod
     def open(cls, **kwargs):
         path = cls.path
+        aggressive = kwargs.pop('aggressive', False)
         if os.getenv("INSTALLATION_DIR_AVOID_WRITE"):
             path = util.PROFILE
         window = cls(cls.xmlFile, path, cls.theme, cls.res, **kwargs)
-        window.modal()
+        window.modal(aggressive=aggressive)
         return window
 
     @classmethod
@@ -66,10 +67,10 @@ class BaseFunctions(object):
         window.isOpen = xbmcgui.getCurrentWindowId() >= 13000
         return window
 
-    def modal(self):
+    def modal(self, aggressive=False):
         self.isOpen = True
         try:
-            self.doModal()
+            self.doModal(aggressive=aggressive)
         except SystemExit:
             pass
         self.onClosed()
@@ -273,7 +274,7 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
     def onBlindClose(self):
         pass
 
-    def waitForOpen(self, base_win_id=None, aggressive=False):
+    def waitForOpen(self, base_win_id=None):
         tries = 0
         while ((not base_win_id and not self.isOpen) or
                (base_win_id and xbmcgui.getCurrentWindowId() <= base_win_id)) and tries < 120:
@@ -282,7 +283,7 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
             if util.MONITOR.abortRequested():
                 util.LOG("Couldn't open window {}, abort requested", self)
                 break
-            self.show(aggressive=aggressive)
+            self.show()
             if not self.isOpen:
                 tries += 1
                 util.MONITOR.waitForAbort(1.0)
@@ -350,7 +351,7 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
         self.isOpen = False
         self.close()
 
-    def show(self, aggressive=True):
+    def show(self, aggressive=False):
         self._closing = False
         # can we activate?
         ct = 0
@@ -382,7 +383,7 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
                     xbmcgui.WindowXML.show(self)
                     util.MONITOR.waitForAbort(0.5)
 
-                util.DEBUG_LOG("{}: activation state (ID: {}, last: {}, current: {})", self, self._winID, lastWinID, cid)
+                util.DEBUG_LOG("{}: activation state (ID: {}, last: {}, current: {})", self, self._winID, lastWinID, xbmcgui.getCurrentWindowId())
 
         self.isOpen = xbmcgui.getCurrentWindowId() >= 13000
 
@@ -468,8 +469,8 @@ class BaseDialog(XMLBase, xbmcgui.WindowXMLDialog, BaseFunctions):
 
 
 class ControlledBase:
-    def doModal(self):
-        self.show()
+    def doModal(self, aggressive=False):
+        self.show(aggressive=aggressive)
         self.wait()
 
     def wait(self):
