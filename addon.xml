@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="0.8.0-rc5"
+       version="0.8.0-rc5.1"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -34,18 +34,9 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Home: Add "Minimize" and "Exit" options to user menu (touch based devices can't easily hit the exit menu by using BACK)
-- CE/LG: AlternateSeek: Re-Allow seeking to 0 (introduced with RC4)
-- CE/LG: AlternateSeek: Revert massive default window of +/- 10s for a valid seek (broken since RC4)
-- CE/LG: AlternateSeek: Implement AltSeekValidSeekWindow (default: +/- 2000ms); during this window, allow +2000ms for the valid window based on this setting (to compensate for playing media while seeking)
-- CE/LG: Select the correct timestamp after seeking
-- SeekDialog/CE/LG: Clamp seek steps to at least the valid window
-- AddonSettings: Add "\"Use alternate seek\" valid seek window"" to control the behaviour of Alternate Seek's seek confirmation; default: 2000ms (not translated yet)
-- Core: Slightly re-jig waitForOpen
-- Core: Optionally allow direct play for resolutions above 4K
-- AddonSettings: Add setting "Unlock Direct Play for above 4K" (untranslated)
-- KodiGUI: Be less aggressive when waiting for initial open of Background/Home
-- Player: Fix rare traceback when quickly starting and ending video playback
+- Core/KodiGUI: Revert the generic aggressive window show functionality introduced with RC1; do it only on VideoPlayer.open() (could lead to rare broken UI (flickering "home" button))
+- VideoPlayer: Be aggressive while waiting for the window to open
+- CE/LG: Don't throw rare traceback when exiting before Kodi has started playing a file
         </news>
         <assets>
             <icon>icon2.png</icon>
