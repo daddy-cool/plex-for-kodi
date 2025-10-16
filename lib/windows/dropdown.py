@@ -21,6 +21,7 @@ class DropdownDialog(kodigui.BaseDialog):
 
     GROUP_ID = 100
     OPTIONS_LIST_ID = 250
+    SCROLLBAR_ID = 1152
 
     def __init__(self, *args, **kwargs):
         kodigui.BaseDialog.__init__(self, *args, **kwargs)
@@ -41,6 +42,7 @@ class DropdownDialog(kodigui.BaseDialog):
         self.header = kwargs.get('header')
         self.selectIndex = kwargs.get('select_index')
         self.selectItem = kwargs.get('select_item')
+        self.isSubList = kwargs.get('is_sub_list')
         self.openSubLists = kwargs.get('open_sublists')
         self.onCloseCallback = kwargs.get('onclose_callback')
         self.choice = None
@@ -59,9 +61,12 @@ class DropdownDialog(kodigui.BaseDialog):
     def onFirstInit(self):
         self.setProperty('dropdown', self.setDropdownProp and '1' or '')
         self.setProperty('header', self.header)
+        optLen = len(self.options)
+        if self.isSubList:
+            self.setBoolProperty('scroll', optLen > 14)
         self.optionsList = kodigui.ManagedControlList(self, self.OPTIONS_LIST_ID, 14)
         openSubList = self.showOptions()
-        height = min(self.optionHeight * 14, len(self.options) * self.optionHeight) + util.vscalei(86)
+        height = min(self.optionHeight * 14, optLen * self.optionHeight) + util.vscalei(86)
         ol_height = height - util.vscalei(86)
         y = self.y
 
@@ -101,8 +106,10 @@ class DropdownDialog(kodigui.BaseDialog):
         except:
             util.ERROR()
 
+        controlID = self.getFocusId()
+
         if self.roundRobin and action in (xbmcgui.ACTION_MOVE_UP, xbmcgui.ACTION_MOVE_DOWN) and \
-                self.getFocusId() == self.OPTIONS_LIST_ID:
+                controlID == self.OPTIONS_LIST_ID:
             to_pos = None
             last_index = self.optionsList.size() - 1
 
@@ -123,6 +130,10 @@ class DropdownDialog(kodigui.BaseDialog):
                 self.lastSelectedItem = self.optionsList.control.getSelectedPosition()
         elif self.suboptionCallback and action == xbmcgui.ACTION_MOVE_RIGHT:
             self.setChoice()
+
+        elif controlID == self.SCROLLBAR_ID and action == xbmcgui.ACTION_SELECT_ITEM:
+            self.setChoice()
+            return
 
         kodigui.BaseDialog.onAction(self, action)
 
@@ -169,7 +180,7 @@ class DropdownDialog(kodigui.BaseDialog):
                     sub_select = self.selectItem["sub"]
 
                 sub = showDropdown(options, (self.x + 290, self.y + 10), close_direction='left',
-                                   with_indicator=True, select_item=sub_select)
+                                   with_indicator=True, select_item=sub_select, is_sub_list=True)
                 if not sub:
                     return
 
@@ -267,6 +278,7 @@ def showDropdown(
     select_index=None,
     select_item=None,
     open_sublists=False,
+    is_sub_list=False,
     onclose_callback=None,
     dialog_props=None
 ):
@@ -288,6 +300,7 @@ def showDropdown(
             select_index=select_index,
             select_item=select_item,
             open_sublists=open_sublists,
+            is_sub_list=is_sub_list,
             onclose_callback=onclose_callback,
             dialog_props=dialog_props,
         )
@@ -308,6 +321,7 @@ def showDropdown(
             select_index=select_index,
             select_item=select_item,
             open_sublists=open_sublists,
+            is_sub_list=is_sub_list,
             onclose_callback=onclose_callback,
             dialog_props=dialog_props,
         )
