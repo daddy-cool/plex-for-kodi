@@ -121,6 +121,8 @@ class DropdownDialog(kodigui.BaseDialog):
                     return
 
                 self.lastSelectedItem = self.optionsList.control.getSelectedPosition()
+        elif self.suboptionCallback and action == xbmcgui.ACTION_MOVE_RIGHT:
+            self.setChoice()
 
         kodigui.BaseDialog.onAction(self, action)
 
