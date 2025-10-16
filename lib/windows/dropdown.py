@@ -40,6 +40,7 @@ class DropdownDialog(kodigui.BaseDialog):
         self.optionsCallback = kwargs.get('options_callback', None)
         self.header = kwargs.get('header')
         self.selectIndex = kwargs.get('select_index')
+        self.selectItem = kwargs.get('select_item')
         self.onCloseCallback = kwargs.get('onclose_callback')
         self.choice = None
 
@@ -156,7 +157,11 @@ class DropdownDialog(kodigui.BaseDialog):
         if self.suboptionCallback:
             options = self.suboptionCallback(choice)
             if options:
-                sub = showDropdown(options, (self.x + 290, self.y + 10), close_direction='left', with_indicator=True)
+                sub_select = None
+                if self.selectItem and self.selectItem.get("sub"):
+                    sub_select = self.selectItem["sub"]
+                sub = showDropdown(options, (self.x + 290, self.y + 10), close_direction='left',
+                                   with_indicator=True, select_item=sub_select)
                 if not sub:
                     return
 
@@ -174,10 +179,19 @@ class DropdownDialog(kodigui.BaseDialog):
     def showOptions(self):
         items = []
         options = []
+        sids = None
+        if self.selectItem:
+            sids = self.selectItem.copy()
+            if "sub" in sids:
+                sids.pop("sub")
+
         for oo in self.options:
             if oo:
                 o = oo.copy()
-                item = kodigui.ManagedListItem(o['display'], thumbnailImage=o.get('indicator', ''), data_source=o)
+                ds = o.copy()
+                # clear indicator for the dataSource so we can find it later
+                ds["indicator"] = ''
+                item = kodigui.ManagedListItem(o['display'], thumbnailImage=o.get('indicator', ''), data_source=ds)
                 item.setProperty('with.indicator', self.withIndicator and '1' or '')
                 item.setProperty('align', self.alignItems)
                 items.append(item)
@@ -202,6 +216,9 @@ class DropdownDialog(kodigui.BaseDialog):
         if self.selectIndex is not None:
             self.optionsList.setSelectedItemByPos(self.selectIndex)
             self.lastSelectedItem = self.selectIndex
+        elif sids is not None:
+            self.optionsList.setSelectedItemByDataSource(sids)
+            self.lastSelectedItem = self.optionsList.getSelectedPos()
 
 
 class DropdownHeaderDialog(DropdownDialog):
@@ -222,6 +239,7 @@ def showDropdown(
     options_callback=None,
     header=None,
     select_index=None,
+    select_item=None,
     onclose_callback=None,
     dialog_props=None
 ):
@@ -241,6 +259,7 @@ def showDropdown(
             options_callback=options_callback,
             header=header,
             select_index=select_index,
+            select_item=select_item,
             onclose_callback=onclose_callback,
             dialog_props=dialog_props,
         )
@@ -259,6 +278,7 @@ def showDropdown(
             options_callback=options_callback,
             header=header,
             select_index=select_index,
+            select_item=select_item,
             onclose_callback=onclose_callback,
             dialog_props=dialog_props,
         )

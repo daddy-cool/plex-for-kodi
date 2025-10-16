@@ -419,6 +419,7 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
         PlaybackBtnMixin.reset(self)
         util.setGlobalProperty('sort', '')
         self.filterUnwatched = self.librarySettings.getSetting('filter.unwatched', False)
+        self.filter = self.filter or self.librarySettings.getSetting('filter', None)
         self.sort = self.librarySettings.getSetting('sort', self.section.DEFAULT_SORT)
         self.sortDesc = self.librarySettings.getSetting('sort.desc', self.section.DEFAULT_SORT_DESC)
 
@@ -1102,7 +1103,7 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
             for k in self.section.ALLOWED_FILTERS:
                 options.append(optionsMap[k])
 
-        result = dropdown.showDropdown(options, (980, 106), with_indicator=True, suboption_callback=self.subOptionCallback)
+        result = dropdown.showDropdown(options, (980, 106), with_indicator=True, suboption_callback=self.subOptionCallback, select_item=self.filter)
         if not result:
             return
 
@@ -1110,11 +1111,13 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
 
         if choice == 'clear_filter':
             self.filter = None
+            self.librarySettings.setSetting('filter', None)
         elif choice == 'unwatched':
             self.filterUnwatched = not self.filterUnwatched
             self.librarySettings.setSetting('filter.unwatched', self.filterUnwatched)
         else:
             self.filter = result
+            self.librarySettings.setSetting('filter', self.filter)
 
         self.updateFilterDisplay()
 
@@ -1125,6 +1128,7 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
         self.filter = None
         self.filterUnwatched = False
         self.librarySettings.setSetting('filter.unwatched', self.filterUnwatched)
+        self.librarySettings.setSetting('filter', None)
         self.updateFilterDisplay()
 
     def resetSort(self):
