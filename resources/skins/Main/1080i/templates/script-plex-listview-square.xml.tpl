@@ -93,6 +93,7 @@
             <align>left</align>
             <textcolor>FFDDDDDD</textcolor>
             <label>$INFO[Container(101).ListItem.Property(camera.model),,[CR]]$INFO[Container(101).ListItem.Property(camera.lens),,[CR]]$INFO[Container(101).ListItem.Property(photo.dims),,[CR]]$INFO[Container(101).ListItem.Property(camera.settings),,[CR]]$INFO[Container(101).ListItem.Property(photo.summary),[CR],[CR]]$INFO[Container(101).ListItem.Property(summary)]</label>
+            <autoscroll delay="2000" time="2000" repeat="10000"></autoscroll>
         </control>
     </control>
 
