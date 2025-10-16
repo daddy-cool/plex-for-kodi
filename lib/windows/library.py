@@ -401,6 +401,7 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
         self.lastFocusID = None
         self.lastNonOptionsFocusID = None
         self.refill = False
+        self.subOptionCache = {}
 
         self.dcpjPos = 0
         self.dcpjThread = None
@@ -735,6 +736,8 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
         if self.playBtnClicked:
             return
 
+        self.subOptionCache = {}
+
         self.playBtnClicked = True
         filter_ = self.getFilterOpts()
         sort = self.getSortOpts()
@@ -1014,9 +1017,16 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
             'year', 'decade', 'genre', 'contentRating', 'collection', 'director', 'actor', 'country', 'studio', 'network', 'resolution', 'label',
             'make', 'model', 'aperture', 'exposure', 'iso', 'lens', 'writer', 'producer', 'editionTitle', 'location', 'audioLanguage', 'subtitleLanguage'
         ):
-            options = [{'val': o.key, 'display': o.title, 'indicator': o.key == subKey and check or ''} for o in
-                       self.section.listChoices(option['type'],
-                                                libtype=self.librarySettings.getItemType() or self.section.TYPE)]
+            # cache suboptions
+            ck = (self.librarySettings.getItemType() or self.section.TYPE, option['type'])
+            if ck in self.subOptionCache:
+                options = self.subOptionCache[ck]
+            else:
+                options = [{'val': o.key, 'display': o.title, 'indicator': o.key == subKey and check or ''} for o in
+                            self.section.listChoices(option['type'],
+                                                     libtype=self.librarySettings.getItemType() or self.section.TYPE)]
+                self.subOptionCache[ck] = options
+
             if not options:
                 options = [{'val': None, 'display': T(32375, 'No filters available'), 'ignore': True}]
 
@@ -1103,7 +1113,9 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
             for k in self.section.ALLOWED_FILTERS:
                 options.append(optionsMap[k])
 
-        result = dropdown.showDropdown(options, (980, 106), with_indicator=True, suboption_callback=self.subOptionCallback, select_item=self.filter)
+        result = dropdown.showDropdown(options, (980, 106), with_indicator=True,
+                                       suboption_callback=self.subOptionCallback, select_item=self.filter,
+                                       open_sublists=True)
         if not result:
             return
 
@@ -1160,6 +1172,8 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
         sectionType = self.section.TYPE
 
         updateUnwatchedAndProgress = False
+
+        self.subOptionCache = {}
 
         extra_kwargs = {}
 
@@ -1220,6 +1234,7 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
             self.updateUnwatchedAndProgress(mli)
 
     def showPhoto(self, photo):
+        self.subOptionCache = {}
         if isinstance(photo, plexnet.photo.Photo) or photo.TYPE == 'clip':
             self.processCommand(opener.open(photo))
         else:

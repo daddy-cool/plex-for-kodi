@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from kodi_six import xbmcgui
+from kodi_six import xbmc, xbmcgui
 
 from lib import util
 from . import kodigui
@@ -41,6 +41,7 @@ class DropdownDialog(kodigui.BaseDialog):
         self.header = kwargs.get('header')
         self.selectIndex = kwargs.get('select_index')
         self.selectItem = kwargs.get('select_item')
+        self.openSubLists = kwargs.get('open_sublists')
         self.onCloseCallback = kwargs.get('onclose_callback')
         self.choice = None
 
@@ -59,7 +60,7 @@ class DropdownDialog(kodigui.BaseDialog):
         self.setProperty('dropdown', self.setDropdownProp and '1' or '')
         self.setProperty('header', self.header)
         self.optionsList = kodigui.ManagedControlList(self, self.OPTIONS_LIST_ID, 14)
-        self.showOptions()
+        openSubList = self.showOptions()
         height = min(self.optionHeight * 14, len(self.options) * self.optionHeight) + util.vscalei(86)
         ol_height = height - util.vscalei(86)
         y = self.y
@@ -89,6 +90,10 @@ class DropdownDialog(kodigui.BaseDialog):
         if self.closeOnPlaybackEnded:
             from lib import player
             player.PLAYER.on('session.ended', self.playbackSessionEnded)
+
+        if openSubList:
+            # once the item is selected, open its sublist if wanted
+            self.setChoice()
 
     def onAction(self, action):
         try:
@@ -160,6 +165,7 @@ class DropdownDialog(kodigui.BaseDialog):
                 sub_select = None
                 if self.selectItem and self.selectItem.get("sub"):
                     sub_select = self.selectItem["sub"]
+
                 sub = showDropdown(options, (self.x + 290, self.y + 10), close_direction='left',
                                    with_indicator=True, select_item=sub_select)
                 if not sub:
@@ -182,6 +188,7 @@ class DropdownDialog(kodigui.BaseDialog):
         sids = None
         if self.selectItem:
             sids = self.selectItem.copy()
+            sids["indicator"] = ''
             if "sub" in sids:
                 sids.pop("sub")
 
@@ -217,8 +224,25 @@ class DropdownDialog(kodigui.BaseDialog):
             self.optionsList.setSelectedItemByPos(self.selectIndex)
             self.lastSelectedItem = self.selectIndex
         elif sids is not None:
-            self.optionsList.setSelectedItemByDataSource(sids)
-            self.lastSelectedItem = self.optionsList.getSelectedPos()
+            # select the wanted item and wait for it to actually be selected
+            mli = self.optionsList.getListItemByDataSource(sids)
+            if not mli:
+                return False
+
+            pos = self.optionsList.getManagedItemPosition(mli)
+            self.optionsList.setSelectedItemByPos(pos)
+            while self.optionsList and self.optionsList.getSelectedPos() != pos:
+                util.MONITOR.waitForAbort(0.01)
+
+            if not self.optionsList:
+                return False
+
+            self.lastSelectedItem = pos
+
+            # we expect further sub-dropdowns
+            if self.suboptionCallback:
+                return True
+        return False
 
 
 class DropdownHeaderDialog(DropdownDialog):
@@ -240,6 +264,7 @@ def showDropdown(
     header=None,
     select_index=None,
     select_item=None,
+    open_sublists=False,
     onclose_callback=None,
     dialog_props=None
 ):
@@ -260,6 +285,7 @@ def showDropdown(
             header=header,
             select_index=select_index,
             select_item=select_item,
+            open_sublists=open_sublists,
             onclose_callback=onclose_callback,
             dialog_props=dialog_props,
         )
@@ -279,6 +305,7 @@ def showDropdown(
             header=header,
             select_index=select_index,
             select_item=select_item,
+            open_sublists=open_sublists,
             onclose_callback=onclose_callback,
             dialog_props=dialog_props,
         )
