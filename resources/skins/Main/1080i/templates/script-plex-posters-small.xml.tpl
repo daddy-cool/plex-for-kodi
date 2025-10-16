@@ -1,5 +1,6 @@
 {% extends "library_posters.xml.tpl" %}
 {% block header_animation %}<animation effect="slide" end="0,{{ vscale(-135, negpos=True) }}" time="200" tween="quadratic" easing="out" condition="Integer.IsGreater(Container(101).ListItem.Property(index),9) + !ControlGroup(200).HasFocus(0) + String.IsEmpty(Window.Property(content.filling))">Conditional</animation>{% endblock %}
+{% block hide_filter_from_index %}9{% endblock %}
 {% block header_bg %}
 <control type="image">
     <animation effect="fade" start="0" end="100" time="200" tween="quadratic" easing="out" reversible="true">VisibleChange</animation>
@@ -30,6 +31,8 @@
             <height>{{ vscale(145) }}</height>
             <onup>200</onup>
             <ondown>101</ondown>
+            <onleft>210</onleft>
+            <onright>600</onright>
             <itemgap>-20</itemgap>
             <orientation>horizontal</orientation>
             <scrolltime tween="quadratic" easing="out">200</scrolltime>
@@ -275,7 +278,7 @@
         <posy>0</posy>
         <width>34</width>
         <height>1050</height>
-        <onleft>100</onleft>
+        <onleft>600</onleft>
         <onright>152</onright>
         <scrolltime>200</scrolltime>
         <orientation>vertical</orientation>

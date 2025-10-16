@@ -3,7 +3,7 @@
 
 {% block header %}
 <control type="group" id="200">
-    {% block header_animation %}<animation effect="slide" end="0,{{ vscale(-135) }}" time="200" tween="quadratic" easing="out" condition="Integer.IsGreater(Container(101).ListItem.Property(index),5) + !ControlGroup(200).HasFocus(0) + String.IsEmpty(Window.Property(content.filling))">Conditional</animation>{% endblock %}
+    {% block header_animation %}<animation effect="slide" end="0,{{ vscale(-135, negpos=True) }}" time="200" tween="quadratic" easing="out" condition="Integer.IsGreater(Container(101).ListItem.Property(index),5) + !ControlGroup(200).HasFocus(0) + String.IsEmpty(Window.Property(content.filling))">Conditional</animation>{% endblock %}
     <defaultcontrol always="true">201</defaultcontrol>
     <posx>0</posx>
     <posy>0</posy>
@@ -49,13 +49,14 @@
             </control>
         </control>
         <control type="label">
-            <width max="500">auto</width>
+            <width max="300">auto</width>
             <height>{{ vscale(40) }}</height>
             <font>font12</font>
             <align>left</align>
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
             <label>[UPPERCASE]$INFO[Window.Property(screen.title)][/UPPERCASE][COLOR=gray]$INFO[Window.Property(items.count),  (,)][/COLOR]</label>
+            <scroll>true</scroll>
         </control>
         <control type="group">
             <width>40</width>
@@ -78,7 +79,7 @@
     </control>
     <control type="group">
         <visible>Player.HasAudio + String.IsEmpty(Window(10000).Property(script.plex.theme_playing))</visible>
-        <posx>438</posx>
+        <posx>620</posx>
         <posy>0</posy>
         <control type="button" id="204">
             <visible>Player.HasAudio + String.IsEmpty(Window(10000).Property(script.plex.theme_playing))</visible>
@@ -87,7 +88,6 @@
             <width>260</width>
             <height>{{ vscale(75) }}</height>
             <onleft>202</onleft>
-            <onright>211</onright>
             <ondown>50</ondown>
             <font>font12</font>
             <textcolor>FFFFFFFF</textcolor>
@@ -174,18 +174,22 @@
         </control>
     </control>
     {% block filteropts_grouplist %}
-    <control type="grouplist"{% block filteropts_grouplist_attrs %}{% endblock %}>
+    <control type="grouplist"{% block filteropts_grouplist_attrs %} id="600"{% endblock %}>
         <visible>String.IsEmpty(Window.Property(hide.filteroptions))</visible>
-        <right>340</right>
-        <posy>{{ vscale(35) }}</posy>
+        {% block filteropts_animation %}
+            <visible>!Integer.IsGreater(Container(101).ListItem.Property(index),5) + String.IsEmpty(Window.Property(no.content)) + String.IsEmpty(Window.Property(no.content.filtered)) + !String.IsEmpty(Window.Property(initialized))</visible>
+            <animation effect="fade" start="0" end="100" time="200" reversible="true">VisibleChange</animation>
+        {% endblock %}
+        <right>170</right>
+        <posy>{{ vscale(135) }}</posy>
         <width>1000</width>
         <height>{{ vscale(65) }}</height>
         <align>right</align>
         <itemgap>30</itemgap>
         <orientation>horizontal</orientation>
-        <onleft>204</onleft>
-        <onright>210</onright>
-        <ondown>50</ondown>
+        <onleft>304</onleft>
+        <onright>151</onright>
+        <ondown>101</ondown>
         <control type="button" id="311">
             <enable>false</enable>
             <width max="300">auto</width>

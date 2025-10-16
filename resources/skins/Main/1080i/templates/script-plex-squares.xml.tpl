@@ -1,94 +1,94 @@
 {% extends "library_posters.xml.tpl" %}
 {% block filteropts_grouplist %}
-<control type="grouplist">
-<visible>String.IsEmpty(Window.Property(hide.filteroptions))</visible>
-<right>340</right>
-<posy>35</posy>
-<width>1000</width>
-<height>65</height>
-<align>right</align>
-<itemgap>30</itemgap>
-<orientation>horizontal</orientation>
-<onleft>204</onleft>
-<onright>210</onright>
-<ondown>50</ondown>
-<control type="button" id="311">
-    <enable>false</enable>
-    <width max="300">auto</width>
+<control type="grouplist" id="600">
+    <visible>String.IsEmpty(Window.Property(hide.filteroptions))</visible>
+    <right>170</right>
+    <posy>{{ vscale(135) }}</posy>
+    <width>1000</width>
     <height>65</height>
-    <font>font12</font>
-    <textcolor>FFFFFFFF</textcolor>
-    <focusedcolor>FFFFFFFF</focusedcolor>
-    <disabledcolor>FFFFFFFF</disabledcolor>
-    <align>center</align>
-    <aligny>center</aligny>
-    <texturefocus>-</texturefocus>
-    <texturenofocus>-</texturenofocus>
-    <textoffsetx>0</textoffsetx>
-    <textoffsety>0</textoffsety>
-    <label>[UPPERCASE]$INFO[Window.Property(filter2.display)][/UPPERCASE]</label>
-</control>
-<control type="button" id="211">
-    <width max="500">auto</width>
-    <height>65</height>
-    <font>font12</font>
-    <textcolor>FFFFFFFF</textcolor>
-    <focusedcolor>FF000000</focusedcolor>
-    <align>center</align>
-    <aligny>center</aligny>
-    <texturefocus colordiffuse="FFE5A00D" border="10">script.plex/white-square-rounded.png</texturefocus>
-    <texturenofocus>-</texturenofocus>
-    <textoffsetx>20</textoffsetx>
-    <textoffsety>0</textoffsety>
-    <label>[UPPERCASE]$INFO[Window.Property(filter1.display)][/UPPERCASE]</label>
-</control>
-<control type="button" id="310">
-    <visible>!String.IsEqual(Window.Property(media),artist)</visible>
-    <enable>false</enable>
-    <width max="300">auto</width>
-    <height>65</height>
-    <font>font12</font>
-    <textcolor>FFFFFFFF</textcolor>
-    <focusedcolor>FFFFFFFF</focusedcolor>
-    <disabledcolor>FFFFFFFF</disabledcolor>
-    <align>center</align>
-    <aligny>center</aligny>
-    <texturenofocus>-</texturenofocus>
-    <texturenofocus>-</texturenofocus>
-    <textoffsetx>20</textoffsetx>
-    <textoffsety>0</textoffsety>
-    <label>[UPPERCASE]$INFO[Window.Property(media.type)][/UPPERCASE]</label>
-</control>
-<control type="button" id="312">
-    <visible>String.IsEqual(Window.Property(media),artist)</visible>
-    <width max="300">auto</width>
-    <height>65</height>
-    <font>font12</font>
-    <textcolor>FFFFFFFF</textcolor>
-    <focusedcolor>FF000000</focusedcolor>
-    <disabledcolor>FFFFFFFF</disabledcolor>
-    <align>center</align>
-    <aligny>center</aligny>
-    <texturefocus colordiffuse="FFE5A00D" border="10">script.plex/white-square-rounded.png</texturefocus>
-    <texturenofocus>-</texturenofocus>
-    <textoffsetx>20</textoffsetx>
-    <textoffsety>0</textoffsety>
-    <label>[UPPERCASE]$INFO[Window.Property(media.type)][/UPPERCASE]</label>
-</control>
-<control type="button" id="210">
-    <width max="300">auto</width>
-    <height>65</height>
-    <font>font12</font>
-    <textcolor>FFFFFFFF</textcolor>
-    <focusedcolor>FF000000</focusedcolor>
-    <align>center</align>
-    <aligny>center</aligny>
-    <texturefocus colordiffuse="FFE5A00D" border="10">script.plex/white-square-rounded.png</texturefocus>
-    <texturenofocus>-</texturenofocus>
-    <textoffsetx>20</textoffsetx>
-    <textoffsety>0</textoffsety>
-    <label>[UPPERCASE]$INFO[Window.Property(sort.display)][/UPPERCASE]</label>
-</control>
+    <align>right</align>
+    <itemgap>30</itemgap>
+    <orientation>horizontal</orientation>
+    <onleft>304</onleft>
+    <onright>151</onright>
+    <ondown>101</ondown>
+    <control type="button" id="311">
+        <enable>false</enable>
+        <width max="300">auto</width>
+        <height>65</height>
+        <font>font12</font>
+        <textcolor>FFFFFFFF</textcolor>
+        <focusedcolor>FFFFFFFF</focusedcolor>
+        <disabledcolor>FFFFFFFF</disabledcolor>
+        <align>center</align>
+        <aligny>center</aligny>
+        <texturefocus>-</texturefocus>
+        <texturenofocus>-</texturenofocus>
+        <textoffsetx>0</textoffsetx>
+        <textoffsety>0</textoffsety>
+        <label>[UPPERCASE]$INFO[Window.Property(filter2.display)][/UPPERCASE]</label>
+    </control>
+    <control type="button" id="211">
+        <width max="500">auto</width>
+        <height>65</height>
+        <font>font12</font>
+        <textcolor>FFFFFFFF</textcolor>
+        <focusedcolor>FF000000</focusedcolor>
+        <align>center</align>
+        <aligny>center</aligny>
+        <texturefocus colordiffuse="FFE5A00D" border="10">script.plex/white-square-rounded.png</texturefocus>
+        <texturenofocus>-</texturenofocus>
+        <textoffsetx>20</textoffsetx>
+        <textoffsety>0</textoffsety>
+        <label>[UPPERCASE]$INFO[Window.Property(filter1.display)][/UPPERCASE]</label>
+    </control>
+    <control type="button" id="310">
+        <visible>!String.IsEqual(Window.Property(media),artist)</visible>
+        <enable>false</enable>
+        <width max="300">auto</width>
+        <height>65</height>
+        <font>font12</font>
+        <textcolor>FFFFFFFF</textcolor>
+        <focusedcolor>FFFFFFFF</focusedcolor>
+        <disabledcolor>FFFFFFFF</disabledcolor>
+        <align>center</align>
+        <aligny>center</aligny>
+        <texturenofocus>-</texturenofocus>
+        <texturenofocus>-</texturenofocus>
+        <textoffsetx>20</textoffsetx>
+        <textoffsety>0</textoffsety>
+        <label>[UPPERCASE]$INFO[Window.Property(media.type)][/UPPERCASE]</label>
+    </control>
+    <control type="button" id="312">
+        <visible>String.IsEqual(Window.Property(media),artist)</visible>
+        <width max="300">auto</width>
+        <height>65</height>
+        <font>font12</font>
+        <textcolor>FFFFFFFF</textcolor>
+        <focusedcolor>FF000000</focusedcolor>
+        <disabledcolor>FFFFFFFF</disabledcolor>
+        <align>center</align>
+        <aligny>center</aligny>
+        <texturefocus colordiffuse="FFE5A00D" border="10">script.plex/white-square-rounded.png</texturefocus>
+        <texturenofocus>-</texturenofocus>
+        <textoffsetx>20</textoffsetx>
+        <textoffsety>0</textoffsety>
+        <label>[UPPERCASE]$INFO[Window.Property(media.type)][/UPPERCASE]</label>
+    </control>
+    <control type="button" id="210">
+        <width max="300">auto</width>
+        <height>65</height>
+        <font>font12</font>
+        <textcolor>FFFFFFFF</textcolor>
+        <focusedcolor>FF000000</focusedcolor>
+        <align>center</align>
+        <aligny>center</aligny>
+        <texturefocus colordiffuse="FFE5A00D" border="10">script.plex/white-square-rounded.png</texturefocus>
+        <texturenofocus>-</texturenofocus>
+        <textoffsetx>20</textoffsetx>
+        <textoffsety>0</textoffsety>
+        <label>[UPPERCASE]$INFO[Window.Property(sort.display)][/UPPERCASE]</label>
+    </control>
 </control>
 {% endblock filteropts_grouplist %}
 {% block content %}
@@ -110,6 +110,8 @@
             <height>{{ vscale(145) }}</height>
             <onup>200</onup>
             <ondown>101</ondown>
+            <onleft>210</onleft>
+            <onright>600</onright>
             <itemgap>-20</itemgap>
             <orientation>horizontal</orientation>
             <scrolltime tween="quadratic" easing="out">200</scrolltime>
