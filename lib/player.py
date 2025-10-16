@@ -210,8 +210,9 @@ class BasePlayerHandler(object):
 
         if new_time_stored:
             # only update our immediate progress if we should (e.g. if updatePlaybackState reported a new time based
-            # on _time
-            self._progressHld[str(item.ratingKey)] = _time
+            # on _time, and only if the item isn't fully watched, yet (True)
+            if not self._progressHld.get(str(item.ratingKey)) is True:
+                self._progressHld[str(item.ratingKey)] = _time
 
     def getVolume(self):
         return util.rpc.Application.GetProperties(properties=["volume"])["volume"]
@@ -262,6 +263,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.prePlayWitnessed = False
         self.queuingNext = False
         self.queuingSpecific = False
+        self._progressHld = {}
         self.useAlternateSeek = util.getSetting('use_alternate_seek2')
         self.useResumeFix = self.useAlternateSeek
         self.isMapped = False
@@ -276,7 +278,6 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.seekOnStart = 0
         self.waitingForSOS = False
         self._lastDuration = 0
-        self._progressHld = {}
         self._subtitleStreamOffset = None
         self.mode = self.MODE_RELATIVE
         self.ended = False
@@ -296,7 +297,6 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.seeking = seeking
         self.duration = duration
         self._lastDuration = duration
-        self._progressHld = {}
         self.bifURL = bif_url
         self.title = title
         self.title2 = title2
@@ -658,9 +658,11 @@ class SeekPlayerHandler(BasePlayerHandler):
             prk = self.player.video.parentRatingKey
             gprk = self.player.video.grandparentRatingKey
 
-        self.player.trigger('video.progress', data=(gprk, prk, rk, self._progressHld[rk] if not self.getVideoWatched(
-            ref=self._progressHld[rk] if self._progressHld[rk] > self.trueTime * 1000 else None) else True))
-        self._progressHld = {}
+        vw = self.getVideoWatched(
+            ref=self._progressHld[rk] if self._progressHld[rk] > self.trueTime * 1000 else None)
+        if vw:
+            self._progressHld[rk] = True
+        self.player.trigger('video.progress', data=(gprk, prk, rk, vw or self._progressHld[rk]))
 
     def getProgressForItem(self, rk, default=0):
         return self._progressHld.get(rk, default)

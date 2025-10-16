@@ -746,6 +746,10 @@ def getProgressImage(obj, perc=None, view_offset=None):
             view_offset = obj.get('viewOffset') and obj.viewOffset.asInt()
         if not view_offset or not obj.get('duration'):
             return ''
+        try:
+            view_offset = int(view_offset)
+        except ValueError:
+            return ''
         pct = int((view_offset / obj.duration.asFloat()) * 100)
     else:
         pct = perc

@@ -421,7 +421,6 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         if self.handler.playlist:
             self.handler.playlist.on('change', self.updateProperties)
             self.handler.playlist.on('current.changed', self.updateProperties)
-            self.player.on('video.progress', self.storePlaylistProgress)
 
         self.seekbarControl = self.getControl(self.SEEK_IMAGE_ID)
         self.positionControl = self.getControl(self.POSITION_IMAGE_ID)
@@ -987,10 +986,6 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         elif controlID == self.SKIP_FORWARD_BUTTON_ID:
             self.skipForward(immediate=not self.useAutoSeek)
 
-    def storePlaylistProgress(self, data, **kw):
-        gprk, prk, rk, state = data
-        self._item_states[rk] = state
-
     def stop(self):
         self._ignoreTick = True
         self.doClose()
@@ -1013,7 +1008,6 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         if self.handler.playlist:
             self.handler.playlist.off('change', self.updateProperties)
             self.handler.playlist.off('current.changed', self.updateProperties)
-            self.player.off('video.progress', self.storePlaylistProgress)
 
         try:
             if self.playlistDialog:
@@ -2758,7 +2752,8 @@ class PlaylistDialog(kodigui.BaseDialog, SpoilersMixin):
         idx = 1
         for pi in self.playlist.items():
             # mark watched items in playlist during current playback session
-            if self.item_states.get(pi.ratingKey, None) is True:
+            util.DEBUG_LOG("ROLLER: %r %r %r" % (self.handler.getProgressForItem(str(pi.ratingKey), None), self.handler._progressHld, pi.ratingKey))
+            if self.handler.getProgressForItem(str(pi.ratingKey), None) is True:
                 pi.set('viewCount',pi.get('viewCount', 0).asInt() + 1)
                 pi.set('viewOffset', 0)
 
