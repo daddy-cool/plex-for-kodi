@@ -2770,3 +2770,23 @@ msgstr ""
 msgctxt "#34030"
 msgid "Unlock Direct Play for above 4K"
 msgstr ""
+
+msgctxt "#34031"
+msgid "Producer"
+msgstr ""
+
+msgctxt "#34032"
+msgid "Audio Language"
+msgstr ""
+
+msgctxt "#34033"
+msgid "Subtitle Language"
+msgstr ""
+
+msgctxt "#34034"
+msgid "Folder Location"
+msgstr ""
+
+msgctxt "#34035"
+msgid "Editions"
+msgstr ""

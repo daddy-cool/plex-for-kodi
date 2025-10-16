@@ -1010,8 +1010,8 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
                 subKey = self.filter['sub']['val']
 
         if option['type'] in (
-            'year', 'decade', 'genre', 'contentRating', 'collection', 'director', 'actor', 'country', 'studio', 'resolution', 'label',
-            'make', 'model', 'aperture', 'exposure', 'iso', 'lens'
+            'year', 'decade', 'genre', 'contentRating', 'collection', 'director', 'actor', 'country', 'studio', 'network', 'resolution', 'label',
+            'make', 'model', 'aperture', 'exposure', 'iso', 'lens', 'writer', 'producer', 'editionTitle', 'location', 'audioLanguage', 'subtitleLanguage'
         ):
             options = [{'val': o.key, 'display': o.title, 'indicator': o.key == subKey and check or ''} for o in
                        self.section.listChoices(option['type'],
@@ -1046,13 +1046,18 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
             'decade': {'type': 'decade', 'display': T(32378, 'Decade'), 'indicator': self.hasFilter('decade') and check or ''},
             'genre': {'type': 'genre', 'display': T(32379, 'Genre'), 'indicator': self.hasFilter('genre') and check or ''},
             'contentRating': {'type': 'contentRating', 'display': T(32380, 'Content Rating'), 'indicator': self.hasFilter('contentRating') and check or ''},
-            'network': {'type': 'studio', 'display': T(32381, 'Network'), 'indicator': self.hasFilter('studio') and check or ''},
+            'network': {'type': 'network', 'display': T(32381, 'Network'), 'indicator': self.hasFilter('network') and check or ''},
             'collection': {'type': 'collection', 'display': T(32382, 'Collection'), 'indicator': self.hasFilter('collection') and check or ''},
             'director': {'type': 'director', 'display': T(32383, 'Director'), 'indicator': self.hasFilter('director') and check or ''},
             'actor': {'type': 'actor', 'display': T(32384, 'Actor'), 'indicator': self.hasFilter('actor') and check or ''},
+            'writer': {'type': 'writer', 'display': T(32402, 'Writer'), 'indicator': self.hasFilter('writer') and check or ''},
+            'producer': {'type': 'producer', 'display': T(34031, 'Producer'), 'indicator': self.hasFilter('producer') and check or ''},
             'country': {'type': 'country', 'display': T(32385, 'Country'), 'indicator': self.hasFilter('country') and check or ''},
             'studio': {'type': 'studio', 'display': T(32386, 'Studio'), 'indicator': self.hasFilter('studio') and check or ''},
             'resolution': {'type': 'resolution', 'display': T(32362, 'Resolution'), 'indicator': self.hasFilter('resolution') and check or ''},
+            'audioLanguage': {'type': 'audioLanguage', 'display': T(34032, 'Audio Language'), 'indicator': self.hasFilter('audioLanguage') and check or ''},
+            'subtitleLanguage': {'type': 'subtitleLanguage', 'display': T(34033, 'Subtitle Language'), 'indicator': self.hasFilter('subtitleLanguage') and check or ''},
+            'editionTitle': {'type': 'editionTitle', 'display': T(34035, 'Editions'), 'indicator': self.hasFilter('editionTitle') and check or ''},
             'label': {'type': 'label', 'display': T(32387, 'Labels'), 'indicator': self.hasFilter('label') and check or ''},
             'released': {'type': 'released', 'display': T(34001, 'Released'),
                       'indicator': self.hasFilter('released') and check or ''},
@@ -1065,12 +1070,18 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
             'lens': {'type': 'lens', 'display': T(32392, 'Lens'), 'indicator': self.hasFilter('lens') and check or ''}
         }
 
+        if pnUtil.ACCOUNT.isAdmin:
+            optionsMap['location'] = {'type': 'location', 'display': T(34034, 'Folder Location'), 'indicator': self.hasFilter('location') and check or ''}
+
         if self.section.TYPE == 'movie':
             if ITEM_TYPE == 'collection':
                 options.append(optionsMap['contentRating'])
             else:
-                for k in ('year', 'decade', 'genre', 'contentRating', 'collection', 'director', 'actor', 'country', 'studio', 'resolution', 'label'):
-                    options.append(optionsMap[k])
+                for k in ('year', 'decade', 'genre', 'contentRating', 'collection', 'director', 'actor', 'writer',
+                          'producer', 'country', 'studio', 'resolution', 'audioLanguage', 'subtitleLanguage',
+                          'editionTitle', 'label', 'location'):
+                    if k in optionsMap:
+                        options.append(optionsMap[k])
         elif self.section.TYPE == 'show':
             if ITEM_TYPE == 'episode':
                 for k in ('year', 'collection', 'resolution'):
@@ -1079,7 +1090,7 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
                 for k in ('genre', 'year', 'decade', 'collection', 'label'):
                     options.append(optionsMap[k])
             else:
-                for k in ('year', 'genre', 'contentRating', 'network', 'collection', 'actor', 'label'):
+                for k in ('year', 'genre', 'contentRating', 'studio', 'network', 'collection', 'director', 'actor', 'writer', 'producer', 'label'):
                     options.append(optionsMap[k])
         elif self.section.TYPE == 'artist':
             for k in ('genre', 'country', 'collection'):
