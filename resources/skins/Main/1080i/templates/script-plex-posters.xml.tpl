@@ -47,7 +47,8 @@
             <posy>0</posy>
             <width>1800</width>
             <height>1190</height>
-            <onup>300</onup>
+            <onup condition="String.IsEmpty(Container(101).ListItem.Property(side)) | String.IsEqual(Container(101).ListItem.Property(side),left)">300</onup>
+            <onup condition="String.IsEqual(Container(101).ListItem.Property(side),right)">600</onup>
             <onright>151</onright>
             <scrolltime>200</scrolltime>
             <orientation>vertical</orientation>
