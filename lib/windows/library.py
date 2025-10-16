@@ -1349,6 +1349,11 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
                 self.showPanelControl.reset()
                 self.keyListControl.reset()
 
+                if self.filter and self.filter == self.librarySettings.getSetting('filter', None):
+                    util.DEBUG_LOG('Stored filter yielded no content, resetting filter')
+                    self.clearFilters()
+                    return self.fillShows()
+
                 if self.filter or self.filterUnwatched:
                     self.setBoolProperty('no.content.filtered', True)
                 else:
@@ -1373,6 +1378,11 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
             if not jumpList:
                 self.showPanelControl.reset()
                 self.keyListControl.reset()
+
+                if self.filter and self.filter == self.librarySettings.getSetting('filter', None):
+                    util.DEBUG_LOG('Stored filter yielded no content, resetting filter')
+                    self.clearFilters()
+                    return self.fillShows()
 
                 if self.filter or self.filterUnwatched:
                     self.setBoolProperty('no.content.filtered', True)
