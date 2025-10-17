@@ -2790,3 +2790,11 @@ msgstr ""
 msgctxt "#34035"
 msgid "Editions"
 msgstr ""
+
+msgctxt "#34036"
+msgid "DOVI"
+msgstr ""
+
+msgctxt "#34037"
+msgid "HDR"
+msgstr ""

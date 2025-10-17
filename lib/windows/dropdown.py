@@ -96,7 +96,7 @@ class DropdownDialog(kodigui.BaseDialog):
             from lib import player
             player.PLAYER.on('session.ended', self.playbackSessionEnded)
 
-        if openSubList:
+        if openSubList and self.openSubLists:
             # once the item is selected, open its sublist if wanted
             self.setChoice()
 
@@ -199,11 +199,13 @@ class DropdownDialog(kodigui.BaseDialog):
         items = []
         options = []
         sids = None
+        hadSub = False
         if self.selectItem:
             sids = self.selectItem.copy()
             sids["indicator"] = ''
             if "sub" in sids:
                 sids.pop("sub")
+                hadSub = True
 
         for oo in self.options:
             if oo:
@@ -240,6 +242,7 @@ class DropdownDialog(kodigui.BaseDialog):
             # select the wanted item and wait for it to actually be selected
             mli = self.optionsList.getListItemByDataSource(sids)
             if not mli:
+                util.DEBUG_LOG("Dropdown: item not found: {}", sids)
                 return False
 
             pos = self.optionsList.getManagedItemPosition(mli)
@@ -248,12 +251,13 @@ class DropdownDialog(kodigui.BaseDialog):
                 util.MONITOR.waitForAbort(0.01)
 
             if not self.optionsList:
+                util.DEBUG_LOG("Dropdown: something went wrong")
                 return False
 
             self.lastSelectedItem = pos
 
             # we expect further sub-dropdowns
-            if self.suboptionCallback:
+            if hadSub and self.suboptionCallback:
                 return True
         return False
 

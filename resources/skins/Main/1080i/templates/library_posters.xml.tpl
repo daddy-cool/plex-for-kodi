@@ -2,7 +2,6 @@
 {% block filteropts_grouplist %}
 <control type="grouplist" id="600">
     <visible>String.IsEmpty(Window.Property(hide.filteroptions))</visible>
-    <visible>!Integer.IsGreater(Container(101).ListItem.Property(index),{% block hide_filter_from_index %}5{% endblock %}) + String.IsEmpty(Window.Property(no.content)) + String.IsEmpty(Window.Property(no.content.filtered)) + !String.IsEmpty(Window.Property(initialized))</visible>
     <animation effect="fade" start="0" end="100" time="200" reversible="true">VisibleChange</animation>
     <right>170</right>
     <posy>{{ vscale(135) }}</posy>
@@ -11,9 +10,11 @@
     <align>right</align>
     <itemgap>30</itemgap>
     <orientation>horizontal</orientation>
-    <onleft>304</onleft>
+    <onleft condition="String.IsEmpty(Window.Property(no.content.filtered))">304</onleft>
+    <onleft condition="!String.IsEmpty(Window.Property(no.content.filtered))">200</onleft>
     <onright>151</onright>
     <ondown>101</ondown>
+    <onup>200</onup>
     <control type="button" id="311">
         <visible>!String.IsEqual(Window.Property(media.itemType),folder)</visible>
         <enable>false</enable>

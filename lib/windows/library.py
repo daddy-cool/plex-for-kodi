@@ -246,7 +246,8 @@ class CreateDefaultItemsTask(backgroundthread.Task):
         self.callback(items, self.key, firstMli)
 
 class ChunkRequestTask(backgroundthread.Task):
-    def setup(self, section, start, size, callback, filter_=None, sort=None, unwatched=False, subDir=False):
+    def setup(self, section, start, size, callback, filter_=None, sort=None, unwatched=False, subDir=False, hdr=False,
+              dovi=False):
         self.section = section
         self.start = start
         self.size = size
@@ -254,6 +255,8 @@ class ChunkRequestTask(backgroundthread.Task):
         self.filter = filter_
         self.sort = sort
         self.unwatched = unwatched
+        self.hdr = hdr
+        self.dovi = dovi
         self.subDir = subDir
         return self
 
@@ -270,7 +273,8 @@ class ChunkRequestTask(backgroundthread.Task):
             if ITEM_TYPE == 'folder':
                 items = self.section.folder(self.start, self.size, self.subDir)
             else:
-                items = self.section.all(self.start, self.size, self.filter, self.sort, self.unwatched, type_=type_)
+                items = self.section.all(self.start, self.size, self.filter, self.sort, self.unwatched, type_=type_,
+                                         hdr=self.hdr, dovi=self.dovi)
 
             if self.isCanceled():
                 return
@@ -420,6 +424,8 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
         PlaybackBtnMixin.reset(self)
         util.setGlobalProperty('sort', '')
         self.filterUnwatched = self.librarySettings.getSetting('filter.unwatched', False)
+        self.filterHDR = self.librarySettings.getSetting('filter.hdr', False)
+        self.filterDOVI = self.librarySettings.getSetting('filter.dovi', False)
         self.filter = self.filter or self.librarySettings.getSetting('filter', None)
         self.sort = self.librarySettings.getSetting('sort', self.section.DEFAULT_SORT)
         self.sortDesc = self.librarySettings.getSetting('sort.desc', self.section.DEFAULT_SORT_DESC)
@@ -1043,11 +1049,14 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
 
         options = []
 
-        if self.section.TYPE in ('movie', 'show') and not ITEM_TYPE == 'collection':
-            options.append({'type': 'unwatched', 'display': T(32368, 'UNPLAYED').upper(), 'indicator': self.filterUnwatched and check or ''})
-
         if self.filter:
             options.append({'type': 'clear_filter', 'display': T(32376, 'CLEAR FILTER').upper(), 'indicator': 'script.plex/indicators/remove.png'})
+
+        if self.section.TYPE in ('movie', 'show') and not ITEM_TYPE == 'collection':
+            options.append({'type': 'unwatched', 'display': T(32368, 'UNPLAYED').upper(), 'indicator': self.filterUnwatched and check or ''})
+            if self.section.TYPE == 'movie':
+                options.append({'type': 'hdr', 'display': T(34037, 'HDR'), 'indicator': self.filterHDR and check or ''})
+                options.append({'type': 'dovi', 'display': T(34036, 'DOVI'), 'indicator': self.filterDOVI and check or ''})
 
         if options:
             options.append(None)  # Separator
@@ -1088,8 +1097,8 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
             if ITEM_TYPE == 'collection':
                 options.append(optionsMap['contentRating'])
             else:
-                for k in ('year', 'decade', 'genre', 'contentRating', 'collection', 'director', 'actor', 'writer',
-                          'producer', 'country', 'studio', 'resolution', 'audioLanguage', 'subtitleLanguage',
+                for k in ('year', 'decade', 'genre', 'contentRating', 'collection', 'director', 'actor',
+                          'writer', 'producer', 'country', 'studio', 'resolution', 'audioLanguage', 'subtitleLanguage',
                           'editionTitle', 'label', 'location'):
                     if k in optionsMap:
                         options.append(optionsMap[k])
@@ -1114,34 +1123,46 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
                 options.append(optionsMap[k])
 
         result = dropdown.showDropdown(options, (980, 106), with_indicator=True,
-                                       suboption_callback=self.subOptionCallback, select_item=self.filter,
-                                       open_sublists=True)
+                                       suboption_callback=self.subOptionCallback,
+                                       select_item=not self.getBoolProperty('no.content.filtered') and self.filter or None,
+                                       open_sublists=not self.getBoolProperty('no.content.filtered'))
         if not result:
             return
 
         choice = result['type']
 
         if choice == 'clear_filter':
-            self.filter = None
-            self.librarySettings.setSetting('filter', None)
+            self.clearFilters(skip_display=True)
+
         elif choice == 'unwatched':
             self.filterUnwatched = not self.filterUnwatched
             self.librarySettings.setSetting('filter.unwatched', self.filterUnwatched)
+        elif choice == 'hdr':
+            self.filterHDR = not self.filterHDR
+            self.librarySettings.setSetting('filter.hdr', self.filterHDR)
+        elif choice == 'dovi':
+            self.filterDOVI = not self.filterDOVI
+            self.librarySettings.setSetting('filter.dovi', self.filterDOVI)
         else:
             self.filter = result
             self.librarySettings.setSetting('filter', self.filter)
 
         self.updateFilterDisplay()
 
-        if self.filter or choice in ('clear_filter', 'unwatched'):
+        if self.filter or choice in ('clear_filter', 'unwatched', 'hdr', 'dovi'):
             self.fill()
 
-    def clearFilters(self):
+    def clearFilters(self, skip_display=False):
         self.filter = None
         self.filterUnwatched = False
+        self.filterHDR = False
+        self.filterDOVI = False
         self.librarySettings.setSetting('filter.unwatched', self.filterUnwatched)
+        self.librarySettings.setSetting('filter.hdr', self.filterHDR)
+        self.librarySettings.setSetting('filter.dovi', self.filterDOVI)
         self.librarySettings.setSetting('filter', None)
-        self.updateFilterDisplay()
+        if not skip_display:
+            self.updateFilterDisplay()
 
     def resetSort(self):
         self.sort = 'titleSort'
@@ -1159,10 +1180,27 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
             if self.filter.get('sub'):
                 disp = u'{0}: {1}'.format(disp, self.filter['sub']['display'])
             self.setProperty('filter1.display', disp)
-            self.setProperty('filter2.display', self.filterUnwatched and T(32368, 'Unplayed') or '')
+            boolFilters = []
+            if self.filterUnwatched:
+                boolFilters.append(T(32368, 'Unplayed'))
+            if self.filterHDR:
+                boolFilters.append(T(34037, 'HDR'))
+            if self.filterDOVI:
+                boolFilters.append(T(34036, 'DOVI'))
+            self.setProperty('filter2.display', ", ".join(boolFilters))
         else:
             self.setProperty('filter2.display', '')
-            self.setProperty('filter1.display', self.filterUnwatched and T(32368, 'Unplayed') or T(32345, 'All'))
+            boolFilters = []
+            if self.filterUnwatched:
+                boolFilters.append(T(32368, 'Unplayed'))
+            else:
+                if not self.filterHDR and not self.filterDOVI:
+                    boolFilters.append(T(32345, 'All'))
+            if self.filterHDR:
+                boolFilters.append(T(34037, 'HDR'))
+            if self.filterDOVI:
+                boolFilters.append(T(34036, 'DOVI'))
+            self.setProperty('filter1.display', ", ".join(boolFilters))
 
     def showPanelClicked(self):
         mli = self.showPanelControl.getSelectedItem()
@@ -1298,8 +1336,8 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
             return None
 
         if not self.filter.get('sub'):
-            util.DEBUG_LOG('Filter missing sub-filter data')
-            return None
+            #util.DEBUG_LOG('Filter missing sub-filter data')
+            return self.filter['type'], "1"
 
         if isinstance(self.filter['sub']['val'], six.string_types) and self.filter['sub']['val'].startswith("/"):
             return self.filter['type'], self.filter['sub']['val']
@@ -1336,12 +1374,17 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
 
         tasks = []
 
+        kw = {}
+        if self.section.TYPE == 'movie':
+            kw.update({"hdr": self.filterHDR, "dovi": self.filterDOVI})
+
         if self.sort != 'titleSort' or ITEM_TYPE in ('folder', 'episode') or self.subDir \
             or self.section.TYPE in ("collection", "movies_shows"):
             if ITEM_TYPE == 'folder':
                 sectionAll = self.section.folder(0, 0, self.subDir)
             else:
-                sectionAll = self.section.all(0, 0, filter_=self.getFilterOpts(), sort=self.getSortOpts(), unwatched=self.filterUnwatched, type_=type_)
+                sectionAll = self.section.all(0, 0, filter_=self.getFilterOpts(), sort=self.getSortOpts(),
+                                              unwatched=self.filterUnwatched, type_=type_, **kw)
 
             totalSize = sectionAll.totalSize.asInt()
 
@@ -1349,12 +1392,7 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
                 self.showPanelControl.reset()
                 self.keyListControl.reset()
 
-                if self.filter and self.filter == self.librarySettings.getSetting('filter', None):
-                    util.DEBUG_LOG('Stored filter yielded no content, resetting filter')
-                    self.clearFilters()
-                    return self.fillShows()
-
-                if self.filter or self.filterUnwatched:
+                if self.filter or self.filterUnwatched or self.filterHDR or self.filterDOVI:
                     self.setBoolProperty('no.content.filtered', True)
                 else:
                     self.setBoolProperty('no.content', True)
@@ -1373,18 +1411,14 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
             if collection_mode == 2 and not (self.filter or self.filterUnwatched):
                 jl_type = getQueryItemType(self.section, fallback_to_section_type=True, force_include_collections=True)
 
-            jumpList = self.section.jumpList(filter_=self.getFilterOpts(), sort=self.getSortOpts(), unwatched=self.filterUnwatched, type_=jl_type)
+            jumpList = self.section.jumpList(filter_=self.getFilterOpts(), sort=self.getSortOpts(),
+                                             unwatched=self.filterUnwatched, type_=jl_type, **kw)
 
             if not jumpList:
                 self.showPanelControl.reset()
                 self.keyListControl.reset()
 
-                if self.filter and self.filter == self.librarySettings.getSetting('filter', None):
-                    util.DEBUG_LOG('Stored filter yielded no content, resetting filter')
-                    self.clearFilters()
-                    return self.fillShows()
-
-                if self.filter or self.filterUnwatched:
+                if self.filter or self.filterUnwatched or self.filterHDR or self.filterDOVI:
                     self.setBoolProperty('no.content.filtered', True)
                 else:
                     self.setBoolProperty('no.content', True)
@@ -1434,7 +1468,8 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
         for startChunkPosition in range(0, totalSize, self.CHUNK_SIZE):
             tasks.append(
                 ChunkRequestTask().setup(
-                    self.section, startChunkPosition, self.CHUNK_SIZE, self._chunkCallback, filter_=self.getFilterOpts(), sort=self.getSortOpts(), unwatched=self.filterUnwatched, subDir=self.subDir
+                    self.section, startChunkPosition, self.CHUNK_SIZE, self._chunkCallback, filter_=self.getFilterOpts(),
+                    sort=self.getSortOpts(), unwatched=self.filterUnwatched, subDir=self.subDir, **kw
                 )
             )
 
@@ -1739,7 +1774,8 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
             self.alreadyFetchedChunkList.add(startChunkPosition)
             task = ChunkRequestTask().setup(self.section, startChunkPosition, self.CHUNK_SIZE,
                                             self._chunkCallback, filter_=self.getFilterOpts(), sort=self.getSortOpts(),
-                                            unwatched=self.filterUnwatched, subDir=self.subDir)
+                                            unwatched=self.filterUnwatched, subDir=self.subDir, hdr=self.filterHDR,
+                                            dovi=self.filterDOVI)
 
             self.tasks.add(task)
             backgroundthread.BGThreader.addTasksToFront([task])

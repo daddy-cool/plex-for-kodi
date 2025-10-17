@@ -9,9 +9,11 @@
     <align>right</align>
     <itemgap>30</itemgap>
     <orientation>horizontal</orientation>
-    <onleft>304</onleft>
+    <onleft condition="String.IsEmpty(Window.Property(no.content.filtered))">304</onleft>
+    <onleft condition="!String.IsEmpty(Window.Property(no.content.filtered))">200</onleft>
     <onright>151</onright>
     <ondown>101</ondown>
+    <onup>200</onup>
     <control type="button" id="311">
         <enable>false</enable>
         <width max="300">auto</width>
