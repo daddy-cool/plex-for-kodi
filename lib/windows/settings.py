@@ -725,7 +725,7 @@ class Settings(object):
                     [(g, g) for g in genres.GENRES_TV]
                 ).description(T(33017, "")),
                 BoolSetting(
-                    'hubs_use_new_continue_watching', T(32998, ''), False
+                    'hubs_use_new_continue_watching', T(32998, ''), True
                 ).description(
                     T(32999, "")
                 ),
