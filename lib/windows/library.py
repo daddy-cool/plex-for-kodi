@@ -1090,6 +1090,9 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
             'lens': {'type': 'lens', 'display': T(32392, 'Lens'), 'indicator': self.hasFilter('lens') and check or ''}
         }
 
+        for k, option in optionsMap.items():
+            option["is_sub_list"] = True
+
         if pnUtil.ACCOUNT.isAdmin:
             optionsMap['location'] = {'type': 'location', 'display': T(34034, 'Folder Location'), 'indicator': self.hasFilter('location') and check or ''}
 

@@ -64,8 +64,7 @@ class DropdownDialog(kodigui.BaseDialog):
         self.setProperty('header', self.header)
         optLen = len(list(filter(lambda x: x != SEPARATOR, self.options)))
         separators = len(list(filter(lambda x: x == SEPARATOR, self.options)))
-        if self.isSubList:
-            self.setBoolProperty('scroll', optLen > 14)
+        self.setBoolProperty('scroll', optLen > 14)
         self.optionsList = kodigui.ManagedControlList(self, self.OPTIONS_LIST_ID, 14)
         openSubList = self.showOptions()
         height = min(self.optionHeight * 14, optLen * self.optionHeight + separators * self.separatorHeight) + util.vscalei(86)
@@ -131,7 +130,8 @@ class DropdownDialog(kodigui.BaseDialog):
 
                 self.lastSelectedItem = self.optionsList.control.getSelectedPosition()
         elif self.suboptionCallback and action == xbmcgui.ACTION_MOVE_RIGHT:
-            self.setChoice()
+            if self.optionsList.getSelectedItem().dataSource.get("is_sub_list"):
+                self.setChoice()
 
         elif controlID == self.SCROLLBAR_ID and action == xbmcgui.ACTION_SELECT_ITEM:
             self.setChoice()
@@ -169,7 +169,7 @@ class DropdownDialog(kodigui.BaseDialog):
         if not mli:
             return
 
-        choice = self.options[self.optionsList.getSelectedPosition()]
+        choice = self.options[self.optionsList.getSelectedPos()]
 
         if choice.get('ignore'):
             return
@@ -181,8 +181,12 @@ class DropdownDialog(kodigui.BaseDialog):
                 if self.selectItem and self.selectItem.get("sub"):
                     sub_select = self.selectItem["sub"]
 
+                # disable scrollbar temporarily
+                oldprop = self.getBoolProperty('scroll')
+                self.setBoolProperty('scroll', False)
                 sub = showDropdown(options, (self.x + 290, self.y + 10), close_direction='left',
                                    with_indicator=True, select_item=sub_select, is_sub_list=True)
+                self.setBoolProperty('scroll', oldprop)
                 if not sub:
                     return
 
