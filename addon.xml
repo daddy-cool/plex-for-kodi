@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="1.0.1"
+       version="1.0.2"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -46,8 +46,11 @@
 - Libraries: When re-opening applied filters, re-open all subfilter dropdowns until we reach our current one
 - Libraries: Cache subfilter content
 - Libraries: Clear filters if a previously stored filter now yields no content anymore
+- Libraries: Depending on which "side" of the library view we are, when pressing "up", select either the left buttons or the right buttons
+- Libraries: Enable fast navigation through subfilter lists via scrollbar
 - Core: Add memory_util.py.total_size for debugging purposes
 - Dropdown: Allow opening a sublist by pressing RIGHT
+- Dropdown: Show scrollbar if a child-dropdown needs scrolling
 - Update Hungarian translation
         </news>
         <assets>
