@@ -195,6 +195,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self._ignoreTick = False
         self._abortBufferWait = False
         self._playerDebugActive = False
+        self._playerNativePPIActive = False
         self._item_states = {}
         self.no_spoilers = util.getSetting('no_episode_spoilers4')
         self.no_time_no_osd_spoilers = util.getSetting('no_osd_time_spoilers')
@@ -616,12 +617,14 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                     self.hideOSD()
 
                 if action == xbmcgui.ACTION_CONTEXT_MENU or (self.getProperty('show.PPI') and action in (xbmcgui.ACTION_MOVE_LEFT, xbmcgui.ACTION_MOVE_RIGHT)):
-                    if self.getProperty('show.PPI'):
+                    if self.getProperty('show.PPI') and not self._playerDebugActive and not self._playerNativePPIActive:
                         if action == xbmcgui.ACTION_MOVE_LEFT:
                             self.showPPIDialog(real_ppi=True, debug=True)
                         else:
                             self.showPPIDialog(real_ppi=True)
                         return
+                if self._playerNativePPIActive and action in (xbmcgui.ACTION_MOVE_UP, xbmcgui.ACTION_MOVE_DOWN):
+                    self._playerNativePPIActive = False
 
                 passThroughMain = False
                 if controlID == self.SKIP_MARKER_BUTTON_ID:
@@ -809,6 +812,8 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                             xbmc.executebuiltin('Action(playerdebug)')
                             self._playerDebugActive = False
                             return
+                        if self._playerNativePPIActive:
+                            self._playerNativePPIActive = False
 
                     # immediate marker timer actions
                     if self.countingDownMarker:
@@ -1032,6 +1037,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                     self._playerDebugActive = True
                 else:
                     xbmc.executebuiltin('Action(playerprocessinfo)')
+                    self._playerNativePPIActive = True
             return
 
         for attrib in SESSION_ATTRIBUTE_TYPES.values():
