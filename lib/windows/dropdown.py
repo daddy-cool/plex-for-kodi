@@ -16,6 +16,7 @@ class DropdownDialog(kodigui.BaseDialog):
     width = 1920
     height = 1080
     optionHeight = util.vscalei(66)
+    separatorHeight = util.vscalei(2)
     dropWidth = 360
     borderOff = -20
 
@@ -61,12 +62,13 @@ class DropdownDialog(kodigui.BaseDialog):
     def onFirstInit(self):
         self.setProperty('dropdown', self.setDropdownProp and '1' or '')
         self.setProperty('header', self.header)
-        optLen = len(self.options)
+        optLen = len(list(filter(lambda x: x != SEPARATOR, self.options)))
+        separators = len(list(filter(lambda x: x == SEPARATOR, self.options)))
         if self.isSubList:
             self.setBoolProperty('scroll', optLen > 14)
         self.optionsList = kodigui.ManagedControlList(self, self.OPTIONS_LIST_ID, 14)
         openSubList = self.showOptions()
-        height = min(self.optionHeight * 14, optLen * self.optionHeight) + util.vscalei(86)
+        height = min(self.optionHeight * 14, optLen * self.optionHeight + separators * self.separatorHeight) + util.vscalei(86)
         ol_height = height - util.vscalei(86)
         y = self.y
 
