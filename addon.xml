@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="1.0.3"
+       version="1.0.3b"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -39,6 +39,11 @@
 - Libraries: Revert auto-clearing of filters with no content
 - Libraries: Re-enable filter clearing when no content, optimize navigation in this case
 - PhotoLibraries: Fix filtering
+- Dropdowns: Add scrollbar if necessary
+- Libraries: Hide main filter list scrollbar while subfilter list is open
+- Dropdowns: Fix shadow size; perfect shadow positioning
+- SeekDialog: Be smarter about playerprocessinfo/playerdebug/PM4K stream info (thanks @varmint9931)
+- Settings: Make the combined continue watching/ondeck hub default enabled
         </news>
         <assets>
             <icon>icon2.png</icon>
