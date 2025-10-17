@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="1.0.2"
+       version="1.0.3"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -34,24 +34,11 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Player: Don't throw away progress data during consecutive watch sessions; properly represent watched state in current video playlist during those
-- Libraries: Move filter options out of the header area to fix overlapping music player and long filter descriptions
-- Libraries: Unify and optimize play/filter/jumplist/scrollbar navigation
-- Libraries/Listviews/Squares: Autoscroll long description texts
-- Libraries/Photos: Fix PhotoDirectory browsing
-- Library/Movies: Add filters for Writer, Producer, Editions, Audio Language, Subtitle Language, Folder Location (only if admin)
-- Library/Shows: Add filters for Director, Writer, Producer; correctly separate Studio and Network filters
-- Libraries: Store subfilter states
-- Libraries: Re-select currently selected items in filter dropdowns
-- Libraries: When re-opening applied filters, re-open all subfilter dropdowns until we reach our current one
-- Libraries: Cache subfilter content
-- Libraries: Clear filters if a previously stored filter now yields no content anymore
-- Libraries: Depending on which "side" of the library view we are, when pressing "up", select either the left buttons or the right buttons
-- Libraries: Enable fast navigation through subfilter lists via scrollbar
-- Core: Add memory_util.py.total_size for debugging purposes
-- Dropdown: Allow opening a sublist by pressing RIGHT
-- Dropdown: Show scrollbar if a child-dropdown needs scrolling
-- Update Hungarian translation
+- MovieLibraries: Allow filtering by HDR and DOVI; allow multiple boolean filters at the same time
+- Libraries: Don't reopen current subfilter list if our current filtering yields no content
+- Libraries: Revert auto-clearing of filters with no content
+- Libraries: Re-enable filter clearing when no content, optimize navigation in this case
+- PhotoLibraries: Fix filtering
         </news>
         <assets>
             <icon>icon2.png</icon>
