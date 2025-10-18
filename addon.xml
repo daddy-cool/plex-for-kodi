@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="1.0.3b"
+       version="1.0.3c"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -38,6 +38,8 @@
 - Libraries: Don't reopen current subfilter list if our current filtering yields no content
 - Libraries: Revert auto-clearing of filters with no content
 - Libraries: Re-enable filter clearing when no content, optimize navigation in this case
+- Libraries: Allow filter clearing for boolean filters
+- Libraries: Consider filters active if an item type was selected that yields no content (allow filter access in this case)
 - PhotoLibraries: Fix filtering
 - Dropdowns: Add scrollbar if necessary
 - Libraries: Hide main filter list scrollbar while subfilter list is open
