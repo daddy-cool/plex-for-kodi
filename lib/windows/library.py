@@ -1049,7 +1049,7 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
 
         options = []
 
-        if self.filter:
+        if self.filter or self.filterHDR or self.filterDOVI:
             options.append({'type': 'clear_filter', 'display': T(32376, 'CLEAR FILTER').upper(), 'indicator': 'script.plex/indicators/remove.png'})
 
         if self.section.TYPE in ('movie', 'show') and not ITEM_TYPE == 'collection':
@@ -1395,7 +1395,8 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
                 self.showPanelControl.reset()
                 self.keyListControl.reset()
 
-                if self.filter or self.filterUnwatched or self.filterHDR or self.filterDOVI:
+                if (self.filter or self.filterUnwatched or self.filterHDR or self.filterDOVI
+                        or self.librarySettings.getItemType()):
                     self.setBoolProperty('no.content.filtered', True)
                 else:
                     self.setBoolProperty('no.content', True)
@@ -1421,7 +1422,8 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
                 self.showPanelControl.reset()
                 self.keyListControl.reset()
 
-                if self.filter or self.filterUnwatched or self.filterHDR or self.filterDOVI:
+                if (self.filter or self.filterUnwatched or self.filterHDR or self.filterDOVI
+                        or self.librarySettings.getItemType()):
                     self.setBoolProperty('no.content.filtered', True)
                 else:
                     self.setBoolProperty('no.content', True)
