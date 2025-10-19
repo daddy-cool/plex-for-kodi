@@ -2798,3 +2798,11 @@ msgstr ""
 msgctxt "#34037"
 msgid "HDR"
 msgstr ""
+
+msgctxt "#34038"
+msgid "Force plex.direct mapping"
+msgstr ""
+
+msgctxt "#34039"
+msgid "If you (still) don't see any posters: Under certain circumstances when Kodi still can't resolve hostnames when loading assets, even though the host resolves natively, enable this to force plex.direct mapping via advancedsettings.xml."
+msgstr ""

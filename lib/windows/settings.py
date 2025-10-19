@@ -924,6 +924,9 @@ class Settings(object):
                 ).description(
                     T(32992, 'stub')
                 ),
+                BoolSetting(
+                    'force_pd_mapping', T(34038, 'Force plex.direct mapping'), False
+                ).description(T(34039, 'stub')),
                 IPSetting('manual_ip_0', T(32044, 'Connection 1 IP'), ''),
                 IntegerSetting('manual_port_0', T(32045, 'Connection 1 Port'), 32400),
                 IPSetting('manual_ip_1', T(32046, 'Connection 2 IP'), ''),
