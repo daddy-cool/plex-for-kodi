@@ -1658,9 +1658,6 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
                         else:
                             subtitle = ' - ' + obj.originallyAvailableAt.asDatetime('%m/%d/%y')
                         mli.setLabel((obj.defaultTitle or ''))# + subtitle)
-                        # are we on the left plane or right plane of the view?
-                        if self._current.ROW_SIZE and pos < self._current.ROW_SIZE:
-                            mli.setProperty('side', pos < self._current.ROW_SIZE / 2 and "left" or "right")
 
                         mli.setThumbnailImage(obj.defaultThumb.asTranscodedImageURL(*thumbDim))
 
@@ -1689,9 +1686,6 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
                         mli.dataSource = obj
                         mli.setProperty('index', str(pos))
                         mli.setLabel(u'{0}\n{1}'.format(obj.parentTitle, obj.title))
-                        # are we on the left plane or right plane of the view?
-                        if self._current.ROW_SIZE and pos < self._current.ROW_SIZE:
-                            mli.setProperty('side', pos < self._current.ROW_SIZE / 2 and "left" or "right")
 
                         mli.setThumbnailImage(obj.defaultThumb.asTranscodedImageURL(*thumbDim))
 
@@ -1712,9 +1706,6 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
                     mli = self.showPanelControl[pos]
                     if obj:
                         mli.setProperty('index', str(pos))
-                        # are we on the left plane or right plane of the view?
-                        if self._current.ROW_SIZE and pos < self._current.ROW_SIZE:
-                            mli.setProperty('side', pos < self._current.ROW_SIZE / 2 and "left" or "right")
 
                         if obj.TYPE == 'track':
                             mli.setLabel("{} - {}: {}".format(obj.grandparentTitle, obj.parentTitle, obj.title))
