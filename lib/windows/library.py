@@ -1438,6 +1438,7 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
                 ji_size = ji.size.asInt()
                 mli = kodigui.ManagedListItem(ji.title, data_source=ji.key)
                 mli.setProperty('key', ji.key)
+                mli.setProperty('index', str(kidx))
                 mli.setProperty('original', '{0:02d}'.format(kidx))
                 self.keyItems[ji.key] = mli
                 jitems.append(mli)
