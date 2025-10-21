@@ -296,11 +296,11 @@ def validInt(int_str):
         return 0
 
 
-def bitrateToString(bits):
+def bitrateToString(bits, multiplier=0):
     if not bits:
         return ''
 
-    speed = bits / 1000000.0
+    speed = bits / 1000000.0 * multiplier
     if speed < 1:
         speed = int(round(bits / 1000.0))
         return '{0} Kbps'.format(speed)

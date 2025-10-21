@@ -213,33 +213,33 @@ def durationToText(seconds):
     return '0 seconds'
 
 
-def durationToShortText(ms, shortHourMins=False, shortSeconds=False):
+def durationToShortText(ms, shortHourMins=False, shortSeconds=False, noSpaces=False):
     """
     Converts seconds to a short user friendly string
     Example: 143 -> 2m 23s
     """
     days = int(ms / 86400000)
     if days:
-        return '{0} d'.format(days)
+        return '{0}{1}d'.format(days, "" if noSpaces else " ")
     left = ms % 86400000
     hours = int(left / 3600000)
     if hours:
-        hours_s = '{0} h '.format(hours)
+        hours_s = '{0}{1}h '.format(hours, "" if noSpaces else " ")
     else:
         hours_s = ''
     left = left % 3600000
     mins = int(left / 60000)
     if mins:
         if shortHourMins and hours:
-            return '{0}:{1} h'.format(hours, mins)
-        return hours_s + '{0} m'.format(mins)
+            return '{0}:{1}{2}h'.format(hours, mins, "" if noSpaces else " ")
+        return hours_s + '{0}{1}m'.format(mins, "" if noSpaces else " ")
     elif hours_s:
         return hours_s.rstrip()
     secs = int(left % 60000)
     if secs:
         secs /= 1000
-        return '{0} s'.format(round(secs) if shortSeconds and round(secs) == int(secs) else secs)
-    return '0 s'
+        return '{0}{1}s'.format(round(secs) if shortSeconds and round(secs) == int(secs) else secs, "" if noSpaces else " ")
+    return noSpaces and '0s' or '0 s'
 
 
 def cleanLeadingZeros(text):

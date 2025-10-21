@@ -2814,3 +2814,11 @@ msgstr ""
 msgctxt "#34041"
 msgid "Progress"
 msgstr ""
+
+msgctxt "#34042"
+msgid "By Album"
+msgstr ""
+
+msgctxt "#34043"
+msgid "Album"
+msgstr ""
