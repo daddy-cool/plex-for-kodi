@@ -449,7 +449,7 @@ class Settings(object):
                 ),
                 ThemeMusicSetting('theme_music', T(32480, 'Theme music'), 5),
                 BoolSetting(
-                    'theme_music_loop', T(33737, 'Loop theme music'), True
+                    'theme_music_loop', T(33737, 'Loop theme music'), False
                 ),
                 PlayedThresholdSetting('played_threshold', T(33501, 'Video played threshold'), 1,
                                        show_cb=lambda: plexnet.plexapp.SERVERMANAGER.selectedServer.prefs.get("LibraryVideoPlayedThreshold", None) is None
@@ -488,7 +488,7 @@ class Settings(object):
                              ' of asking whether to resume or start from the beginning.')
                 ),
                 BoolSetting(
-                    'home_inprogress_resume', T(33713, 'Home: Resume in-progress items'), True
+                    'home_inprogress_resume', T(33713, 'Home: Resume in-progress items'), False
                 ).description(
                     T(33714, 'Resume in-progress items directly instead of visiting the media.')
                 ),
