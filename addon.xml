@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="1.0.4"
+       version="1.0.5"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -34,14 +34,21 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Core/Plex.direct: Only check native resolving of hostnames containing plex.direct
-- Core/Plex.direct: Add logging
-- Core/Plex.direct: Reset mapped hosts if the user skips the confirmation dialog
-- Core/Plex.direct: Fix long-existing issue with multiple servers in certain circumstances not triggering plex.direct host mapping check
-- Core/Plex.direct: Force mapping if requested
-- Core/GDM: GDM could still be reported as active under certain circumstances
-- Core/MyPlex: Consider a device that is product="Plex Media Server" as a server as well, even if it doesn't provide the correct attributes (can happen; very rare)
-- Settings: Add setting "Force plex.direct mapping" (default: False)
+- Libraries/Movies: Add "year" and "progress" sort types
+- Libraries: Movies: Show current sort reference value if possible in addition to movie year
+- Libraries: Shows/Movies use sort order from PlexWeb
+- Libraries: Photos: Properly implement PlexWeb sort; fix display
+- Libraries/Music: Unify sort options with PlexWeb
+- Libraries: Fix filters not hiding when scrolling
+- Libraries: Unify visual behaviour between action button and filter button area
+- Libraries: Fix mis-selecting buttons/filters after changing view type and pressing up
+- Libraries: Fix "left" on jumpLists navigation; properly hide filters when necessary
+- Core/Util: Implement no spaces for durationToShortText
+- Core/plexnet/util: Implement multiplier for bitrateToString
+- Settings: Sanitize defaults ("Loop Theme Music" off vs on, "Home: Resume in-progress items" off vs on)
+- KodiGUI: Add more logging to waitForOpen
+- AddonSettings: widen maximum for "Use alternate seek" wait for seek to 5000 (was 2500)
+- PostPlay: Remove leftover bifurcation line
         </news>
         <assets>
             <icon>icon2.png</icon>
