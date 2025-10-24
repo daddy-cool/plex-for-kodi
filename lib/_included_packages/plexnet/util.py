@@ -261,6 +261,7 @@ def getPlexHeaders():
             "X-Plex-Product": "PM4K",
             "X-Plex-Provides": not INTERFACE.getPreference("remotecontrol", False) and 'player' or '',
             "X-Plex-Device": INTERFACE.getGlobal("device"),
+            "X-Plex-Device-Vendor": INTERFACE.getGlobal("vendor"),
             "X-Plex-Model": INTERFACE.getGlobal("model"),
             "X-Plex-Device-Name": INTERFACE.getGlobal("friendlyName"),
             "X-Plex-Language": LANGUAGE_CODE,

@@ -665,13 +665,33 @@ def getPlatform():
 
 
 platform = getPlatform()
+platform_version = None
+device = None
+vendor = None
+model = None
 
 
 def getCoreELEC():
+    global platform, device, platform_version, vendor, model
     try:
         stdout = subprocess.check_output('lsb_release', shell=True).decode()
         match = re.search(r'CoreELEC', stdout)
         if match:
+            platform = "Linux"
+            try:
+                model = subprocess.check_output(['cat', '/proc/device-tree/model']).decode().strip("\0 \n\r")
+                vendor, device = model.split()
+            except:
+                pass
+            try:
+                platform_version = stdout.split(":")[1].strip()
+            except:
+                pass
+
+            if model:
+                #device = ("{} ({})".format(model, stdout.strip("\0 \n\r")).replace("\0", "")
+                #          .replace("\n", "").replace("\r", ""))
+                device = "{} (CoreELEC)".format(model).replace("\0", "").replace("\n", "").replace("\r", "")
             return True
 
     except:
@@ -691,13 +711,9 @@ def getWebOS():
 
 
 def getPlatformFlavor():
-    # detected before?
-    flavor = getSetting('platform_flavor', None)
-    if flavor is None:
-        flavor = 'default'
-        if platform in ['Linux', 'RaspberryPi']:
-            flavor = "CoreELEC" if getCoreELEC() else "LG WebOS" if getWebOS() else 'default'
-        setSetting('platform_flavor', flavor)
+    flavor = 'default'
+    if platform in ['Linux', 'RaspberryPi']:
+        flavor = "CoreELEC" if getCoreELEC() else "LG WebOS" if getWebOS() else 'default'
 
     if flavor != 'default':
         LOG("{} detected".format(flavor))
