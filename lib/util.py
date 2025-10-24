@@ -49,7 +49,7 @@ PROFILE = translatePath(ADDON.getAddonInfo('profile'))
 
 
 DEF_THEME = "modern-colored"
-THEME_VERSION = 67
+THEME_VERSION = 68
 
 xbmc.log('script.plexmod: Kodi {0}.{1} (build {2})'.format(KODI_VERSION_MAJOR, KODI_VERSION_MINOR, KODI_BUILD_NUMBER),
          xbmc.LOGINFO)
@@ -611,8 +611,11 @@ timeFormat, timeFormatKN, padHour = getTimeFormat()
 
 def getShortDateFormat():
     try:
-        return (rpc.Settings.GetSettingValue(setting="locale.shortdateformat")["value"]
-                .replace("DD", "%d").replace("MM", "%m").replace("YYYY", "%Y"))
+        fromAPI = rpc.Settings.GetSettingValue(setting="locale.shortdateformat")["value"]
+        if fromAPI == "regional":
+            return xbmc.getRegion('dateshort').replace('%-d', '%d')
+        else:
+            return fromAPI.replace("DD", "%d").replace("MM", "%m").replace("YYYY", "%Y")
     except:
         DEBUG_LOG("Couldn't get locale.shortdateformat setting, falling back to MM/DD/YYYY")
         return "%d/%m/%Y"

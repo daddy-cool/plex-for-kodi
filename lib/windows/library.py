@@ -825,7 +825,15 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
         else:
             return
 
-        result = dropdown.showDropdown(options, (1280, 106), with_indicator=True)
+        selectItem = None
+        curType = self.librarySettings.getItemType()
+        try:
+            selectItem = list(filter(lambda o: o["type"] == curType, options))[0]
+        except:
+            pass
+
+        result = dropdown.showDropdown(options, (1280, 106), with_indicator=True,
+                                       select_item=not self.getBoolProperty('no.content.filtered') and selectItem or None)
         if not result:
             return
 
@@ -941,7 +949,14 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
         else:
             return
 
-        result = dropdown.showDropdown(options, (1280, 106), with_indicator=True)
+        selectItem = None
+        try:
+            selectItem = list(filter(lambda o: o["type"] == self.sort, options))[0]
+        except:
+            pass
+
+        result = dropdown.showDropdown(options, (1280, 106), with_indicator=True,
+                                       select_item=not self.getBoolProperty('no.content.filtered') and selectItem or None)
         if not result:
             return
 

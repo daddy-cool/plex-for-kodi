@@ -296,7 +296,7 @@ def validInt(int_str):
         return 0
 
 
-def bitrateToString(bits, multiplier=0):
+def bitrateToString(bits, multiplier=1):
     if not bits:
         return ''
 
