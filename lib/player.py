@@ -391,7 +391,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                 if hasNext:
                     self.seeking = self.SEEK_PLAYLIST
                 return True
-            elif util.getUserSetting('post_play_never', False):
+            elif util.getUserSetting('post_play_never', False) and not self.skipPostPlay:
                 return False
 
         if not self.playlist or self.stoppedManually or self.endedManually or (self.playlist and not hasNext):

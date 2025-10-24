@@ -2121,7 +2121,7 @@ msgstr "Diese Anzahl an Medieninhalten pro gestückelter Anfrage in der Biblioth
 #: 
 msgctxt "#32973"
 msgid "Episodes: Skip Post Play screen"
-msgstr "Direkt zur nächsten Episode springen"
+msgstr "Episoden: Nahtlose Wiedergabe"
 
 #: 
 msgctxt "#32974"

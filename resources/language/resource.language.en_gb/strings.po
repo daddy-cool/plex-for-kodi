@@ -1707,7 +1707,7 @@ msgid "Request this amount of media items per chunk request in library view (+6-
 msgstr ""
 
 msgctxt "#32973"
-msgid "Episodes: Skip Post Play screen"
+msgid "Episodes: Continuous playback"
 msgstr ""
 
 msgctxt "#32974"
