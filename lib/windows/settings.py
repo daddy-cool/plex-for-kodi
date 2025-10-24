@@ -651,7 +651,7 @@ class Settings(object):
                         ('modern-dotted', T(32986, 'Modern (dotted)')),
                         ('modern-colored', T(32989, 'Modern (colored)')),
                         ('classic', T(32987, 'Classic')),
-                        ('custom', T(32988, 'Custom')),
+                        #('custom', T(32988, 'Custom')),
                     ), theme_relevant=True
                 ).description(
                     T(32984, 'stub')
