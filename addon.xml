@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="1.0.5c"
+       version="1.0.5d"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -34,10 +34,8 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Library/Movies: Remove secondary date on Date Added
-- Library: Fix missing mli in chunkCallback
-- Library/Movies: Show sort value first, then year
-- Player: Honor "Never show Post Play" properly even when an episode has ended
+- Player: Also go to the next episode when episode ended without any credit marker (introduced with 1.0.5c)
+- Settings: Rename "Episodes: Skip Post Play screen" to "Episodes: Continuous playback" to make functionality clearer
         </news>
         <assets>
             <icon>icon2.png</icon>
