@@ -120,7 +120,7 @@ TYPE_PLURAL = {
 SORT_KEYS = {
     'movie': {
         'titleSort': {'title': T(32357, 'By Title'), 'display': T(32358, 'Title'), 'defSortDesc': False},
-        'addedAt': {'title': T(32351, 'By Date Added'), 'display': T(32352, 'Date Added'), 'defSortDesc': True, 'subDisplay': 'addedAt'},
+        'addedAt': {'title': T(32351, 'By Date Added'), 'display': T(32352, 'Date Added'), 'defSortDesc': True},
         'originallyAvailableAt': {'title': T(32353, 'By Release Date'), 'display': T(32354, 'Release Date'),
                                   'defSortDesc': True, 'subDisplay': 'originallyAvailableAt', 'subDisplayExclusive': True},
         'lastViewedAt': {'title': T(32355, 'By Date Viewed'), 'display': T(32356, 'Date Viewed'), 'defSortDesc': True, 'subDisplay': 'lastViewedAt'},
@@ -1740,7 +1740,13 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
             else:
                 for offset, obj in enumerate(items):
 
-                    mli = self.showPanelControl[pos]
+                    try:
+                        mli = self.showPanelControl[pos]
+                    except RuntimeError:
+                        util.LOG("Library/ChunkCallback: {} not found", pos)
+                        pos += 1
+                        continue
+
                     if obj:
                         mli.setProperty('index', str(pos))
 
