@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="1.0.5"
+       version="1.0.5b"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -34,21 +34,15 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Libraries/Movies: Add "year" and "progress" sort types
-- Libraries: Movies: Show current sort reference value if possible in addition to movie year
-- Libraries: Shows/Movies use sort order from PlexWeb
-- Libraries: Photos: Properly implement PlexWeb sort; fix display
-- Libraries/Music: Unify sort options with PlexWeb
-- Libraries: Fix filters not hiding when scrolling
-- Libraries: Unify visual behaviour between action button and filter button area
-- Libraries: Fix mis-selecting buttons/filters after changing view type and pressing up
-- Libraries: Fix "left" on jumpLists navigation; properly hide filters when necessary
-- Core/Util: Implement no spaces for durationToShortText
-- Core/plexnet/util: Implement multiplier for bitrateToString
-- Settings: Sanitize defaults ("Loop Theme Music" off vs on, "Home: Resume in-progress items" off vs on)
-- KodiGUI: Add more logging to waitForOpen
-- AddonSettings: widen maximum for "Use alternate seek" wait for seek to 5000 (was 2500)
-- PostPlay: Remove leftover bifurcation line
+- Libraries/PosterSmall: Fix vertical cutoff
+- Libraries/Posters/PostersSmall: Scale and position scrollbar appropriately when moving down
+- Libraries: Fix short date format in case of "regional" for secondary display values when sorting
+- Libraries: Re-select currently used item type and sort attribute in dropdowns
+- Streams: Fix bitrate display (introduced in 1.0.5)
+- Util: Fix getShortDateFormat()
+- Settings: Temporarily remove "custom" theme setting as it's been broken for a while now
+- Update German translation
+- Core/PlexNet/CoreELEC: Properly report device and platform parameters to Plex.tv
         </news>
         <assets>
             <icon>icon2.png</icon>
