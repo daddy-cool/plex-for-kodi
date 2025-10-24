@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="1.0.5b"
+       version="1.0.5c"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -34,15 +34,10 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Libraries/PosterSmall: Fix vertical cutoff
-- Libraries/Posters/PostersSmall: Scale and position scrollbar appropriately when moving down
-- Libraries: Fix short date format in case of "regional" for secondary display values when sorting
-- Libraries: Re-select currently used item type and sort attribute in dropdowns
-- Streams: Fix bitrate display (introduced in 1.0.5)
-- Util: Fix getShortDateFormat()
-- Settings: Temporarily remove "custom" theme setting as it's been broken for a while now
-- Update German translation
-- Core/PlexNet/CoreELEC: Properly report device and platform parameters to Plex.tv
+- Library/Movies: Remove secondary date on Date Added
+- Library: Fix missing mli in chunkCallback
+- Library/Movies: Show sort value first, then year
+- Player: Honor "Never show Post Play" properly even when an episode has ended
         </news>
         <assets>
             <icon>icon2.png</icon>
