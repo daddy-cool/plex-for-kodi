@@ -1780,7 +1780,7 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
                                     exclusive = sk_data.get('subDisplayExclusive', False)
                                     sub_title = res
                                     if not exclusive:
-                                        sub_title = "{} ({})".format(obj.get('year'), res)
+                                        sub_title = "{} ({})".format(res, obj.get('year'))
                         mli.setProperty('year', sub_title)
 
                         if obj.TYPE != 'collection':
