@@ -381,17 +381,24 @@ class SeekPlayerHandler(BasePlayerHandler):
         hasNext = False
         if self.playlist:
             hasNext = bool(next(self.playlist))
-            if hasNext:
-                self.seeking = self.SEEK_PLAYLIST
 
         self.triggerProgressEvent()
 
         if on_end:
+            # todo: this needs to be seriously cleaned up; showPostPlay/showShowPostPlay have too much impact on things
+            #       they don't control/shouldn't control
             if self.showPostPlay():
+                if hasNext:
+                    self.seeking = self.SEEK_PLAYLIST
                 return True
+            elif util.getUserSetting('post_play_never', False):
+                return False
 
         if not self.playlist or self.stoppedManually or self.endedManually or (self.playlist and not hasNext):
             return False
+
+        if hasNext:
+            self.seeking = self.SEEK_PLAYLIST
 
         self.player.playVideoPlaylist(self.playlist, handler=self, resume=False)
 
