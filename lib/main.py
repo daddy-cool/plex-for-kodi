@@ -120,6 +120,9 @@ def main(force_render=False):
         with kodigui.GlobalProperty('rendering'):
             render_templates(force=force_render)
 
+        # cleanup cache folder
+        util.cleanupCacheFolder()
+
         with util.Cron(1 / util.addonSettings.tickrate):
             BACKGROUND = background.BackgroundWindow.create(function=_main)
             if BACKGROUND.waitForOpen():
