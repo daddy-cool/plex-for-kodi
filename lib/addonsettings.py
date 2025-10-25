@@ -72,6 +72,7 @@ class AddonSettings(object):
         ("playlist_max_size", 500),
         ("max_shutdown_wait", 5),
         ("unlock_res", False),
+        ("ui_wait_rate", 10),
     )
 
     def __init__(self):

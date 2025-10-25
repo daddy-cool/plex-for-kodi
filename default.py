@@ -67,8 +67,8 @@ try:
                         log('Main: script.plexmod: Delaying start for {}s.', boot_delay)
                         while (not main.util.MONITOR.abortRequested() and waited < boot_delay
                                and getGlobalProperty('waiting_for_start')):
-                            waited += 0.1
-                            main.util.MONITOR.waitForAbort(0.1)
+                            waited += main.util.MONITOR.wait_interval
+                            main.util.MONITOR.waitFor()
 
                     # boot delay canceled by immediate start
                     if waited < boot_delay:

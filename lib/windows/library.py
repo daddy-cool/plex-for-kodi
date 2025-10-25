@@ -1498,7 +1498,7 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
 
         # Wait for the default items to be created
         while backgroundthread.BGThreader.working() and not util.MONITOR.abortRequested():
-            util.MONITOR.waitForAbort(0.1)
+            util.MONITOR.waitFor()
 
         if jitems:
             self.keyListControl.addItems(jitems)

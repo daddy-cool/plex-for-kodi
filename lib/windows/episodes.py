@@ -619,8 +619,8 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
 
             # wait for ep list to update
             waited = 0
-            while self.episodeListControl.getSelectedItem() != selected_new and waited < 20:
-                util.MONITOR.waitForAbort(0.1)
+            while self.episodeListControl.getSelectedItem() != selected_new and waited < util.MONITOR.waitAmount(4):
+                util.MONITOR.waitFor()
                 waited += 1
 
         self.episode = None
@@ -1024,8 +1024,8 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
         # wait for current item to be loaded
         if not from_auto_play:
             amount = 0
-            while not self.currentItemLoaded and amount < 50:
-                util.MONITOR.waitForAbort(0.1)
+            while not self.currentItemLoaded and amount < util.MONITOR.waitAmount(50):
+                util.MONITOR.waitFor()
                 amount += 1
 
             if not self.currentItemLoaded:
@@ -1556,8 +1556,8 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
                         tries = 0
                         PBID = self.getPlayButtonID(mli)
                         while not xbmc.getCondVisibility('Control.IsVisible({})'.format(PBID)) \
-                                and not util.MONITOR.abortRequested() and tries < 15:
-                            util.MONITOR.waitForAbort(0.1)
+                                and not util.MONITOR.abortRequested() and tries < util.MONITOR.waitAmount(15):
+                            util.MONITOR.waitFor()
                             tries += 1
                         if xbmc.getCondVisibility('Control.IsVisible({})'.format(PBID)) and self.getFocusId() != PBID:
                             self.setFocusId(PBID)

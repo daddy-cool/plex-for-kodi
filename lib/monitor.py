@@ -11,6 +11,7 @@ class UtilityMonitor(xbmc.Monitor, signalsmixin.SignalsMixin):
         xbmc.Monitor.__init__(self, *args, **kwargs)
         signalsmixin.SignalsMixin.__init__(self)
         self.device_sleeping = False
+        self.wait_interval = 0.1
 
     def watchStatusChanged(self):
         self.trigger('changed.watchstatus')
@@ -124,6 +125,16 @@ class UtilityMonitor(xbmc.Monitor, signalsmixin.SignalsMixin):
     def onSettingsChanged(self):
         """ unused stub, but works if needed """
         pass
+
+    def waitFor(self, interval=None):
+        if interval is None:
+            interval = self.wait_interval
+        return self.waitForAbort(interval)
+
+    def waitAmount(self, amount, interval=None):
+        if interval is None:
+            interval = self.wait_interval
+        return amount * interval
 
 
 MONITOR = UtilityMonitor()
