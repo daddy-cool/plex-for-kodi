@@ -811,7 +811,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                 needsReSeek = False
                 if (self.useResumeFix and origSOS > 500) or not self.useResumeFix:
                     # seekOnStart might've changed to 0
-                    if self.player.getTime() * 1000 < withinSOSLow or self.player.getTime() * 1000 > withinSOSHigh:
+                    if self.player.isPlayingVideo() and self.player.getTime() * 1000 < withinSOSLow or self.player.getTime() * 1000 > withinSOSHigh:
                         util.DEBUG_LOG("SeekHandler: onPlayBackSeek: resumeFix: not there, yet, re-seeking: ({}, {}, {})", self.player.getTime(), withinSOSLow, withinSOSHigh)
                         needsReSeek = True
                         self.seek(origSOS)
@@ -820,7 +820,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                 else:
                     util.DEBUG_LOG("SeekHandler: onPlayBackSeek: SOS is less than 500ms, not triggering seek")
 
-                if self.useResumeFix and origSOS > 500 and needsReSeek:
+                if self.player.isPlayingVideo() and self.useResumeFix and origSOS > 500 and needsReSeek:
                     # clamp to lower 500ms at least
                     seekWait = max(util.addonSettings.coreelecResumeSeekWait, 500)
                     withinSOSHigh += seekWait
@@ -1334,17 +1334,22 @@ class BGMPlayerHandler(BasePlayerHandler):
         self.timelineType = 'music'
         self.initData = init_data
         self.currentlyPlaying = init_data[2]
+        self.abort = False
+        self.fading = False
         util.setGlobalProperty('track.ID', '')
 
-        self.oldVolume = util.rpc.Application.GetProperties(properties=["volume"])["volume"]
+        self.oldVolume = self._getVolume()
 
     def onPlayBackStarted(self):
         self.player.bgmStarting = False
         self.player.trigger('bgm.started')
         util.DEBUG_LOG("BGM: playing theme for {}", self.currentlyPlaying)
 
+    def _getVolume(self):
+        return util.rpc.Application.GetProperties(properties=["volume"])["volume"]
+
     def _setVolume(self, vlm):
-        xbmc.executebuiltin("SetVolume({})".format(vlm))
+        xbmc.executebuiltin("SetVolume({})".format(vlm), True)
 
     def setVolume(self, volume=None, reset=False):
         vlm = self.oldVolume if reset else volume
@@ -1353,35 +1358,93 @@ class BGMPlayerHandler(BasePlayerHandler):
         if curVolume != vlm:
             util.DEBUG_LOG("BGM: {}setting volume to: {}", "re-" if reset else "", vlm)
             self._setVolume(vlm)
+            return True
         else:
             util.DEBUG_LOG("BGM: Volume already at {}", vlm)
-            return
-
-        waited = 0
-        waitMax = 5
-        while curVolume != vlm and waited < waitMax:
-            util.DEBUG_LOG("Waiting for volume to change from {} to {}", curVolume, vlm)
-            xbmc.sleep(100)
-            waited += 1
-            curVolume = self.getVolume()
-
-        if waited == waitMax:
-            util.DEBUG_LOG("BGM: Timeout setting volume to {} (is: {}). Might have been externally changed in the "
-                           "meantime".format(vlm, self.getVolume()))
+            return False
 
     def resetVolume(self):
         self.setVolume(reset=True)
 
-    def onPlayBackStopped(self):
+    def fade(self, to, fast=False, stop=False, fade_time=1.0):
+        self.fading = True
+        try:
+            cur_vol = float(self._getVolume())
+            is_out = to < cur_vol
+
+            util.DEBUG_LOG(
+                "BGM: fade {} from {} to {}, fast: {}",
+                "out" if is_out else "in", cur_vol, to, fast
+            )
+
+            fade_time = 0.5 if fast else fade_time
+            num_steps = fade_time / 0.1
+            step_delay = fade_time / num_steps
+            vol_step = (to - cur_vol) / num_steps  # automatically handles direction
+
+            for step in range(int(num_steps) + 1):
+                # Stop immediately if system requests abort
+                if util.MONITOR.abortRequested() or self.abort:
+                    util.LOG("BGM: Abort requested, cancelling fade {}",
+                             "out" if is_out else "in")
+                    self.resetVolume()
+                    break
+
+                # Compute new volume
+                vol = cur_vol + step * vol_step
+
+                # Clamp between 1 and 100 instead of 0 and 100
+                vol = int(max(1, min(vol, 100)))  # never drop to 0
+
+                util.DEBUG_LOG("BGM: fade {} step {} -> {}",
+                               "out" if is_out else "in", step, vol)
+                self._setVolume(vol)
+                util.MONITOR.waitFor(step_delay)
+
+            # Guarantee final target (but still not below 1)
+            self._setVolume(max(1, int(to)))
+        finally:
+            self.fading = False
+        if stop:
+            self.player.stop()
+
+    def fadeIn(self, volume, fast=False):
+        waited = 0
+        while not self.player.isPlayingAudio() and waited < util.MONITOR.waitAmount(2.0):
+            if util.MONITOR.abortRequested():
+                return
+            util.MONITOR.waitFor()
+        return self.fade(volume, fast=fast)
+
+    def fadeOut(self, fast=False, stop=False, fade_time=1.5):
+        if not self.player.isPlayingAudio():
+            self.resetVolume()
+            return
+        return self.fade(0, fast=fast, stop=stop, fade_time=fade_time)
+
+    def onPlayBackStopped(self, rm=True):
         util.DEBUG_LOG("BGM: stopped theme for {}", self.currentlyPlaying)
         util.setGlobalProperty('theme_playing', '')
+        self.abort = True
+        while self.fading:
+            util.MONITOR.waitFor()
         self.player.bgmPlaying = False
         self.resetVolume()
 
-    def onPlayBackEnded(self):
-        self.onPlayBackStopped()
+        if rm:
+            fn = os.path.join(util.translatePath("special://temp/"), "theme_{}.mp3".format(self.currentlyPlaying))
+            if os.path.exists(fn):
+                util.DEBUG_LOG("BGM: Removing cached theme: {}", fn)
+                try:
+                    util.xbmcvfs.delete(fn)
+                except:
+                    util.DEBUG_LOG("BGM: Couldn't delete cached theme: {}", fn)
 
-        if util.getSetting('theme_music_loop') and not self.player.dontRequeueBGM:
+    def onPlayBackEnded(self):
+        requeue = util.getSetting('theme_music_loop') and not self.player.dontRequeueBGM
+        self.onPlayBackStopped(rm=not requeue)
+
+        if requeue:
             self.player.playBackgroundMusic(*self.initData)
 
     def onPlayBackFailed(self):
@@ -1393,9 +1456,13 @@ class BGMPlayerHandler(BasePlayerHandler):
 
 
 class BGMPlayerTask(backgroundthread.Task):
-    def setup(self, source, player, *args, **kwargs):
+    def setup(self, source, player, volume, *args, **kwargs):
         self.source = source
         self.player = player
+        self.volume = volume
+        self.is_local = kwargs.get('is_local', False)
+        self.is_cached = kwargs.get('is_cached', False)
+        self.fade_fast = kwargs.get('fade_fast', False)
         return self
 
     def cancel(self):
@@ -1414,7 +1481,11 @@ class BGMPlayerTask(backgroundthread.Task):
             util.MONITOR.waitForAbort(0.1)
             ct += 1
 
+        # always set to min volume
+        self.player.handler.setVolume(1)
         self.player.play(self.source, windowed=True)
+        # fade in
+        self.player.handler.fadeIn(self.volume, fast=self.fade_fast)
 
 
 class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
@@ -1442,6 +1513,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
         self.bgmPlaying = False
         self.bgmStarting = False
         self.lastPlayWasBGM = False
+        self.startingVideoPlayback = False
         self.BGMTask = None
         self.pauseAfterPlaybackStarted = False
         self.video = None
@@ -1561,6 +1633,8 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
         xbmc.Player.play(self, *args, **kwargs)
 
     def playBackgroundMusic(self, source, volume, rating_key, *args, **kwargs):
+        if self.startingVideoPlayback:
+            return
         if self.isPlaying():
             if not self.lastPlayWasBGM:
                 return
@@ -1572,7 +1646,10 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
 
                 # cancel any currently playing theme before starting the new one
                 else:
-                    self.stopAndWait()
+                    self.stopAndWait(fade=self.bgmPlaying, fade_fast=self.bgmPlaying)
+                    if self.startingVideoPlayback:
+                        return
+
         self.sessionID = "BGM{}".format(rating_key)
         curVol = self.handler.getVolume()
         # no current volume, don't play BGM either
@@ -1592,10 +1669,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
             util.setSetting('last_good_volume', curVol)
 
         self.lastPlayWasBGM = True
-
-        self.handler.setVolume(volume)
-
-        self.BGMTask = BGMPlayerTask().setup(source, self, *args, **kwargs)
+        self.BGMTask = BGMPlayerTask().setup(source, self, volume, *args, **kwargs)
         backgroundthread.BGThreader.addTask(self.BGMTask)
 
     def playVideo(self, video, resume=False, force_update=False, session_id=None, handler=None):
@@ -2146,10 +2220,18 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
         except:
             util.ERROR()
 
-    def stopAndWait(self):
+    def stopAndWait(self, fade=False, fade_fast=False, deferred=False):
         if self.isPlaying():
             util.DEBUG_LOG('Player: Stopping and waiting...')
             self.dontRequeueBGM = True
+            if fade and self.isPlayingAudio() and self.bgmPlaying and isinstance(self.handler, BGMPlayerHandler):
+                # fade out
+                # don't block main thread if we're simply waiting for the theme music to fade out
+                if deferred:
+                    threading.Thread(target=lambda: self.handler.fadeOut(fast=fade_fast, stop=True)).start()
+                    return
+                else:
+                    self.handler.fadeOut(fast=fade_fast)
             self.stop()
             if not util.MONITOR.abortRequested():
                 while not util.MONITOR.waitForAbort(0.1) and self.isPlaying():

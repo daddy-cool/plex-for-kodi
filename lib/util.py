@@ -38,6 +38,7 @@ from .properties import setGlobalProperty, setGlobalBoolProperty, waitForGPEmpty
 # noinspection PyUnresolvedReferences
 from .addonsettings import addonSettings, AddonSettings
 from .settings_util import getSetting, getUserSetting, setSetting, USER_SETTINGS, JSON_SETTINGS, DEFAULT_SETTINGS
+from .os_utils import fast_iglob
 from .monitor import MONITOR
 
 
@@ -900,6 +901,17 @@ def dumpSettings():
 
 def garbageCollect():
     gc.collect(2)
+
+
+def cleanupCacheFolder():
+    try:
+        base = translatePath("special://temp")
+        for f in fast_iglob(os.path.join(base, "theme_*.mp3")):
+            fn = os.path.join(base, f)
+            DEBUG_LOG("Removing leftover cached file: {}", fn)
+            xbmcvfs.delete(fn)
+    except:
+        pass
 
 
 def shutdown():

@@ -531,7 +531,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
             return
 
         if player.PLAYER.bgmPlaying:
-            player.PLAYER.stopAndWait()
+            player.PLAYER.stopAndWait(fade=True, deferred=True)
 
         self._anyItemAction = False
         if self._applyTheme:

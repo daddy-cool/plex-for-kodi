@@ -47,6 +47,9 @@ class UtilityMonitor(xbmc.Monitor, signalsmixin.SignalsMixin):
         xbmc.executebuiltin('System.LogOff')
 
     def onNotification(self, sender, method, data):
+        if method == "Application.OnVolumeChanged":
+            return
+
         LOG("Notification: {} {} {}".format(sender, method, data))
         if sender == 'script.plexmod' and method.endswith('RESTORE'):
             from .windows import kodigui, windowutils
