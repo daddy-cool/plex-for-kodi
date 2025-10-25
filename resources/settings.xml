@@ -603,6 +603,18 @@
                         <popup>false</popup>
                     </control>
                 </setting>
+                <setting id="ui_wait_rate" type="number" label="34044">
+                    <level>0</level>
+                    <default>10</default>
+                    <constraints>
+                        <minimum>10</minimum>
+                        <step>10</step>
+                        <maximum>1000</maximum>
+                    </constraints>
+                    <control type="slider" format="number">
+                        <popup>false</popup>
+                    </control>
+                </setting>
                 <setting id="worker_count" type="number" label="32981" help="32982">
                     <level>0</level>
                     <default>3</default>

@@ -52,9 +52,15 @@ PROFILE = translatePath(ADDON.getAddonInfo('profile'))
 DEF_THEME = "modern-colored"
 THEME_VERSION = 68
 
+UI_INTERVAL = 1 / float(addonSettings.uiWaitRate)
+
+MONITOR.wait_interval = UI_INTERVAL
+
 xbmc.log('script.plexmod: Kodi {0}.{1} (build {2})'.format(KODI_VERSION_MAJOR, KODI_VERSION_MINOR, KODI_BUILD_NUMBER),
          xbmc.LOGINFO)
 
+xbmc.log('script.plexmod: UI wait rate is {0} ({1} Hz)'.format(UI_INTERVAL, addonSettings.uiWaitRate),
+         xbmc.LOGINFO)
 
 def getChannelMapping():
     data = rpc.Settings.GetSettings(filter={"section": "system", "category": "audio"})["settings"]

@@ -149,7 +149,7 @@ class BusySignalContext(BusyMsgContext):
     window_cls = BusyWindow
     delay = True
 
-    def __init__(self, context, signal, wait_max=10, delay=True, delay_time=0.5):
+    def __init__(self, context, signal, wait_max=1, delay=True, delay_time=0.5):
         self.wfSignal = signal
         self.signalEmitter = context
         self.waitMax = wait_max
@@ -170,9 +170,9 @@ class BusySignalContext(BusyMsgContext):
         try:
             if not self.ignoreSignal:
                 waited = 0
-                while not self.signalReceived and waited < self.waitMax:
-                    util.MONITOR.waitForAbort(0.1)
-                    waited += 0.1
+                while not self.signalReceived and waited < util.MONITOR.waitAmount(self.waitMax):
+                    util.MONITOR.waitFor()
+                    waited += util.MONITOR.wait_interval
         finally:
             self.signalEmitter.off(self.wfSignal, self.onSignal)
 

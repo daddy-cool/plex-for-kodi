@@ -1651,6 +1651,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
                         return
 
         self.sessionID = "BGM{}".format(rating_key)
+        util.DEBUG_LOG("CALLED WITH: %s" % self.sessionID)
         curVol = self.handler.getVolume()
         # no current volume, don't play BGM either
         if not curVol:
@@ -2234,7 +2235,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
                     self.handler.fadeOut(fast=fade_fast)
             self.stop()
             if not util.MONITOR.abortRequested():
-                while not util.MONITOR.waitForAbort(0.1) and self.isPlaying():
+                while not util.MONITOR.waitFor() and self.isPlaying():
                     if util.MONITOR.abortRequested():
                         break
             util.MONITOR.waitForAbort(0.2)
