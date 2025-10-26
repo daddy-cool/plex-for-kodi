@@ -892,6 +892,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
                 not xbmc.Player().isPlayingVideo()):
             util.DEBUG_LOG("Home: Ticking, section stale, calling showHubs(update=True)")
             self.showHubs(self.lastSection, update=True)
+            util.cleanupCacheFolder()
 
     def doClose(self, force=True):
         util.DEBUG_LOG("Home: doClose called, triggering close.windows")
