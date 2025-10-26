@@ -2758,7 +2758,6 @@ class PlaylistDialog(kodigui.BaseDialog, SpoilersMixin):
         idx = 1
         for pi in self.playlist.items():
             # mark watched items in playlist during current playback session
-            util.DEBUG_LOG("ROLLER: %r %r %r" % (self.handler.getProgressForItem(str(pi.ratingKey), None), self.handler._progressHld, pi.ratingKey))
             if self.handler.getProgressForItem(str(pi.ratingKey), None) is True:
                 pi.set('viewCount',pi.get('viewCount', 0).asInt() + 1)
                 pi.set('viewOffset', 0)
