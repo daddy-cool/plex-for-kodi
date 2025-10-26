@@ -1651,7 +1651,6 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
                         return
 
         self.sessionID = "BGM{}".format(rating_key)
-        util.DEBUG_LOG("CALLED WITH: %s" % self.sessionID)
         curVol = self.handler.getVolume()
         # no current volume, don't play BGM either
         if not curVol:
