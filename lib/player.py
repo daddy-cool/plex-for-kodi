@@ -173,7 +173,7 @@ class BasePlayerHandler(object):
 
         # if we've been called explicitly with a time, honor
         force_time = t is not None
-        _time = t or int(self.trueTime * 1000)
+        _time = max(t or int(self.trueTime * 1000), 0)
 
         # self.trigger("progress", [m, item, time])
 

@@ -2137,7 +2137,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         if ((not self.resumeSeekBehindOnlyDP or self.isDirectPlay)
                 and self.resumeSeekBehind and to > amount):
             util.DEBUG_LOG("SeekDialog: Seeking back from {} to {}", to, to - amount)
-            self.doSeek(to - amount)
+            self.doSeek(max(to - amount, 0))
 
     def onPlayBackResumed(self):
         util.DEBUG_LOG("SeekDialog: OnPlaybackResumed")
