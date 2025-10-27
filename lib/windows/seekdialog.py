@@ -681,12 +681,18 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                         return
 
                     if action in (xbmcgui.ACTION_MOVE_RIGHT, xbmcgui.ACTION_STEP_FORWARD):
+                        if self.handler.waitingForSOS:
+                            util.DEBUG_LOG("SeekDialog: Ignoring seek action as we're waiting for SOS")
+                            return
                         self.setProperty('show.chapters', '')
                         if self.useDynamicStepsForTimeline:
                             return self.skipForward()
                         return self.seekByOffset(10000, auto_seek=self.useAutoSeek)
 
                     elif action in (xbmcgui.ACTION_MOVE_LEFT, xbmcgui.ACTION_STEP_BACK):
+                        if self.handler.waitingForSOS:
+                            util.DEBUG_LOG("SeekDialog: Ignoring seek action as we're waiting for SOS")
+                            return
                         self.setProperty('show.chapters', '')
                         if self.useDynamicStepsForTimeline:
                             return self.skipBack()
@@ -732,6 +738,9 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                         return
 
                     if action in (xbmcgui.ACTION_MOVE_RIGHT, xbmcgui.ACTION_MOVE_LEFT):
+                        if self.handler.waitingForSOS:
+                            util.DEBUG_LOG("SeekDialog: Ignoring seek action as we're waiting for SOS")
+                            return
                         # we're seeking from the timeline, with the OSD closed; act as we're skipping
                         if not self._seeking:
                             self.selectedOffset = self.trueOffset()
