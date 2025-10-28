@@ -12,7 +12,6 @@ from plexnet.http import GET
 
 class ThemeMusicTask(backgroundthread.Task):
     temp_path = util.translatePath("special://temp/")
-    cache_theme_music = True
     def setup(self, url, volume, rating_key, is_local=False, fade_fast=False):
         self.url = url
         self.volume = volume
@@ -24,7 +23,7 @@ class ThemeMusicTask(backgroundthread.Task):
     def run(self):
         path = self.url
         is_cached = False
-        if not self.is_local and self.cache_theme_music:
+        if not self.is_local and util.addonSettings.cacheThemeMusic:
             fn = os.path.join(self.temp_path, "theme_{}.mp3".format(self.rating_key))
             if not os.path.exists(fn):  # and not xbmc.getCacheThumbName(tmpFn):
                 try:
@@ -35,11 +34,13 @@ class ThemeMusicTask(backgroundthread.Task):
                     f.close()
                     path = fn
                     is_cached = True
+                    util.DEBUG_LOG("Cached theme music for {} to: {}", self.rating_key, path)
                 except:
                     util.LOG("Couldn't download theme music: {}", self.rating_key)
                     return
         player.PLAYER.playBackgroundMusic(path, self.volume, self.rating_key, is_local=self.is_local,
-                                          is_cached=is_cached, fade_fast=self.fade_fast)
+                                          is_cached=is_cached, fade=util.addonSettings.themeMusicFade,
+                                          fade_fast=self.fade_fast)
 
 
 class ThemeMusicMixin(object):
@@ -69,7 +70,7 @@ class ThemeMusicMixin(object):
 
     def themeMusicReinit(self, item):
         if player.PLAYER.bgmPlaying and not self.isPlayingOurs(item):
-            player.PLAYER.stopAndWait(fade=True, deferred=True)
+            player.PLAYER.stopAndWait(fade=util.addonSettings.themeMusicFade, deferred=True)
         self.useBGM = False
 
     def playThemeMusic(self, theme_url, identifier, locations, server, fade_fast=False):

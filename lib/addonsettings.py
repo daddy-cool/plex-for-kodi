@@ -73,6 +73,8 @@ class AddonSettings(object):
         ("max_shutdown_wait", 5),
         ("unlock_res", False),
         ("ui_wait_rate", 10),
+        ("theme_music_fade", True),
+        ("cache_theme_music", True),
     )
 
     def __init__(self):

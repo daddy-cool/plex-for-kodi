@@ -3409,3 +3409,23 @@ msgstr "Nach Album"
 msgctxt "#34043"
 msgid "Album"
 msgstr "Album"
+
+msgctxt "#34044"
+msgid "UI wait poll rate (Hz)"
+msgstr "UI Warteabtastrate (Hz)"
+
+msgctxt "#34045"
+msgid "When waiting for certain events to occur, poll this often. Default: 10 Hz. With a decent device try 100 Hz, it should feel snappier in certain situations."
+msgstr "Warten wir auf bestimmte Ereignisse, frage so häufig ab. Standard: 10 Hz. Mit einem leistungsfähigen Gerät, versuche 100 Hz, was sich in bestimmten Situationen schneller anfühlen sollte."
+
+msgctxt "#34046"
+msgid "Fade theme music in/out"
+msgstr "Titelmusik überblenden"
+
+msgctxt "#34047"
+msgid "Cache theme music"
+msgstr "Titelmusik zwischenspeichern"
+
+msgctxt "#34048"
+msgid "Cache theme music locally instead of streaming it directly"
+msgstr "Speichere Titelmusik lokal zwischen anstatt es direkt zu streamen"

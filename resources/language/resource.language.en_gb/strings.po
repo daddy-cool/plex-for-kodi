@@ -2826,3 +2826,19 @@ msgstr ""
 msgctxt "#34044"
 msgid "UI wait poll rate (Hz)"
 msgstr ""
+
+msgctxt "#34045"
+msgid "When waiting for certain events to occur, wait this long. Default: 10 Hz. With a decent device try 100 Hz, it should feel snappier in certain situations."
+msgstr ""
+
+msgctxt "#34046"
+msgid "Fade theme music in/out"
+msgstr ""
+
+msgctxt "#34047"
+msgid "Cache theme music"
+msgstr ""
+
+msgctxt "#34048"
+msgid "Cache theme music locally instead of streaming it directly"
+msgstr ""
