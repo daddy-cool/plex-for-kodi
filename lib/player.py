@@ -1462,6 +1462,7 @@ class BGMPlayerTask(backgroundthread.Task):
         self.volume = volume
         self.is_local = kwargs.get('is_local', False)
         self.is_cached = kwargs.get('is_cached', False)
+        self.fade = kwargs.get('fade', True)
         self.fade_fast = kwargs.get('fade_fast', False)
         return self
 
@@ -1482,10 +1483,14 @@ class BGMPlayerTask(backgroundthread.Task):
             ct += 1
 
         # always set to min volume
-        self.player.handler.setVolume(1)
-        self.player.play(self.source, windowed=True)
-        # fade in
-        self.player.handler.fadeIn(self.volume, fast=self.fade_fast)
+        if self.fade:
+            self.player.handler.setVolume(1)
+            self.player.play(self.source, windowed=True)
+            # fade in
+            self.player.handler.fadeIn(self.volume, fast=self.fade_fast)
+        else:
+            self.player.handler.setVolume(self.volume)
+            self.player.play(self.source, windowed=True)
 
 
 class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
@@ -1646,7 +1651,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
 
                 # cancel any currently playing theme before starting the new one
                 else:
-                    self.stopAndWait(fade=self.bgmPlaying, fade_fast=self.bgmPlaying)
+                    self.stopAndWait(fade=self.bgmPlaying and kwargs.get("fade", True), fade_fast=self.bgmPlaying)
                     if self.startingVideoPlayback:
                         return
 

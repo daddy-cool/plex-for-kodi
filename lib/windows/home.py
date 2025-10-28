@@ -527,12 +527,11 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
 
     def onReInit(self):
         util.DEBUG_LOG("Home: On ReInit")
-        util.DEBUG_LOG("RALLE: %s" % util.addonSettings.kodiSkipStepping)
         if self._ignoreReInit:
             return
 
         if player.PLAYER.bgmPlaying:
-            player.PLAYER.stopAndWait(fade=True, deferred=True)
+            player.PLAYER.stopAndWait(fade=util.addonSettings.themeMusicFade, deferred=True)
 
         self._anyItemAction = False
         if self._applyTheme:
