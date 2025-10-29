@@ -1562,17 +1562,17 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
             util.DEBUG_LOG("Switching embedded subtitle stream, seeking due to Kodi issue #21086")
 
             # true offset can be 0, which might lead to an infinite loop, seek to 100ms at least.
-            if self.handler.seekOnStart:
+            if self.handler.seekOnStart is not None:
                 util.DEBUG_LOG("Waiting for seekOnStart to apply: {}", self.handler.seekOnStart)
 
             waited = 0
-            while self.handler.seekOnStart and waited < 40 and not util.MONITOR.abortRequested():
+            while self.handler.seekOnStart is not None and waited < 100 and not util.MONITOR.abortRequested():
                 util.MONITOR.waitForAbort(0.1)
                 waited += 1
 
-            if waited < 40:
+            if waited < 100:
                 seekBack = 1500 if self.useAlternateSeek else 100
-                self.doSeek(max(self.trueOffset() - seekBack, seekBack))
+                self.doSeek(max(self.trueOffset() - seekBack, seekBack, 0))
                 return
             util.LOG("Tried switching embedded subtitle stream to the correct one, but we've waited too long for "
                       "seekOnStart.")
@@ -2523,7 +2523,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
 
             cancelTick = False
             # don't auto skip while we're initializing and waiting for the handler to seek on start
-            if offset is None and not self.handler.seekOnStart and not self.handler.waitingForSOS:
+            if offset is None and not self.handler.seekOnStart and not self.handler.waitingForSOS and not self.handler.seekBackTo:
                 cancelTick = self.displayMarkers()
 
             if cancelTick:
@@ -2554,7 +2554,9 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                           self.offset != self.selectedOffset):
                 #off = offset is not None and offset or None
                 #self.doSeek(off)
-                if not self.useAlternateSeek or (((self.selectedOffset and abs(self.selectedOffset - self.offset) >= util.addonSettings.altseekValidSeekWindow) or not self.selectedOffset) and not self.handler.waitingForSOS):
+                if (not self.useAlternateSeek or
+                        (((self.selectedOffset and abs(self.selectedOffset - self.offset) >= util.addonSettings.altseekValidSeekWindow)
+                          or not self.selectedOffset) and not self.handler.waitingForSOS and not self.handler.seekBackTo)):
                     util.DEBUG_LOG("SeekDialog: Tick: Seek: {}, {}, {}", self.offset, self.selectedOffset, util.addonSettings.altseekValidSeekWindow)
                     self.resetAutoSeekTimer(None)
                     self.doSeek()
