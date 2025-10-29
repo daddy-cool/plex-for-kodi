@@ -819,6 +819,11 @@ class Settings(object):
                 ).description(T(33094, '')),
                 BoolSetting('resume_seek_behind_onlydp', T(33096, ''), True).description(
                     T(33097, '')),
+                BoolSetting('seek_back_on_start', T(34049, 'Seek back on start'), util.altSeekRecommended).description(
+                    T(34050, "Issue a quick seek forward then back to the start of the video, when we start "
+                             "fresh (no resume point, not marker to immediately skip). Can fix A/V desync issues with "
+                             "certain setups (e.g. CoreELEC on Ugoos with passthrough). Only for DirectPlay. This still "
+                             "requires a sensible value for \"Delay after change of refresh rate\" in Kodi (default: Off, CE/LG: On)")),
                 OptionsSetting(
                     'player_stop_on_idle',
                     T(32946, 'Stop video playback on idle after'),

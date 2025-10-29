@@ -2842,3 +2842,11 @@ msgstr ""
 msgctxt "#34048"
 msgid "Cache theme music locally instead of streaming it directly"
 msgstr ""
+
+msgctxt "#34049"
+msgid "Seek back on start"
+msgstr ""
+
+msgctxt "#34050"
+msgid "Issue a quick seek forward then back to the start of the video, when we start fresh (no resume point, not marker to immediately skip). Can fix A/V desync issues with certain setups (e.g. CoreELEC on Ugoos with passthrough). Only for DirectPlay. This still requires a sensible value for \"Delay after change of refresh rate\" in Kodi (default: Off, CE/LG: On)"
+msgstr ""
