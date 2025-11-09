@@ -274,6 +274,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         self._progressHld = {}
         self.useAlternateSeek = util.getSetting('use_alternate_seek2')
         self.useResumeFix = self.useAlternateSeek
+        self.skipFixForNextSeek = False
         self.isMapped = False
         self.reused = False
         self.reset()
@@ -297,6 +298,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.queuingSpecific = False
         self.isMapped = False
         self.creditMarkerHit = None
+        self.skipFixForNextSeek = False
 
     def setup(self, duration, meta, offset, bif_url, title='', title2='', seeking=NO_SEEK, chapters=None,
               is_mapped=False):
@@ -456,7 +458,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                 del d
                 util.garbageCollect()
 
-    def seek(self, offset, settings_changed=False, seeking=SEEK_IN_PROGRESS):
+    def seek(self, offset, settings_changed=False, seeking=SEEK_IN_PROGRESS, skip_alt_seek_fix=False):
         util.DEBUG_LOG(
             "SeekHandler: offset={0}, settings_changed={1}, seeking={2}, state={3}".format(offset,
                                                                                            settings_changed,
@@ -471,7 +473,7 @@ class SeekPlayerHandler(BasePlayerHandler):
             util.DEBUG_LOG('New absolute player offset: {0}', self.offset)
 
             if self.player.playerObject.offsetIsValid(offset / 1000) and not self.player.isExternal:
-                if self.seekAbsolute(offset):
+                if self.seekAbsolute(offset, skip_alt_seek_fix=skip_alt_seek_fix):
                     return
 
         self.seeking = self.SEEK_IN_PROGRESS
@@ -491,7 +493,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         else:
             self.seek(max(self.trueTime - 30, 0) * 1000, seeking=self.SEEK_REWIND)
 
-    def seekAbsolute(self, seek=None):
+    def seekAbsolute(self, seek=None, skip_alt_seek_fix=False):
         self.seekOnStart = seek if seek is not None else self.seekOnStart if self.seekOnStart is not None else None
 
         if self.player.isExternal:
@@ -516,6 +518,7 @@ class SeekPlayerHandler(BasePlayerHandler):
             if self.useAlternateSeek:
                 currentTime = self.player.getTime()
                 relativeSeekSeconds = seekSeconds - currentTime
+                self.skipFixForNextSeek = skip_alt_seek_fix
                 # we need to allow for a little less than the actual seconds we wanted to seek, as all this is happening
                 # while the player is playing (otherwise abs(relativeSeekSeconds) > util.addonSettings.altseekValidSeekWindow / 1000.0
                 # would be correct
@@ -791,6 +794,7 @@ class SeekPlayerHandler(BasePlayerHandler):
 
         # store original seekOnStart as it can change during seek attempts
         origSOS = self.seekOnStart
+        useSeekFix = self.useResumeFix and not self.skipFixForNextSeek
 
         if self.dialog:
             self.dialog.onPlayBackSeek(stime, offset)
@@ -831,12 +835,12 @@ class SeekPlayerHandler(BasePlayerHandler):
             SOSSuccess = True
 
             # this block should only be entered with alternate seek enabled
-            if self.useResumeFix and (p_time * 1000 < withinSOSLow or p_time * 1000 > withinSOSHigh):
+            if useSeekFix and (p_time * 1000 < withinSOSLow or p_time * 1000 > withinSOSHigh):
                 # on certain problematic devices such as CoreELEC and LG, we advise to use the alternate seek fix, which
                 # uses a relative Kodi seek instead of the native absolute one. This can lead to onSeek being triggered
                 # without the player having actually seeked. In this case we need to monitor the player for a while and
                 # re-seek if necessary.
-                if self.useResumeFix and sosDiff > 500:
+                if useSeekFix and sosDiff > 500:
                     util.DEBUG_LOG("SeekHandler: onPlayBackSeek: resumeFix: enabling waiting for seekOnStart "
                                    "(low: {}, high: {}, range: {}, time: {}, diff: {}, sos: {})", withinSOSLow, withinSOSHigh, seekWindow, p_time, sosDiff, origSOS)
                     self.waitingForSOS = True
@@ -848,7 +852,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                 sosDiff = abs(origSOS - p_time * 1000)
 
                 needsReSeek = False
-                if (self.useResumeFix and sosDiff > 500) or not self.useResumeFix:
+                if (useSeekFix and sosDiff > 500) or not useSeekFix:
                     # seekOnStart might've changed to 0
                     if self.player.isPlayingVideo() and self.player.getTime() * 1000 < withinSOSLow or self.player.getTime() * 1000 > withinSOSHigh:
                         # special case for CE and start seek back
@@ -861,6 +865,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                                            self.player.getTime(), origSOS)
                             # we've reached our target without explicitly seeking; seek back to 0
                             seekBackToStart()
+                            self.skipFixForNextSeek = False
                             return
 
                         util.DEBUG_LOG("SeekHandler: onPlayBackSeek: resumeFix: not there, yet, re-seeking: "
@@ -873,7 +878,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                     util.DEBUG_LOG("SeekHandler: onPlayBackSeek: SOS is less than 500ms, not triggering seek")
 
                 sosDiff = abs(origSOS - p_time * 1000)
-                if self.player.isPlayingVideo() and self.useResumeFix and sosDiff > 500 and needsReSeek:
+                if self.player.isPlayingVideo() and useSeekFix and sosDiff > 500 and needsReSeek:
                     # clamp to lower 500ms at least
                     seekWait = max(util.addonSettings.coreelecResumeSeekWait, 500)
                     withinSOSHigh += seekWait
@@ -907,6 +912,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                             break
                         elif not self.player.isPlayingVideo():
                             util.DEBUG_LOG("OnPlayBackSeek: SeekOnStart: Player not playing video while waiting for seek")
+                            self.skipFixForNextSeek = False
                             return
 
                         withinSOSHigh += 250
@@ -934,14 +940,14 @@ class SeekPlayerHandler(BasePlayerHandler):
                             util.DEBUG_LOG("OnPlayBackSeek: Seek on start failed")
                         else:
                             util.DEBUG_LOG("OnPlayBackSeek: Seeked on start to: {0}", origSOS)
-            elif self.useResumeFix:
+            elif useSeekFix:
                 util.DEBUG_LOG("SeekHandler: onPlayBackSeek: resumeFix: current time already within range ({}, {}, {})", p_time * 1000, withinSOSLow, withinSOSHigh)
 
             # should not be necessary due to other recent changes to dialog persistence, but it doesn't hurt, either
             appliedOffset = None
             if self.dialog:
-                if SOSSuccess and ((self.useResumeFix and sosDiff > 500) or not self.useResumeFix):
-                    appliedOffset = max(int(self.player.getTime() * 1000) if self.useResumeFix else origSOS, 0)
+                if SOSSuccess and ((useSeekFix and sosDiff > 500) or not useSeekFix):
+                    appliedOffset = max(int(self.player.getTime() * 1000) if useSeekFix else origSOS, 0)
                     util.DEBUG_LOG("SeekHandler: onPlayBackSeek: Setting dialog offset to {}", appliedOffset)
                     # set to current time if we succeeded, as seekOnStart could've been set to 0 in the meantime by the relative seek
                     self.dialog.offset = appliedOffset
@@ -952,7 +958,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                 util.DEBUG_LOG("SeekHandler: onPlayBackSeek: SeekOnStart not successful: {}", origSOS)
             self.waitingForSOS = False
             self.seekOnStart = 0
-            if self.useResumeFix and self.dialog:
+            if useSeekFix and self.dialog:
                 self.dialog.offset = appliedOffset
                 self.dialog.selectedOffset = appliedOffset
                 self.dialog.update()
@@ -960,6 +966,8 @@ class SeekPlayerHandler(BasePlayerHandler):
             if self.unPauseAfterSeek:
                 self.player.control('play')
                 self.unPauseAfterSeek = False
+
+        self.skipFixForNextSeek = False
 
         self.updateOffset()
         # self.showOSD(from_seek=True)
