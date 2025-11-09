@@ -723,7 +723,10 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
         li = self.keyItems.get(mli.getProperty('key'))
         if not li:
             return
-        self.keyListControl.selectItem(li.pos())
+        try:
+            self.keyListControl.selectItem(li.pos())
+        except:
+            pass
 
     def searchButtonClicked(self):
         self.processCommand(search.dialog(self, section_id=self.section.key))
