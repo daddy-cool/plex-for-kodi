@@ -1878,7 +1878,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
     def hasMoreParts(self):
         return self.player and self.player.playerObject and self.player.playerObject.hasMoreParts()
 
-    def doSeek(self, offset=None, settings_changed=False):
+    def doSeek(self, offset=None, settings_changed=False, skip_alt_seek_fix=False):
         self._applyingSeek = True
         self._ignoreInput = settings_changed
         offset = self.selectedOffset if offset is None else offset
@@ -1890,7 +1890,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.updateProgress(offset=offset)
 
         try:
-            self.handler.seek(offset, settings_changed=settings_changed)
+            self.handler.seek(offset, settings_changed=settings_changed, skip_alt_seek_fix=skip_alt_seek_fix)
         finally:
             self.resetSeeking()
 
@@ -2146,7 +2146,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         if ((not self.resumeSeekBehindOnlyDP or self.isDirectPlay)
                 and self.resumeSeekBehind and to > amount):
             util.DEBUG_LOG("SeekDialog: Seeking back from {} to {}", to, to - amount)
-            self.doSeek(max(to - amount, 0))
+            self.doSeek(max(to - amount, 0), skip_alt_seek_fix=True)
 
     def onPlayBackResumed(self):
         util.DEBUG_LOG("SeekDialog: OnPlaybackResumed")
