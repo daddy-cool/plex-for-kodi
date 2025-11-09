@@ -118,6 +118,15 @@
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="advanced_language_priorities" type="string" label="40003" help="40004">
+                    <level>2</level>
+                    <default></default>
+                    <constraints>
+                        <allowempty>true</allowempty>
+                    </constraints>
+                    <control type="edit" format="string">
+                    </control>
+                </setting>
             </group>
         </category>
         <!-- Player -->

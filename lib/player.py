@@ -20,6 +20,7 @@ from plexnet import plexplayer
 from plexnet import plexapp
 from plexnet import signalsmixin
 from plexnet import util as plexnetUtil
+from plexnet import plexstream
 from six.moves import range
 
 FIVE_MINUTES_MILLIS = 300000
@@ -1039,12 +1040,188 @@ class SeekPlayerHandler(BasePlayerHandler):
 
     def initPlayback(self):
         self.seeking = self.NO_SEEK
+        # run advanced language priorities rule once per playback start
+        if util.getUserSetting("language_priorities_enabled", False):
+            self.applyAdvancedLanguagePriorities()
 
         #self.setSubtitles()
         if self.isTranscoded and self.player.getAvailableSubtitleStreams():
             util.DEBUG_LOG('Enabling first subtitle stream, as we\'re in DirectStream')
             self.player.showSubtitles(True)
         self.setAudioTrack()
+
+    def applyAdvancedLanguagePriorities(self):
+        """Parse and apply the advanced_language_priorities ruleset from settings.
+
+        Rules are space-separated. Each rule is AUDIO:SUB[|FILTERS]
+        - AUDIO/SUB can be language codes, '*' (any) or 'off' for no subtitles
+        - FILTERS are characters 'd' (default) and 'f' (forced). Prefix with '!' to invert.
+        Example: "jp:en|d!f en:en|d"
+        """
+        setting = util.addonSettings.advancedLanguagePriorities or ''
+        setting = setting.strip()
+        if not setting:
+            return
+
+        video = getattr(self.player, 'video', None)
+        if not video:
+            return
+
+        # convenience lists
+        audio_streams = list(getattr(video, 'audioStreams', []) or [])
+        subtitle_streams = list(getattr(video, 'subtitleStreams', []) or [])
+
+        if not audio_streams and not subtitle_streams:
+            return
+
+        def lang_matches(spec, stream):
+            # spec: '*' or language code (compare against languageCode or language)
+            if spec == '*':
+                return True
+            if not stream:
+                return False
+            code = getattr(stream, 'languageCode', None) or getattr(stream, 'language', None)
+            if not code:
+                return False
+            return str(code).lower().startswith(str(spec).lower())
+
+        def check_filters(sub_stream, filterspec):
+            # filterspec is string like 'd!f' meaning must be default and not forced
+            if not filterspec:
+                return True
+            i = 0
+            ok = True
+            # parse sequence of tokens: 'd' or 'f' optionally prefixed with '!'
+            tokens = []
+            cur = ''
+            for ch in filterspec:
+                if ch in ('d', 'f'):
+                    tokens.append(ch)
+                elif ch == '!':
+                    # attach invert marker to next token
+                    tokens.append('!')
+            # rebuild pairs
+            pairs = []
+            invert = False
+            for t in tokens:
+                if t == '!':
+                    invert = True
+                else:
+                    pairs.append((t, invert))
+                    invert = False
+
+            for token, inv in pairs:
+                if token == 'd':
+                    val = bool(getattr(sub_stream, 'default', False) and getattr(sub_stream, 'default').asBool()) if getattr(sub_stream, 'default', None) is not None else False
+                elif token == 'f':
+                    val = bool(getattr(sub_stream, 'forced', False) and getattr(sub_stream, 'forced').asBool()) if getattr(sub_stream, 'forced', None) is not None else False
+                else:
+                    val = False
+                if inv:
+                    val = not val
+                if not val:
+                    return False
+            return True
+
+        # iterate rules
+        for rule in setting.split():
+            try:
+                if ':' not in rule:
+                    continue
+                audio_spec, sub_part = rule.split(':', 1)
+                sub_lang = None
+                sub_filters = ''
+                if '|' in sub_part:
+                    sub_lang, sub_filters = sub_part.split('|', 1)
+                else:
+                    sub_lang = sub_part
+
+                audio_spec = audio_spec.strip()
+                sub_lang = sub_lang.strip() if sub_lang is not None else ''
+                sub_filters = sub_filters.strip()
+
+                # find matching audio candidates
+                audio_candidates = []
+                if audio_spec == '*':
+                    audio_candidates = audio_streams
+                else:
+                    for a in audio_streams:
+                        if lang_matches(audio_spec, a):
+                            audio_candidates.append(a)
+
+                # find subtitle candidates or special off
+                if sub_lang.lower() == 'off':
+                    subtitle_candidates = [plexstream.NONE_STREAM]
+                elif sub_lang == '*' or not sub_lang:
+                    subtitle_candidates = subtitle_streams
+                else:
+                    subtitle_candidates = [s for s in subtitle_streams if lang_matches(sub_lang, s)]
+
+                # if no audio candidate found and audio_spec != '*', skip this rule
+                if audio_spec != '*' and not audio_candidates:
+                    continue
+
+                # if no subtitle candidate and not 'off', skip this rule
+                if sub_lang.lower() != 'off' and not subtitle_candidates:
+                    continue
+
+                # now check filters for subtitle candidates
+                filtered_subs = []
+                for s in subtitle_candidates:
+                    if s is plexstream.NONE_STREAM:
+                        filtered_subs.append(s)
+                        continue
+                    if check_filters(s, sub_filters):
+                        filtered_subs.append(s)
+
+                if not filtered_subs:
+                    # rule doesn't match
+                    continue
+
+                # At this point we have at least one matching audio and one matching subtitle option
+                # pick first audio candidate and first subtitle candidate and apply selections
+                # prefer audio candidate that is already selected
+                chosen_audio = None
+                for a in audio_candidates:
+                    if a.isSelected():
+                        chosen_audio = a
+                        break
+                if not chosen_audio and audio_candidates:
+                    chosen_audio = audio_candidates[0]
+
+                chosen_sub = None
+                for s in filtered_subs:
+                    if s is plexstream.NONE_STREAM:
+                        chosen_sub = s
+                        break
+                    if s.isSelected():
+                        chosen_sub = s
+                        break
+                if not chosen_sub and filtered_subs:
+                    chosen_sub = filtered_subs[0]
+
+                # apply selections via video.selectStream
+                if chosen_audio:
+                    try:
+                        video.selectStream(chosen_audio, sync_to_server=True, from_session=False, _async=False)
+                    except Exception:
+                        util.DEBUG_LOG('Failed to select audio stream via selectStream', exc_info=True)
+
+                if chosen_sub:
+                    try:
+                        if chosen_sub is plexstream.NONE_STREAM:
+                            video.selectStream(plexstream.NONE_STREAM, sync_to_server=True, from_session=False, _async=False)
+                        else:
+                            video.selectStream(chosen_sub, sync_to_server=True, from_session=False, _async=False)
+                    except Exception:
+                        util.DEBUG_LOG('Failed to select subtitle stream via selectStream', exc_info=True)
+
+                # rule applied, stop processing further rules
+                util.DEBUG_LOG('Applied advanced language priority rule: {}', rule)
+                return
+            except Exception:
+                util.DEBUG_LOG('Error parsing/applying rule: {}', rule, exc_info=True)
+                continue
 
     def onPlayBackFailed(self):
         if self.ended:
