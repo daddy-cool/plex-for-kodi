@@ -1771,7 +1771,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
                     chaps.append((st, thumb, chapter.tag or T(33607, 'Chapter {}').format(index + 1)))
 
             # fake chapters by using markers
-            if util.getUserSetting('virtual_chapters', True) and self.markers:
+            if util.getUserSetting('virtual_chapters', True) and self.markers and (not self.chapters or util.getUserSetting('always_virtual_chapters', True)):
                 if not self.chapters:
                     self.setProperty('chapters.label', T(33606, 'Virtual Chapters').upper())
                 else:
