@@ -2901,4 +2901,19 @@ msgstr ""
 
 msgctxt "#34061"
 msgid "Show directors in cast lists"
+
+msgctxt "#40001"
+msgid "Advanced language priorities"
+msgstr ""
+
+msgctxt "#40002"
+msgid "Enables advanced audio and subtitle language priorities, configurable via addon configuration. Per-user setting. Default: Off"
+msgstr ""
+
+msgctxt "#40003"
+msgid "Playback language priorities"
+msgstr ""
+
+msgctxt "#40004"
+msgid "Set audio/subtitle combination priorities based on rules as in LAVFilters."
 msgstr ""
