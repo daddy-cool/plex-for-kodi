@@ -55,6 +55,7 @@ class AddonSettings(object):
         ("episode_no_spoiler_blur", 16),
         ("ignore_docker_v4", True),
         ("cache_home_users", True),
+        ("advanced_language_priorities", ""),
         ("intro_marker_max_offset", 600),
         ("hubs_rr_max", 250),
         ("max_retries1", 3),
