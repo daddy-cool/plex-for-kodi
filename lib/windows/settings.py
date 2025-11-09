@@ -638,6 +638,9 @@ class Settings(object):
                             False).description(
                     T(32959, '')
                 ),
+                BoolUserSetting('language_priorities_enabled', T(40001, 'Advanced language priorities'), False).description(
+                    T(40002, 'Enables advanced audio and subtitle language priorities, configurable via addon configuration. Per-user setting. Default: Off'),
+                ),
             )
         ),
         'ui': (

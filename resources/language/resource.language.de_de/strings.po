@@ -3419,3 +3419,86 @@ msgstr "Nach Album"
 msgctxt "#34043"
 msgid "Album"
 msgstr "Album"
+
+msgctxt "#34044"
+msgid "UI wait poll rate (Hz)"
+msgstr "UI Warteabtastrate (Hz)"
+
+msgctxt "#34045"
+msgid "When waiting for certain events to occur, poll this often. Default: 10 Hz. With a decent device try 100 Hz, it should feel snappier in certain situations."
+msgstr "Warten wir auf bestimmte Ereignisse, frage so häufig ab. Standard: 10 Hz. Mit einem leistungsfähigen Gerät, versuche 100 Hz, was sich in bestimmten Situationen schneller anfühlen sollte."
+
+msgctxt "#34046"
+msgid "Fade theme music in/out"
+msgstr "Titelmusik überblenden"
+
+msgctxt "#34047"
+msgid "Cache theme music"
+msgstr "Titelmusik zwischenspeichern"
+
+msgctxt "#34048"
+msgid "Cache theme music locally instead of streaming it directly"
+msgstr "Speichere Titelmusik lokal zwischen anstatt es direkt zu streamen"
+
+msgctxt "#34049"
+msgid "Seek back on start"
+msgstr "Zurückspringen beim Start"
+
+msgctxt "#34050"
+msgid "Issue a quick seek forward then back to the start of the video, when we start fresh (no resume point, no marker to immediately skip). Can fix A/V desync issues with certain setups (e.g. CoreELEC on Ugoos with passthrough). Only for DirectPlay. This still requires a sensible value for \"Delay after change of refresh rate\" in Kodi (default: Off, CE/LG: On)"
+msgstr "Springe kurz vorwärts und dann zurück zum Start des Videos, wenn wir ein nicht bereits angefangenes Video starten (kein Wiedergabepunkt, keine Markierung, die sofort übersprungen würde). Kann A/V-Synchronisierungsfehler unter bestimmten Umständen beheben (z. B. CoreELEC on Ugoos with passthrough). Nur für Direkte Wiedergabe. Dies benötigt weiterhin einen passenden Wert für \"Verzögerung nach Änderung der Bildwiederholrate\" in Kodi (standard: Aus, CE/LG: An)"
+
+msgctxt "#34051"
+msgid "Movies: Play pre-rolls"
+msgstr "Filme: Pre-Roll-Clips abspielen"
+
+msgctxt "#34052"
+msgid "Plays pre-roll clips (server-defined) before playing a movie without a resume point. User-specific."
+msgstr "Spielt erst einen Pre-Roll-Clip (serverseitig definiert) vor einem nicht bereits angefangenen Film ab. Benutzerspezifisch."
+
+msgctxt "#34053"
+msgid "Cinema Trailers to Play Before Movies"
+msgstr "Kinotrailer, die vor dem Film abgespielt werden"
+
+msgctxt "#34054"
+msgid "Play pre-rolls before trailers"
+msgstr "Pre-Roll-Clips vor Kinotrailern abspielen"
+
+msgctxt "#34055"
+msgid "Official Plex clients play the trailers first, then the preroll clips. Enabling this will do the opposite. Default: On. User-specific."
+msgstr "Die offiziellen Plex Clients spielen zuerst Kinotrailer, dann die Pre-Roll-Clips ab. Diese Einstellung invertiert das. Standard: An. Benutzerspezifisch."
+
+msgctxt "#34056"
+msgid "\"Use alternate seek\" prefer reported time"
+msgstr "\"Alternatives Spulen\" mitgeteilte Zeit präferieren"
+
+msgctxt "#34057"
+msgid "Use reported seek time instead of the current player time (usually more accurate); Default: On"
+msgstr "Verwende die mitgeteilte Zeit anstatt der aktuellen Player-Zeit (normalerweise akkurater); Standard: An"
+
+msgctxt "#34058"
+msgid "\"Use alternate seek\" wait for valid player time"
+msgstr "\"Alternatives Spulen\" warte auf valide Player-Zeit"
+
+msgctxt "#34059"
+msgid "The player time reporting might be inaccurate on playback start. Wait for a valid player time before seeking; Default: On"
+msgstr "Die Player-Zeit-Mitteilung kann inakkurat sein beim Starten einer Wiedergabe. Warte auf eine valide Player-Zeit vor dem Spulen; Standard: An"
+
+msgctxt "#34060"
+msgid "Blackout while seeking back to start"
+msgstr "Verdunkelung während Zurückspringen beim Start"
+msgctxt "#40001"
+msgid "Advanced language priorities"
+msgstr "Fortgeschrittene Wiedergabesprachprioritäten"
+
+msgctxt "#40002"
+msgid "Enables advanced audio and subtitle language priorities, configurable via addon configuration. Per-user setting. Default: Off"
+msgstr "Aktiviert fortgeschrittene Wiedergabesprachprioritäten, konfigurierbar über Addon Konfiguration. Pro-Nutzer Einstellung. Standard: Aus"
+
+msgctxt "#40003"
+msgid "Playback language priorities"
+msgstr "Wiedergabesprachprioritäten"
+
+msgctxt "#40004"
+msgid "Set audio/subtitle combination priorities based on rules as in LAVFilters."
+msgstr "Setze Audio- & Untertitel-Kombinationsprioritäten basierend auf Regeln wie in LAVFilters."

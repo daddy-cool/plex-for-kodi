@@ -2830,3 +2830,86 @@ msgstr ""
 msgctxt "#34043"
 msgid "Album"
 msgstr ""
+
+msgctxt "#34044"
+msgid "UI wait poll rate (Hz)"
+msgstr ""
+
+msgctxt "#34045"
+msgid "When waiting for certain events to occur, wait this long. Default: 10 Hz. With a decent device try 100 Hz, it should feel snappier in certain situations."
+msgstr ""
+
+msgctxt "#34046"
+msgid "Fade theme music in/out"
+msgstr ""
+
+msgctxt "#34047"
+msgid "Cache theme music"
+msgstr ""
+
+msgctxt "#34048"
+msgid "Cache theme music locally instead of streaming it directly"
+msgstr ""
+
+msgctxt "#34049"
+msgid "Seek back on start"
+msgstr ""
+
+msgctxt "#34050"
+msgid "Issue a quick seek forward then back to the start of the video, when we start fresh (no resume point, no marker to immediately skip). Can fix A/V desync issues with certain setups (e.g. CoreELEC on Ugoos with passthrough). Only for DirectPlay. This still requires a sensible value for \"Delay after change of refresh rate\" in Kodi (default: Off, CE/LG: On)"
+msgstr ""
+
+msgctxt "#34051"
+msgid "Movies: Play pre-rolls"
+msgstr ""
+
+msgctxt "#34052"
+msgid "Plays pre-roll clips (server-defined) before playing a movie without a resume point. User-specific."
+msgstr ""
+
+msgctxt "#34053"
+msgid "Cinema Trailers to Play Before Movies"
+msgstr ""
+
+msgctxt "#34054"
+msgid "Play pre-rolls before trailers"
+msgstr ""
+
+msgctxt "#34055"
+msgid "Official Plex clients play the trailers first, then the preroll clips. Enabling this will do the opposite. Default: On. User-specific."
+msgstr ""
+
+msgctxt "#34056"
+msgid "\"Use alternate seek\" prefer reported time"
+msgstr ""
+
+msgctxt "#34057"
+msgid "Use reported seek time instead of the current player time (usually more accurate); Default: On"
+msgstr ""
+
+msgctxt "#34058"
+msgid "\"Use alternate seek\" wait for valid player time"
+msgstr ""
+
+msgctxt "#34059"
+msgid "The player time reporting might be inaccurate on playback start. Wait for a valid player time before seeking; Default: On"
+msgstr ""
+
+msgctxt "#34060"
+msgid "Blackout while seeking back to start"
+msgstr ""
+msgctxt "#40001"
+msgid "Advanced language priorities"
+msgstr ""
+
+msgctxt "#40002"
+msgid "Enables advanced audio and subtitle language priorities, configurable via addon configuration. Per-user setting. Default: Off"
+msgstr ""
+
+msgctxt "#40003"
+msgid "Playback language priorities"
+msgstr ""
+
+msgctxt "#40004"
+msgid "Set audio/subtitle combination priorities based on rules as in LAVFilters."
+msgstr ""
