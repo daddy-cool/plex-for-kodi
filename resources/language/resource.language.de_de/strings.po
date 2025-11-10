@@ -3433,5 +3433,5 @@ msgid "Playback language priorities"
 msgstr "Wiedergabesprachprioritäten"
 
 msgctxt "#40004"
-msgid "Set audio/subtitle combination priorities based on rules as in LAVFilters."
-msgstr "Setze Audio- & Untertitel-Kombinationsprioritäten basierend auf Regeln wie in LAVFilters."
+msgid "Set audio/subtitle combination priorities based on rules."
+msgstr "Definiere Audio- & Untertitelkombinationsprioritäten basierend auf Regeln"
