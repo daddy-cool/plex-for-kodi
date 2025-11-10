@@ -1333,10 +1333,61 @@ class SeekPlayerHandler(BasePlayerHandler):
                 return True
             if not stream:
                 return False
+
+            # try to resolve both spec and stream code/name via iso639
+            def resolve_token(tok):
+                if not tok:
+                    return None
+                tok = str(tok).strip()
+                if not tok:
+                    return None
+                # try common lookups: part1 (ISO639-1), part2t, part2b, part3, name
+                try:
+                    # 2-letter code
+                    if len(tok) == 2:
+                        return languages.get(part1=tok)
+                except Exception:
+                    pass
+                try:
+                    if len(tok) == 3:
+                        # try terminological then bibliographic then part3
+                        try:
+                            return languages.get(part2t=tok)
+                        except Exception:
+                            try:
+                                return languages.get(part2b=tok)
+                            except Exception:
+                                return languages.get(part3=tok)
+                except Exception:
+                    pass
+                # fallback: try any named lookup
+                try:
+                    return languages.get(name=tok)
+                except Exception:
+                    # final attempt: try all part lookups defensively
+                    for kw in ('part1', 'part2t', 'part2b', 'part3'):
+                        try:
+                            return languages.get(**{kw: tok})
+                        except Exception:
+                            continue
+                return None
+
             code = getattr(stream, 'languageCode', None) or getattr(stream, 'language', None)
-            if not code:
+            spec_lang = resolve_token(spec)
+            stream_lang = resolve_token(code)
+            if spec_lang and stream_lang:
+                # compare by any matching canonical field
+                for attr in ('part1', 'part2t', 'part2b', 'part3', 'name'):
+                    a = getattr(spec_lang, attr, None)
+                    b = getattr(stream_lang, attr, None)
+                    if a and b and str(a).lower() == str(b).lower():
+                        return True
                 return False
-            return str(code).lower().startswith(str(spec).lower())
+
+            # fallback to best-effort substring match if iso639 couldn't resolve
+            if code:
+                return str(code).lower().startswith(str(spec).lower())
+            return False
 
         def check_filters(sub_stream, filterspec):
             # filterspec is string like 'd!f' meaning must be default and not forced
