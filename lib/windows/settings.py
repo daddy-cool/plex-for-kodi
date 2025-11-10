@@ -846,6 +846,11 @@ class Settings(object):
                              ' markers identified by the Plex Server (Intro, Credits).')
                 ),
                 BoolUserSetting(
+                    'combined_chapters', T(35001, 'Combine video & virtual chapters'), True
+                ).description(
+                    T(35002, 'Combine video & virtual chapters when both are available.')
+                ),
+                BoolUserSetting(
                     'auto_skip_in_transcode', T(32948, 'Allow auto-skip when transcoding'), True
                 ).description(
                     T(32949, 'When transcoding/DirectStreaming, allow auto-skip functionality.')
