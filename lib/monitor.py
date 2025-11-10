@@ -90,8 +90,12 @@ class UtilityMonitor(xbmc.Monitor, signalsmixin.SignalsMixin):
             self.trigger('system.exit')
             self.stopPlayback()
             LOG("OnQuit: Closing Home")
-            windowutils.HOME.closeOption = "kodi_exit"
-            windowutils.HOME.doClose()
+            try:
+                windowutils.HOME.closeOption = "kodi_exit"
+                windowutils.HOME.doClose()
+            except:
+                LOG("Addon never properly started, stopping")
+                xbmc.executebuiltin('StopScript(script.plexmod)')
             return
 
     def stopPlayback(self):

@@ -35,7 +35,7 @@
                 </setting>
                 <setting id="poster_resolution_scale_perc" type="integer" label="32956" help="32957">
                     <level>0</level>
-                    <default>100</default>
+                    <default>400</default>
                     <constraints>
                         <minimum>25</minimum>
                         <step>25</step>
@@ -47,7 +47,7 @@
                 </setting>
                 <setting id="background_resolution_scale_perc" type="integer" label="33653" help="33654">
                     <level>0</level>
-                    <default>100</default>
+                    <default>400</default>
                     <constraints>
                         <minimum>25</minimum>
                         <step>25</step>
