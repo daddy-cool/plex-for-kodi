@@ -1562,6 +1562,16 @@ msgctxt "#33604"
 msgid "When the above is enabled and no video chapters are available, simulate them by using the markers identified by the Plex Server (Intro, Credits)."
 msgstr "Wenn die obige Option aktiviert ist und keine Video-Kapitel verfügbar sind, virtuelle Kapitel aus den Plex-Server-Markern (Intro, Abspann) erzeugen."
 
+#:
+msgctxt "#35001"
+msgid "Combine video & virtual chapters"
+msgstr "Video- & virtuelle Kapitel kombinieren"
+
+#:
+msgctxt "#35002"
+msgid "Combine video & virtual chapters when both are available."
+msgstr "Kombiniere Video-Kapitel mit virtuellen Kapiteln, falls beide verfügbar sind."
+
 #: 
 msgctxt "#33605"
 msgid "Video Chapters"

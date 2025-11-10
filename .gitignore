@@ -1,5 +1,7 @@
 .idea
+.vscode
 /fixRepo.py
 /resources/skins/Main/TexturePacker.exe
 /resources/skins/Main/packtex.bat
 /resources/skins/Main/1080i/*.xml
+__pycache__
