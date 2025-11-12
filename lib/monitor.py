@@ -134,7 +134,7 @@ class UtilityMonitor(xbmc.Monitor, signalsmixin.SignalsMixin):
     def waitAmount(self, amount, interval=None):
         if interval is None:
             interval = self.wait_interval
-        return amount * interval
+        return amount / float(interval)
 
 
 MONITOR = UtilityMonitor()
