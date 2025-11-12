@@ -305,6 +305,16 @@ class MultiUAOptionsSetting(MultiOptionsSetting, UserAwareSetting):
     pass
 
 
+class UAListSetting(ListSetting, UserAwareSetting):
+    def __init__(self, ID, label, default, options, **kwargs):
+        super(UAListSetting, self).__init__(ID, label, default, **kwargs)
+        self.options = options
+
+    def set(self, val, skip_get=False):
+        val = len(self.options) - 1 - val
+        return UserAwareSetting.set(self, val, skip_get=True)
+
+
 class KCMSetting(OptionsSetting):
     key = None
 
@@ -763,6 +773,17 @@ class Settings(object):
             T(32940, 'Player UI'), (
                 BoolSetting('player_official', T(33045, 'Behave like official Plex clients'), True).description(
                     T(33046, '')),
+                BoolUserSetting('preplay_preroll', T(34051, 'Movies: Play pre-rolls'), False).description(
+                    T(34052, 'Plays pre-roll clips (server-defined) before playing a movie without a resume '
+                             'point. User-specific.')),
+                BoolUserSetting('preplay_preroll_first', T(34054, 'Play pre-rolls before trailers'), True).description(
+                    T(34055, 'Official Plex clients play the trailers first, then the preroll clips. Enabling '
+                             'this will do the opposite. Default: On. User-specific.')),
+                UAListSetting(
+                    'preplay_trailers', T(34053, 'Cinema Trailers to Play Before Movies'),
+                    5,
+                    list(map(str, list(range(6))))
+                ),
                 BoolSetting('no_osd_time_spoilers', T(33004, ''), False, backport_from="no_spoilers").description(
                     T(33005, '')),
                 MultiUAOptionsSetting(
