@@ -116,7 +116,7 @@ class BasePlayerHandler(object):
         return None
 
     def shouldSendTimeline(self, item):
-        return item.ratingKey and item.getServer()
+        return item.ratingKey and not item.isExtra and item.getServer()
 
     def currentDuration(self):
         if self.player.playerObject and self.player.isPlaying():
@@ -395,7 +395,8 @@ class SeekPlayerHandler(BasePlayerHandler):
 
         self.triggerProgressEvent()
 
-        if on_end:
+        # don't handle pre-roll extras as real media items
+        if on_end and not self.player.video.isExtra:
             # todo: this needs to be seriously cleaned up; showPostPlay/showShowPostPlay have too much impact on things
             #       they don't control/shouldn't control
             if self.showPostPlay():
@@ -667,7 +668,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         return self.getVideoWatched()
 
     def triggerProgressEvent(self):
-        if not self.player.video:
+        if not self.player.video or self.player.video.isExtra:
             return
 
         rk = str(self.player.video.ratingKey)
@@ -905,7 +906,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                     max_tries = int(10000 / seekWait)
                     while (self.player.isPlayingVideo() and (self.player.getTime() * 1000 < withinSOSLow or self.player.getTime() * 1000 > withinSOSHigh)) and tries < max_tries:
                         util.DEBUG_LOG("OnPlayBackSeek: SeekOnStart: Not there, yet, "
-                                       "seeking again ({}, range: {}, {})", origSOS, withinSOSHigh - withinSOSLow, self.player.getTime())
+                                       "seeking again ({}, range: {}, {})", origSOS, withinSOSHigh - withinSOSLow, self.player.getTime() * 1000)
                         if util.MONITOR.abortRequested():
                             util.DEBUG_LOG("OnPlayBackSeek: SeekOnStart: Abort requested while waiting for seek")
                             SOSSuccess = False
@@ -1198,9 +1199,10 @@ class SeekPlayerHandler(BasePlayerHandler):
                 self.player.isPlayingVideo() and self.player.playState != self.player.STATE_STOPPED):
             self.updateNowPlaying(t=self.dialog.timeKeeperTime if self.player.isExternal else None)
         else:
-            util.DEBUG_LOG("Not ticking UpdateNowPlaying: {}, {}, {}, {}, {}, {}, {}, {}", self.seeking,
+            util.DEBUG_LOG("Not ticking UpdateNowPlaying: seeking: {}, ended: {}, started: {}, SOS: {}, "
+                           "queuingNext: {}, stoppedManually: {}, playingVideo: {}, playState: {}, seekBackTo: {}", self.seeking,
                            self.ended, self.player.started, self.seekOnStart, self.queuingNext, self.stoppedManually,
-                           self.player.isPlayingVideo(), self.player.playState)
+                           self.player.isPlayingVideo(), self.player.playState, self.seekBackTo)
 
         if self.dialog and getattr(self.dialog, "_ignoreTick", None) is not True:
             self.dialog.tick()

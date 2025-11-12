@@ -2850,3 +2850,23 @@ msgstr ""
 msgctxt "#34050"
 msgid "Issue a quick seek forward then back to the start of the video, when we start fresh (no resume point, not marker to immediately skip). Can fix A/V desync issues with certain setups (e.g. CoreELEC on Ugoos with passthrough). Only for DirectPlay. This still requires a sensible value for \"Delay after change of refresh rate\" in Kodi (default: Off, CE/LG: On)"
 msgstr ""
+
+msgctxt "#34051"
+msgid "Movies: Play pre-rolls"
+msgstr ""
+
+msgctxt "#34052"
+msgid "Plays pre-roll clips (server-defined) before playing a movie without a resume point. User-specific."
+msgstr ""
+
+msgctxt "#34053"
+msgid "Cinema Trailers to Play Before Movies"
+msgstr ""
+
+msgctxt "#34054"
+msgid "Play pre-rolls before trailers"
+msgstr ""
+
+msgctxt "#34055"
+msgid "Official Plex clients play the trailers first, then the preroll clips. Enabling this will do the opposite. Default: On. User-specific."
+msgstr ""

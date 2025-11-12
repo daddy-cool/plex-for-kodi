@@ -735,6 +735,9 @@ class Movie(PlayableVideo):
         self.session = self._findSession(data)
         self.transcodeSession = self._findTranscodeSession(data)
 
+    def isLibraryItem(self):
+        return True
+
     @property
     def defaultTitle(self):
         title = self.title or ''
@@ -814,6 +817,9 @@ class Show(CachableItemsMixin, Video, media.RelatedMixin, SectionOnDeckMixin):
     @property
     def isFullyWatched(self):
         return self.isWatched
+
+    def isLibraryItem(self):
+        return True
 
     def seasons(self):
         path = self.key
@@ -1010,6 +1016,9 @@ class Episode(PlayableVideo, SectionOnDeckMixin):
             self._show = plexobjects.listItems(self.server, self.grandparentKey, cachable=self.cachable,
                                                cache_ref=self.cacheRef, not_cachable=self._not_cachable)[0]
         return self._show
+
+    def isLibraryItem(self):
+        return True
 
     @property
     def genres(self):
