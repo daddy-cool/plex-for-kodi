@@ -855,7 +855,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                 needsReSeek = False
                 if (useSeekFix and sosDiff > 500) or not useSeekFix:
                     # seekOnStart might've changed to 0
-                    if self.player.isPlayingVideo() and self.player.getTime() * 1000 < withinSOSLow or self.player.getTime() * 1000 > withinSOSHigh:
+                    if self.player.isPlayingVideo() and (self.player.getTime() * 1000 < withinSOSLow or self.player.getTime() * 1000 > withinSOSHigh):
                         # special case for CE and start seek back
                         # note: you will see this block of code multiple times. We're in relative seek mode here and the
                         # CE handlers are possibly "partially" playing in the background without telling us up to this
@@ -874,7 +874,12 @@ class SeekPlayerHandler(BasePlayerHandler):
                         needsReSeek = True
                         self.seek(origSOS)
                     else:
-                        util.DEBUG_LOG("SeekHandler: onPlayBackSeek: resumeFix: we've reached {}", origSOS)
+                        if self.player.isPlayingVideo():
+                            util.DEBUG_LOG("SeekHandler: onPlayBackSeek: resumeFix: we've reached {}", origSOS)
+                        else:
+                            util.DEBUG_LOG(
+                                "OnPlayBackSeek: SeekOnStart: Player not playing video anymore during initial evaluation")
+                            return
                 else:
                     util.DEBUG_LOG("SeekHandler: onPlayBackSeek: SOS is less than 500ms, not triggering seek")
 
