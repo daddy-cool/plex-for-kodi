@@ -357,7 +357,7 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
         self._closing = False
         # can we activate?
         ct = 0
-        while xbmcgui.getCurrentWindowDialogId() > 9999 and ct < util.MONITOR.waitAmount(20):
+        while xbmcgui.getCurrentWindowDialogId() > 9999 and ct < util.MONITOR.waitAmount(2):
             util.MONITOR.waitFor()
             ct += 1
 
@@ -378,12 +378,12 @@ class BaseWindow(XMLBase, xbmcgui.WindowXML, BaseFunctions):
                     util.MONITOR.waitFor()
 
                 ct = 0
-                while xbmcgui.getCurrentWindowId() == lastWinID and ct < util.MONITOR.waitAmount(4) and not util.MONITOR.abortRequested():
+                while xbmcgui.getCurrentWindowId() == lastWinID and ct < util.MONITOR.waitAmount(2, interval=0.5) and not util.MONITOR.abortRequested():
                     ct += 1
                     # we might have run into an active dialog, which happens sometimes, so we didn't really activate the window
                     # retry
                     xbmcgui.WindowXML.show(self)
-                    util.MONITOR.waitFor()
+                    util.MONITOR.waitFor(0.5)
 
                 util.DEBUG_LOG("{}: activation state (ID: {}, last: {}, current: {})", self, self._winID, lastWinID, xbmcgui.getCurrentWindowId())
 
