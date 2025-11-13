@@ -149,7 +149,7 @@ class BusySignalContext(BusyMsgContext):
     window_cls = BusyWindow
     delay = True
 
-    def __init__(self, context, signal, wait_max=1, delay=True, delay_time=0.5):
+    def __init__(self, context, signal, wait_max=10, delay=True, delay_time=0.5):
         self.wfSignal = signal
         self.signalEmitter = context
         self.waitMax = wait_max
