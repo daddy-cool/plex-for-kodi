@@ -23,17 +23,16 @@ import requests
 import plexnet.util
 
 from .kodijsonrpc import rpc
-
 from . import colors
 # noinspection PyUnresolvedReferences
 from .exceptions import NoDataException
-from .logging import log, log_error
+from .logging import log, DEBUG_LOG, LOG, ERROR, setShutdown, showNotification
 # noinspection PyUnresolvedReferences
 from .i18n import T, TRANSLATED_ROLES
 from . import aspectratio
 # noinspection PyUnresolvedReferences
 from .kodi_util import (ADDON, xbmc, xbmcvfs, xbmcaddon, xbmcgui, translatePath, KODI_VERSION_MAJOR, KODI_VERSION_MINOR,
-                        KODI_BUILD_NUMBER, FROM_KODI_REPOSITORY)
+                        KODI_BUILD_NUMBER, FROM_KODI_REPOSITORY, PYTHON_VERSION, ENABLE_HIGH_CONCURRENCY)
 from .properties import setGlobalProperty, setGlobalBoolProperty, waitForGPEmpty, waitForConsumption, getGlobalProperty
 # noinspection PyUnresolvedReferences
 from .addonsettings import addonSettings, AddonSettings
@@ -43,7 +42,6 @@ from .monitor import MONITOR
 
 
 DEBUG = True
-_SHUTDOWN = False
 
 SKIN_PLEXTUARY = "skin.plextuary" in xbmc.getSkinDir()
 PROFILE = translatePath(ADDON.getAddonInfo('profile'))
@@ -56,7 +54,9 @@ UI_INTERVAL = 1 / float(addonSettings.uiWaitRate)
 
 MONITOR.wait_interval = UI_INTERVAL
 
-xbmc.log('script.plexmod: Kodi {0}.{1} (build {2})'.format(KODI_VERSION_MAJOR, KODI_VERSION_MINOR, KODI_BUILD_NUMBER),
+xbmc.log('script.plexmod: Kodi {0}.{1} (build {2}, Python: {3}, '
+         'High concurrency possible: {4})'.format(KODI_VERSION_MAJOR, KODI_VERSION_MINOR, KODI_BUILD_NUMBER,
+                                         PYTHON_VERSION, ENABLE_HIGH_CONCURRENCY),
          xbmc.LOGINFO)
 
 xbmc.log('script.plexmod: UI wait rate is {0} ({1} Hz)'.format(UI_INTERVAL, addonSettings.uiWaitRate),
@@ -96,7 +96,7 @@ except:
 try:
     DISPLAY_RESOLUTION = [xbmcgui.getScreenWidth(), xbmcgui.getScreenHeight()]
 except:
-    log('Couldn\'t determine display resolution')
+    LOG('Couldn\'t determine display resolution')
     DISPLAY_RESOLUTION = [1920, 1080]
 
 
@@ -122,31 +122,6 @@ homeButtonMapped()
 DEBUG = addonSettings.debug
 
 
-def LOG(msg, *args, **kwargs):
-    return log(msg, *args, **kwargs)
-
-
-def DEBUG_LOG(msg, *args, **kwargs):
-    if _SHUTDOWN:
-        return
-
-    if not addonSettings.debug and not xbmc.getCondVisibility('System.GetBool(debug.showloginfo)'):
-        return
-
-    return log(msg, *args, **kwargs)
-
-
-def ERROR(txt='', hide_tb=False, notify=False, time_ms=3000):
-    short = log_error(txt, hide_tb)
-    if notify:
-        showNotification('ERROR: {0}'.format(txt or short), time_ms=time_ms)
-    return short
-
-
-def TEST(msg):
-    xbmc.log('---TEST: {0}'.format(msg), xbmc.LOGINFO)
-
-
 hasCustomBGColour = False
 if KODI_VERSION_MAJOR > 18:
     hasCustomBGColour = not addonSettings.dynamicBackgrounds and addonSettings.backgroundColour and \
@@ -165,14 +140,6 @@ def reInitAddon():
     ADDON = xbmcaddon.Addon()
     getAdvancedSettings()
     populateTimeFormat()
-
-
-def showNotification(message, time_ms=3000, icon_path=None, header=ADDON.getAddonInfo('name')):
-    try:
-        icon_path = icon_path or translatePath(ADDON.getAddonInfo('icon'))
-        xbmc.executebuiltin('Notification({0},{1},{2},{3})'.format(header, message, time_ms, icon_path))
-    except RuntimeError:  # Happens when disabling the addon
-        LOG(message)
 
 
 def videoIsPlaying():
@@ -921,8 +888,8 @@ def cleanupCacheFolder():
 
 
 def shutdown():
-    global MONITOR, ADDON, T, _SHUTDOWN
-    _SHUTDOWN = True
+    global MONITOR, ADDON, T
+    setShutdown()
     del MONITOR
     del T
     del ADDON
