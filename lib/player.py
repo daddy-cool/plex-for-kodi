@@ -890,8 +890,8 @@ class SeekPlayerHandler(BasePlayerHandler):
                                            "initial seek point ({}, {}), commence seeking to start",
                                            self.player.getTime(), origSOS)
                             # we've reached our target without explicitly seeking; seek back to 0
-                            seekBackToStart()
                             self.skipFixForNextSeek = False
+                            seekBackToStart()
                             return
 
                         util.DEBUG_LOG("SeekHandler: onPlayBackSeek: resumeFix: not there, yet, re-seeking: "
@@ -934,6 +934,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                                        "initial seek point ({}, {}), commence seeking to start",
                                        self.player.getTime(), origSOS)
                         # we've reached our target without explicitly seeking; seek back to 0
+                        self.skipFixForNextSeek = False
                         seekBackToStart()
                         return
 
@@ -960,6 +961,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                                            "initial seek point ({}, {}), commence seeking to start",
                                            self.player.getTime(), origSOS)
                             # we've reached our target without explicitly seeking; seek back to 0
+                            self.skipFixForNextSeek = False
                             seekBackToStart()
                             return
 
@@ -1000,8 +1002,8 @@ class SeekPlayerHandler(BasePlayerHandler):
                 self.dialog.update()
 
             if self.unPauseAfterSeek:
-                self.player.control('play')
                 self.unPauseAfterSeek = False
+                self.player.control('play')
 
         self.skipFixForNextSeek = False
 
