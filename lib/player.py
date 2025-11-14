@@ -830,6 +830,7 @@ class SeekPlayerHandler(BasePlayerHandler):
 
             withinSOSLow = origSOS - seekWindow * 2
             # allow the upper bounds to move because we might be playing (and moving forward)
+            # fixme: this isn't true anymore as we now pause while seeking
             withinSOSHigh = origSOS + seekWindow + min(seekWindow, 500)
 
             tries = 0
@@ -868,6 +869,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                     withinSOSHigh += 250
                     util.MONITOR.waitForAbort(0.25)
 
+                # player time can change at any point as we're waiting for the seek to apply
                 p_time = getTime()
                 if p_time is None:
                     util.LOG("SeekHandler: onPlayBackSeek: Called without playing player, exiting.")
@@ -906,6 +908,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                 else:
                     util.DEBUG_LOG("SeekHandler: onPlayBackSeek: adjusted SOS is now less than 500ms, not triggering seek (player: {}, low: {}, high: {})", p_time, withinSOSLow, withinSOSHigh)
 
+                # player time can change at any point as we're waiting for the seek to apply
                 p_time = getTime()
                 if p_time is None:
                     util.LOG("SeekHandler: onPlayBackSeek: Called without playing player, exiting.")
@@ -913,8 +916,7 @@ class SeekPlayerHandler(BasePlayerHandler):
 
                 sosDiff = abs(origSOS - p_time * 1000)
                 if self.player.isPlayingVideo() and useSeekFix and sosDiff > 500 and needsReSeek:
-                    # clamp to lower 500ms at least
-                    seekWait = max(util.addonSettings.coreelecResumeSeekWait1, 500)
+                    seekWait = util.addonSettings.coreelecResumeSeekWait1
                     withinSOSHigh += seekWait
                     util.MONITOR.waitForAbort(seekWait / 1000.0)
 
