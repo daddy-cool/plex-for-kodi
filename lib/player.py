@@ -826,7 +826,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                 # we're seeking near 0 offset, or a time-critical seekBackTo, be a little harsher about the valid window
                 util.DEBUG_LOG("SeekHandler: onPlayBackSeek: Using smaller seek window as we're seeking near to 0 or "
                                "seeking back to start")
-                seekWindow = min(500, util.addonSettings.altseekValidSeekWindow / 2.0)
+                seekWindow = min(100, util.addonSettings.altseekValidSeekWindow / 2.0)
 
             withinSOSLow = origSOS - seekWindow * 2
             # allow the upper bounds to move because we might be playing (and moving forward)
