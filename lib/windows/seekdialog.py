@@ -232,8 +232,12 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.useAutoSeek = util.addonSettings.autoSeek
         self.useDynamicStepsForTimeline = util.addonSettings.dynamicTimelineSeek
 
-        self.showSkipIntro = False
-        self.showSkipCredits = False
+        # this is duplicated in onFirstInit; we need to do this to get the early player skip right, as we might be
+        # an initialized instance already, but not yet a window, but the player needs to access these values
+        button_settings = util.getUserSetting('player_show_buttons',
+                                              ['subtitle_downloads', 'skip_intro', 'skip_credits'])
+        self.showSkipIntro = 'skip_intro' in button_settings
+        self.showSkipCredits = 'skip_credits' in button_settings
         self.bingeMode = False
         self.autoSkipIntro = False
         self.autoSkipCredits = False
