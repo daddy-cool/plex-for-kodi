@@ -2157,6 +2157,12 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         if self._ignoreInput:
             self._ignoreInput = False
 
+        # the alt seek fix will pause during a seek and resume afterwards if necessary; in that case, don't try any
+        # normal shenanigans
+        if self.handler and self.handler.pausedForSeek:
+            self.handler.pausedForSeek = False
+            return
+
         self.idleTime = None
         self.ldTimer and self.syncTimeKeeper()
 

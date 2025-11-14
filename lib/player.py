@@ -275,6 +275,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.useAlternateSeek = util.getSetting('use_alternate_seek2')
         self.useResumeFix = self.useAlternateSeek
         self.skipFixForNextSeek = False
+        self.pausedForSeek = False
         self.isMapped = False
         self.reused = False
         self.reset()
@@ -299,6 +300,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.isMapped = False
         self.creditMarkerHit = None
         self.skipFixForNextSeek = False
+        self.pausedForSeek = False
 
     def setup(self, duration, meta, offset, bif_url, title='', title2='', seeking=NO_SEEK, chapters=None,
               is_mapped=False):
@@ -520,6 +522,16 @@ class SeekPlayerHandler(BasePlayerHandler):
                 currentTime = self.player.getTime()
                 relativeSeekSeconds = seekSeconds - currentTime
                 self.skipFixForNextSeek = skip_alt_seek_fix
+
+                if not skip_alt_seek_fix:
+                    # pause before seeking
+                    self.pausedForSeek = True
+                    # only unpause if we're currently playing
+                    if self.player.playState == self.player.STATE_PLAYING:
+                        self.unPauseAfterSeek = True
+                    util.DEBUG_LOG("SeekAbsolute: Pausing for seek fix (state: {})", self.player.playState)
+                    self.player.control('pause')
+
                 # we need to allow for a little less than the actual seconds we wanted to seek, as all this is happening
                 # while the player is playing (otherwise abs(relativeSeekSeconds) > util.addonSettings.altseekValidSeekWindow / 1000.0
                 # would be correct
@@ -763,7 +775,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                 self.sessionEnded()
 
     def onPlayBackPaused(self):
-        if self.seekBackTo is not None:
+        if self.pausedForSeek:
             return
 
         vpsc = False
@@ -793,6 +805,14 @@ class SeekPlayerHandler(BasePlayerHandler):
             finally:
                 self.ignoreTimelines = False
 
+        def getTime():
+            try:
+                return self.player.getTime()
+            except RuntimeError:
+                # kodi isn't playing anything
+                util.LOG("SeekHandler: onPlayBackSeek: Called without playing player, exiting.")
+                return
+
         # store original seekOnStart as it can change during seek attempts
         origSOS = self.seekOnStart
         useSeekFix = self.useResumeFix and not self.skipFixForNextSeek
@@ -808,7 +828,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                                "seeking back to start")
                 seekWindow = min(500, util.addonSettings.altseekValidSeekWindow / 2.0)
 
-            withinSOSLow = origSOS - seekWindow
+            withinSOSLow = origSOS - seekWindow * 2
             # allow the upper bounds to move because we might be playing (and moving forward)
             withinSOSHigh = origSOS + seekWindow + min(seekWindow, 500)
 
@@ -817,10 +837,8 @@ class SeekPlayerHandler(BasePlayerHandler):
                 util.MONITOR.waitForAbort(0.1)
                 tries += 1
 
-            try:
-                p_time = self.player.getTime()
-            except RuntimeError:
-                # kodi isn't playing anything
+            p_time = getTime()
+            if p_time is None:
                 util.LOG("SeekHandler: onPlayBackSeek: Called without playing player, exiting.")
                 return
 
@@ -831,7 +849,7 @@ class SeekPlayerHandler(BasePlayerHandler):
 
             util.DEBUG_LOG("SeekHandler: onPlayBackSeek: Playing: {}, Time: {}", self.player.isPlayingVideo(), p_time)
 
-            sosDiff = abs(origSOS - p_time * 1000)
+            sosDiff = origSosDiff = abs(origSOS - p_time * 1000)
 
             SOSSuccess = True
 
@@ -850,10 +868,15 @@ class SeekPlayerHandler(BasePlayerHandler):
                     withinSOSHigh += 250
                     util.MONITOR.waitForAbort(0.25)
 
+                p_time = getTime()
+                if p_time is None:
+                    util.LOG("SeekHandler: onPlayBackSeek: Called without playing player, exiting.")
+                    return
+
                 sosDiff = abs(origSOS - p_time * 1000)
 
                 needsReSeek = False
-                if (useSeekFix and sosDiff > 500) or not useSeekFix:
+                if useSeekFix and sosDiff > 500:
                     # seekOnStart might've changed to 0
                     if self.player.isPlayingVideo() and (self.player.getTime() * 1000 < withinSOSLow or self.player.getTime() * 1000 > withinSOSHigh):
                         # special case for CE and start seek back
@@ -881,7 +904,12 @@ class SeekPlayerHandler(BasePlayerHandler):
                                 "OnPlayBackSeek: SeekOnStart: Player not playing video anymore during initial evaluation")
                             return
                 else:
-                    util.DEBUG_LOG("SeekHandler: onPlayBackSeek: SOS is less than 500ms, not triggering seek")
+                    util.DEBUG_LOG("SeekHandler: onPlayBackSeek: adjusted SOS is now less than 500ms, not triggering seek (player: {}, low: {}, high: {})", p_time, withinSOSLow, withinSOSHigh)
+
+                p_time = getTime()
+                if p_time is None:
+                    util.LOG("SeekHandler: onPlayBackSeek: Called without playing player, exiting.")
+                    return
 
                 sosDiff = abs(origSOS - p_time * 1000)
                 if self.player.isPlayingVideo() and useSeekFix and sosDiff > 500 and needsReSeek:
@@ -911,7 +939,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                     max_tries = int(10000 / seekWait)
                     while (self.player.isPlayingVideo() and (self.player.getTime() * 1000 < withinSOSLow or self.player.getTime() * 1000 > withinSOSHigh)) and tries < max_tries:
                         util.DEBUG_LOG("OnPlayBackSeek: SeekOnStart: Not there, yet, "
-                                       "seeking again ({}, range: {}, {})", origSOS, withinSOSHigh - withinSOSLow, self.player.getTime() * 1000)
+                                       "seeking again ({}, lower: {}, higher: {}, {})", origSOS, withinSOSLow, withinSOSHigh, self.player.getTime() * 1000)
                         if util.MONITOR.abortRequested():
                             util.DEBUG_LOG("OnPlayBackSeek: SeekOnStart: Abort requested while waiting for seek")
                             SOSSuccess = False
@@ -939,7 +967,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                         withinSOSHigh += seekWait
                         util.MONITOR.waitForAbort(seekWait / 1000.0)
                     if tries >= max_tries:
-                        util.DEBUG_LOG("OnPlayBackSeek: SeekOnStart: Couldn't properly seek on start within ~5 seconds.")
+                        util.DEBUG_LOG("OnPlayBackSeek: SeekOnStart: Couldn't properly seek on start within ~10 seconds.")
                         SOSSuccess = False
                     else:
                         if not SOSSuccess:
@@ -952,7 +980,7 @@ class SeekPlayerHandler(BasePlayerHandler):
             # should not be necessary due to other recent changes to dialog persistence, but it doesn't hurt, either
             appliedOffset = None
             if self.dialog:
-                if SOSSuccess and ((useSeekFix and sosDiff > 500) or not useSeekFix):
+                if SOSSuccess and ((useSeekFix and origSosDiff > 500) or not useSeekFix):
                     appliedOffset = max(int(self.player.getTime() * 1000) if useSeekFix else origSOS, 0)
                     util.DEBUG_LOG("SeekHandler: onPlayBackSeek: Setting dialog offset to {}", appliedOffset)
                     # set to current time if we succeeded, as seekOnStart could've been set to 0 in the meantime by the relative seek
@@ -1200,14 +1228,15 @@ class SeekPlayerHandler(BasePlayerHandler):
 
     def tick(self):
         if (self.seeking != self.SEEK_IN_PROGRESS and not self.ended and self.player.started and not self.seekOnStart
-                and not self.seekBackTo and not self.queuingNext and not self.queuingSpecific and not self.stoppedManually and
-                self.player.isPlayingVideo() and self.player.playState != self.player.STATE_STOPPED):
+                and not self.seekBackTo and not self.pausedForSeek and not self.queuingNext and not self.queuingSpecific
+                and not self.stoppedManually and self.player.isPlayingVideo() and self.player.playState != self.player.STATE_STOPPED):
             self.updateNowPlaying(t=self.dialog.timeKeeperTime if self.player.isExternal else None)
         else:
             util.DEBUG_LOG("Not ticking UpdateNowPlaying: seeking: {}, ended: {}, started: {}, SOS: {}, "
-                           "queuingNext: {}, stoppedManually: {}, playingVideo: {}, playState: {}, seekBackTo: {}", self.seeking,
-                           self.ended, self.player.started, self.seekOnStart, self.queuingNext, self.stoppedManually,
-                           self.player.isPlayingVideo(), self.player.playState, self.seekBackTo)
+                           "queuingNext: {}, stoppedManually: {}, playingVideo: {}, playState: {}, seekBackTo: {}, "
+                           "pausedForSeek: {}", self.seeking, self.ended, self.player.started, self.seekOnStart,
+                           self.queuingNext, self.stoppedManually, self.player.isPlayingVideo(), self.player.playState,
+                           self.seekBackTo, self.pausedForSeek)
 
         if self.dialog and getattr(self.dialog, "_ignoreTick", None) is not True:
             self.dialog.tick()
