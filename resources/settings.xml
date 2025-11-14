@@ -168,7 +168,7 @@
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="coreelec_resume_seek_wait" type="integer" label="33649" help="33650">
+                <setting id="coreelec_resume_seek_wait1" type="integer" label="33649" help="33650">
                     <level>0</level>
                     <default>850</default>
                     <constraints>

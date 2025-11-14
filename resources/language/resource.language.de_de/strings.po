@@ -2862,8 +2862,8 @@ msgstr "\"Alternatives Spulen\" Sprungwartezeit"
 
 #: 
 msgctxt "#33650"
-msgid "This adjusts the delay between seek-tries on problematic platforms when \"Use alternate seek\" is enabled, which fixes resume not always working or double-seeking. When you have resume/double-seek issues, increase this. Default: 500ms"
-msgstr "Dies passt die Wartezeit zwischen Sprungversuchen auf problematischen Plattformen an, wenn \"Alternatives Spulen\" aktiv ist, welches den Fehler behebt, dass das Fortsetzen manchmal nicht funktioniert, oder doppelt gesprungen wird. Solltest Du Fortsetzen-/Doppelsprungprobleme haben, diesen Wert erhöhen. Standard: 500ms"
+msgid "This adjusts the delay between seek-tries on problematic platforms when \"Use alternate seek\" is enabled, which fixes resume not always working or double-seeking. When you have resume/double-seek issues, increase this. Default: 100ms"
+msgstr "Dies passt die Wartezeit zwischen Sprungversuchen auf problematischen Plattformen an, wenn \"Alternatives Spulen\" aktiv ist, welches den Fehler behebt, dass das Fortsetzen manchmal nicht funktioniert, oder doppelt gesprungen wird. Solltest Du Fortsetzen-/Doppelsprungprobleme haben, diesen Wert erhöhen. Standard: 100ms"
 
 #: 
 msgctxt "#33651"
