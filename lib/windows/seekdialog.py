@@ -2390,7 +2390,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
 
         # we just want to return an early marker if we want to autoSkip it, so we can tell the handler to seekOnStart
         if onlyReturnIntroMD and markerDef["marker_type"] == "intro" and markerAutoSkip:
-            if startTimeOff == 0 and not markerDef["markerAutoSkipped"]:
+            if startTimeOff <= 2000 and not markerDef["markerAutoSkipped"]:
                 if setSkipped:
                     markerDef["markerAutoSkipped"] = True
                 return markerDef["marker"].endTimeOffset + MARKER_END_JUMP_OFF
