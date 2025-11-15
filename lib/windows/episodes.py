@@ -1194,6 +1194,7 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
             )
         elif choice['key'] == 'delete':
             self.delete(mli.dataSource)
+            self.fillEpisodes()
         elif choice['key'] == 'playback_settings':
             self.playbackSettings(self.show_, pos, bottom)
         elif choice['key'] == 'refresh':
@@ -1245,6 +1246,8 @@ class EpisodesWindow(kodigui.ControlledWindow, windowutils.UtilMixin, SeasonsMix
 
         if not self._delete():
             util.messageDialog(T(32330, 'Message'), T(32331, 'There was a problem while attempting to delete the media.'))
+        else:
+            return True
 
     @busy.dialog()
     def _delete(self):
