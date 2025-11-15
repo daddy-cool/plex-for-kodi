@@ -477,8 +477,8 @@ class Settings(object):
                     (
                         (0, T(34024, 'at selected threshold percentage')),
                         (1, T(34025, 'at final credits marker position')),
-                        (2, T(34025, 'at first credits marker position')),
-                        (3, T(34026, 'earliest between threshold percent and first credits marker')),
+                        (2, T(34026, 'at first credits marker position')),
+                        (3, T(34027, 'earliest between threshold percent and first credits marker')),
                     ),
                     show_cb=lambda: plexnet.plexapp.SERVERMANAGER.selectedServer.prefs.get(
                         "LibraryVideoPlayedAtBehaviour", None) is None
