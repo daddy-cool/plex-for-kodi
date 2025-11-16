@@ -168,12 +168,12 @@
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="coreelec_resume_seek_wait1" type="integer" label="33649" help="33650">
+                <setting id="coreelec_resume_seek_wait2" type="integer" label="33649" help="33650">
                     <level>0</level>
-                    <default>850</default>
+                    <default>100</default>
                     <constraints>
-                        <minimum>100</minimum>
-                        <step>50</step>
+                        <minimum>10</minimum>
+                        <step>10</step>
                         <maximum>5000</maximum>
                     </constraints>
                     <control type="slider" format="integer">

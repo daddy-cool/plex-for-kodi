@@ -916,7 +916,7 @@ class SeekPlayerHandler(BasePlayerHandler):
 
                 sosDiff = abs(origSOS - p_time * 1000)
                 if self.player.isPlayingVideo() and useSeekFix and sosDiff > 500 and needsReSeek:
-                    seekWait = util.addonSettings.coreelecResumeSeekWait1
+                    seekWait = util.addonSettings.coreelecResumeSeekWait2
                     withinSOSHigh += seekWait
                     util.MONITOR.waitForAbort(seekWait / 1000.0)
 
