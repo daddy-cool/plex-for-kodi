@@ -524,20 +524,23 @@ class SeekPlayerHandler(BasePlayerHandler):
                 currentTime = self.player.getTime()
                 relativeSeekSeconds = seekSeconds - currentTime
                 self.skipFixForNextSeek = skip_alt_seek_fix
+                doPause = False
 
                 if not skip_alt_seek_fix:
-                    # pause before seeking
-                    self.pausedForSeek = True
-                    # only unpause if we're currently playing
-                    if self.player.playState == self.player.STATE_PLAYING:
-                        self.unPauseAfterSeek = True
                     util.DEBUG_LOG("SeekAbsolute: Pausing for seek fix (state: {})", self.player.playState)
-                    self.player.control('pause')
+                    doPause = True
 
                 # we need to allow for a little less than the actual seconds we wanted to seek, as all this is happening
                 # while the player is playing (otherwise abs(relativeSeekSeconds) > util.addonSettings.altseekValidSeekWindow / 1000.0
                 # would be correct
                 if abs(relativeSeekSeconds) > min((util.addonSettings.altseekValidSeekWindow - 500), 500) / 1000.0:
+                    if doPause:
+                        # pause before seeking
+                        self.pausedForSeek = True
+                        # only unpause if we're currently playing
+                        if self.player.playState == self.player.STATE_PLAYING:
+                            self.unPauseAfterSeek = True
+                        self.player.control('pause')
                     util.DEBUG_LOG("SeekAbsolute: Relative-seeking to offset: {0}, current time: {1}, relative seek: {2}".format(
                         seekSeconds, currentTime, relativeSeekSeconds))
                     xbmc.executebuiltin('Seek({})'.format(relativeSeekSeconds))
@@ -804,13 +807,18 @@ class SeekPlayerHandler(BasePlayerHandler):
                 self.ignoreTimelines = False
 
         def getTime(force_player=False):
+            """
+            Return the current player time in seconds.
+            :param force_player: Return the current player time in seconds.
+            :return: seconds
+            """
             try:
                 t = self.player.getTime()
                 if force_player:
                     return t
                 # it's possible that we got a wrong current time from the player, but a correct time from the seek event
-                if self.reportedSeekPlayerTime is not None and (self.reportedSeekPlayerTime > t + 5000 or
-                                                                self.reportedSeekPlayerTime < t - 5000):
+                if self.reportedSeekPlayerTime is not None and (self.reportedSeekPlayerTime > t * 1000 + 50000 or
+                                                                self.reportedSeekPlayerTime < t * 1000 - 50000):
                     util.DEBUG_LOG("SeekHandler: onPlayBackSeek: Massive deviation of reported time vs. player time. "
                                    "Using reported time. (Reported: {}, Player: {})", self.reportedSeekPlayerTime, t)
                     return self.reportedSeekPlayerTime / 1000.0
@@ -1709,16 +1717,16 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
         #self.handler = AudioPlayerHandler(self)
         self.currentTime = 0
 
-    def control(self, cmd):
+    def control(self, cmd, force=False):
         if cmd == 'play':
             self.pauseAfterPlaybackStarted = False
             util.DEBUG_LOG('Player - Control:  Command=Play')
-            if xbmc.getCondVisibility('Player.Paused | !Player.Playing'):
+            if xbmc.getCondVisibility('Player.Paused | !Player.Playing') or force:
                 util.DEBUG_LOG('Player - Control:  Playing')
                 xbmc.executebuiltin('PlayerControl(Play)')
         elif cmd == 'pause':
             util.DEBUG_LOG('Player - Control:  Command=Pause')
-            if not xbmc.getCondVisibility('Player.Paused'):
+            if not xbmc.getCondVisibility('Player.Paused') or force:
                 util.DEBUG_LOG('Player - Control:  Pausing')
                 xbmc.executebuiltin('PlayerControl(Play)')
 
