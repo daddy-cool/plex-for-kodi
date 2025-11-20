@@ -521,7 +521,21 @@ class SeekPlayerHandler(BasePlayerHandler):
             # we only apply the fix for a significant seek, otherwise the event might not fire, and we end up with
             # an unconsumed self.seekOnStart, which leads to never sending timeline events
             if self.useAlternateSeek:
-                currentTime = self.player.getTime()
+                def getTime():
+                    if (util.addonSettings.coreelecSeekPreferReported and self.reportedSeekPlayerTime is not None and
+                            self.reportedSeekPlayerTime > 0):
+                        return self.reportedSeekPlayerTime / 1000.0
+                    return self.player.getTime()
+
+                # wait for valid player time?
+                if util.addonSettings.coreelecWaitPlayerTime and self.player.getTime() < 0:
+                    util.DEBUG_LOG("SeekAbsolute: Bad time: {0}, waiting for valid time", self.player.getTime())
+                    tries = 0
+                    while self.player.getTime() < 0 and tries < util.MONITOR.waitAmount(4):
+                        util.MONITOR.waitFor()
+                    util.DEBUG_LOG("SeekAbsolute: Player time after waiting: {0}", self.player.getTime())
+
+                currentTime = getTime()
                 relativeSeekSeconds = seekSeconds - currentTime
                 self.skipFixForNextSeek = skip_alt_seek_fix
                 doPause = False
@@ -541,6 +555,14 @@ class SeekPlayerHandler(BasePlayerHandler):
                         if self.player.playState == self.player.STATE_PLAYING:
                             self.unPauseAfterSeek = True
                         self.player.control('pause')
+                        tries = 0
+                        # wait until player is actually paused before continuing
+                        while (self.player.playState in (self.player.STATE_PLAYING, self.player.STATE_BUFFERING) and
+                               tries < util.MONITOR.waitAmount(4)):
+                            util.MONITOR.waitFor()
+                            tries += 1
+
+                    self.reportedSeekPlayerTime = None
                     util.DEBUG_LOG("SeekAbsolute: Relative-seeking to offset: {0}, current time: {1}, relative seek: {2}".format(
                         seekSeconds, currentTime, relativeSeekSeconds))
                     xbmc.executebuiltin('Seek({})'.format(relativeSeekSeconds))
@@ -801,7 +823,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                 self.seekBackTo = None
                 self.waitingForSOS = False
                 self.unPauseAfterSeek = True
-                self.reportedSeekPlayerTime = None
+                #self.reportedSeekPlayerTime = None
                 self.seek(to)
             finally:
                 self.ignoreTimelines = False
@@ -813,12 +835,15 @@ class SeekPlayerHandler(BasePlayerHandler):
             :return: seconds
             """
             try:
+                if util.addonSettings.coreelecSeekPreferReported and self.reportedSeekPlayerTime is not None and self.reportedSeekPlayerTime > 0:
+                    util.DEBUG_LOG("SeekHandler: Using reported seek time for getTime: {} ({})", self.reportedSeekPlayerTime, self.player.getTime())
+                    return self.reportedSeekPlayerTime / 1000.0
                 t = self.player.getTime()
                 if force_player:
                     return t
                 # it's possible that we got a wrong current time from the player, but a correct time from the seek event
-                if self.reportedSeekPlayerTime is not None and (self.reportedSeekPlayerTime > t * 1000 + 50000 or
-                                                                self.reportedSeekPlayerTime < t * 1000 - 50000):
+                if (self.reportedSeekPlayerTime is not None and self.reportedSeekPlayerTime > 0 and
+                        (self.reportedSeekPlayerTime > t * 1000 + 50000 or self.reportedSeekPlayerTime < t * 1000 - 50000)):
                     util.DEBUG_LOG("SeekHandler: onPlayBackSeek: Massive deviation of reported time vs. player time. "
                                    "Using reported time. (Reported: {}, Player: {})", self.reportedSeekPlayerTime, t)
                     return self.reportedSeekPlayerTime / 1000.0
@@ -838,6 +863,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         # store original seekOnStart as it can change during seek attempts
         origSOS = self.seekOnStart
         useSeekFix = self.useResumeFix and not self.skipFixForNextSeek
+        appliedOffset = None
 
         if self.dialog:
             self.dialog.onPlayBackSeek(stime, offset)
@@ -1004,7 +1030,6 @@ class SeekPlayerHandler(BasePlayerHandler):
                 util.DEBUG_LOG("SeekHandler: onPlayBackSeek: resumeFix: current time already within range ({}, {}, {})", p_time * 1000, withinSOSLow, withinSOSHigh)
 
             # should not be necessary due to other recent changes to dialog persistence, but it doesn't hurt, either
-            appliedOffset = None
             if self.dialog:
                 if SOSSuccess and ((useSeekFix and origSosDiff > 500) or not useSeekFix):
                     appliedOffset = max(int(getTime() * 1000) if useSeekFix else origSOS, 0)
@@ -1021,24 +1046,24 @@ class SeekPlayerHandler(BasePlayerHandler):
                 util.DEBUG_LOG("SeekHandler: onPlayBackSeek: SeekOnStart not successful: {}", origSOS)
             self.waitingForSOS = False
             self.seekOnStart = 0
-            if useSeekFix and self.dialog:
+            if useSeekFix and self.dialog and appliedOffset is not None:
                 self.dialog.offset = appliedOffset
                 self.dialog.selectedOffset = appliedOffset
                 self.dialog.update()
 
-            if self.unPauseAfterSeek:
+            if self.unPauseAfterSeek and not self.seekBackTo:
                 self.unPauseAfterSeek = False
                 self.player.control('play')
 
         self.skipFixForNextSeek = False
-        self.reportedSeekPlayerTime = None
-
-        self.updateOffset()
+        self.updateOffset(offset=appliedOffset)
         # self.showOSD(from_seek=True)
 
         # seek back immediately?
         if self.seekBackTo is not None:
             seekBackToStart()
+        else:
+            self.reportedSeekPlayerTime = None
 
     @property
     def subtitleStreamOffset(self):
@@ -1189,9 +1214,9 @@ class SeekPlayerHandler(BasePlayerHandler):
                     tries += 1
 
 
-    def updateOffset(self):
+    def updateOffset(self, offset=None):
         try:
-            self.offset = int(self.player.getTime() * 1000)
+            self.offset = offset if offset is not None else int(self.player.getTime() * 1000)
         except RuntimeError:
             pass
 

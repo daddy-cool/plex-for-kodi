@@ -2870,3 +2870,19 @@ msgstr ""
 msgctxt "#34055"
 msgid "Official Plex clients play the trailers first, then the preroll clips. Enabling this will do the opposite. Default: On. User-specific."
 msgstr ""
+
+msgctxt "#34056"
+msgid "\"Use alternate seek\" prefer reported time"
+msgstr ""
+
+msgctxt "#34057"
+msgid "Use reported seek time instead of the current player time (usually more accurate); Default: On"
+msgstr ""
+
+msgctxt "#34058"
+msgid "\"Use alternate seek\" wait for valid player time"
+msgstr ""
+
+msgctxt "#34059"
+msgid "The player time reporting might be inaccurate on playback start. Wait for a valid player time before seeking; Default: Off"
+msgstr ""

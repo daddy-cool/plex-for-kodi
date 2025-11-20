@@ -192,6 +192,16 @@
                         <popup>false</popup>
                     </control>
                 </setting>
+                <setting id="coreelec_seek_prefer_reported" type="boolean" label="34056" help="34057">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                </setting>
+                <setting id="coreelec_wait_player_time" type="boolean" label="34058" help="34059">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
                 <setting id="show_media_ends_info" type="boolean" label="32540" help="32541">
                     <level>0</level>
                     <default>true</default>
