@@ -521,7 +521,7 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
         if self.refill:
             self.doRefill()
         if player.PLAYER.bgmPlaying:
-            player.PLAYER.stopAndWait()
+            player.PLAYER.stopAndWait(fade=util.addonSettings.themeMusicFade, deferred=True)
 
     def onAction(self, action):
         try:
@@ -1498,7 +1498,7 @@ class LibraryWindow(PlaybackBtnMixin, kodigui.MultiWindow, windowutils.UtilMixin
 
         # Wait for the default items to be created
         while backgroundthread.BGThreader.working() and not util.MONITOR.abortRequested():
-            util.MONITOR.waitForAbort(0.1)
+            util.MONITOR.waitFor()
 
         if jitems:
             self.keyListControl.addItems(jitems)

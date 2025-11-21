@@ -531,7 +531,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
             return
 
         if player.PLAYER.bgmPlaying:
-            player.PLAYER.stopAndWait()
+            player.PLAYER.stopAndWait(fade=util.addonSettings.themeMusicFade, deferred=True)
 
         self._anyItemAction = False
         if self._applyTheme:
@@ -577,7 +577,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
 
     def checkPlexDirectHosts(self, servers, source="stored", *args, **kwargs):
         while self._checkingPD:
-            util.MONITOR.waitForAbort(0.1)
+            util.MONITOR.waitFor()
         try:
             self._checkingPD = True
             util.DEBUG_LOG("Home: checkPlexDirectHosts: {} ({})", servers, source)
@@ -891,6 +891,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
                 not xbmc.Player().isPlayingVideo()):
             util.DEBUG_LOG("Home: Ticking, section stale, calling showHubs(update=True)")
             self.showHubs(self.lastSection, update=True)
+            util.cleanupCacheFolder()
 
     def doClose(self, force=True):
         util.DEBUG_LOG("Home: doClose called, triggering close.windows")
@@ -1958,7 +1959,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
                         last_item_index = len(control) - 1
                         control.selectItem(last_item_index)
                         while control.getSelectedPos() != last_item_index:
-                            util.MONITOR.waitForAbort(0.1)
+                            util.MONITOR.waitFor()
 
                         if not control[last_item_index].dataSource:
                             last_item_index -= 1
@@ -2017,10 +2018,10 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
         # wait 2s at max if we're currently awaiting any hubs to reload
         # fixme: this can be done in a better way, probably
         waited = 0
-        while any(self.tasks) and waited < 20:
+        while any(self.tasks) and waited < util.MONITOR.waitAmount(2):
             if waited > 5:
                 self.showBusy(True)
-            util.MONITOR.waitForAbort(0.1)
+            util.MONITOR.waitFor()
             waited += 1
         self.showBusy(False)
 
@@ -2040,7 +2041,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
         if not immediate:
             if not self.sectionChangeTimeout:
                 return
-            while not util.MONITOR.waitForAbort(0.1):
+            while not util.MONITOR.waitFor():
                 # timing issue
                 if not self.sectionChangeTimeout:
                     return
@@ -2056,7 +2057,7 @@ class HomeWindow(kodigui.BaseWindow, util.CronReceiver, CommonMixin, SpoilersMix
     def _sectionReallyChanged(self, section):
         with self.lock:
             while self.block_section_change:
-                util.MONITOR.waitForAbort(0.1)
+                util.MONITOR.waitFor()
 
             self.setProperty('hub.focus', '')
             if util.addonSettings.dynamicBackgrounds:

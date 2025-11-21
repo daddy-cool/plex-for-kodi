@@ -305,6 +305,16 @@ class MultiUAOptionsSetting(MultiOptionsSetting, UserAwareSetting):
     pass
 
 
+class UAListSetting(ListSetting, UserAwareSetting):
+    def __init__(self, ID, label, default, options, **kwargs):
+        super(UAListSetting, self).__init__(ID, label, default, **kwargs)
+        self.options = options
+
+    def set(self, val, skip_get=False):
+        val = len(self.options) - 1 - val
+        return UserAwareSetting.set(self, val, skip_get=True)
+
+
 class KCMSetting(OptionsSetting):
     key = None
 
@@ -467,8 +477,8 @@ class Settings(object):
                     (
                         (0, T(34024, 'at selected threshold percentage')),
                         (1, T(34025, 'at final credits marker position')),
-                        (2, T(34025, 'at first credits marker position')),
-                        (3, T(34026, 'earliest between threshold percent and first credits marker')),
+                        (2, T(34026, 'at first credits marker position')),
+                        (3, T(34027, 'earliest between threshold percent and first credits marker')),
                     ),
                     show_cb=lambda: plexnet.plexapp.SERVERMANAGER.selectedServer.prefs.get(
                         "LibraryVideoPlayedAtBehaviour", None) is None
@@ -763,6 +773,17 @@ class Settings(object):
             T(32940, 'Player UI'), (
                 BoolSetting('player_official', T(33045, 'Behave like official Plex clients'), True).description(
                     T(33046, '')),
+                BoolUserSetting('preplay_preroll', T(34051, 'Movies: Play pre-rolls'), False).description(
+                    T(34052, 'Plays pre-roll clips (server-defined) before playing a movie without a resume '
+                             'point. User-specific.')),
+                BoolUserSetting('preplay_preroll_first', T(34054, 'Play pre-rolls before trailers'), True).description(
+                    T(34055, 'Official Plex clients play the trailers first, then the preroll clips. Enabling '
+                             'this will do the opposite. Default: On. User-specific.')),
+                UAListSetting(
+                    'preplay_trailers', T(34053, 'Cinema Trailers to Play Before Movies'),
+                    5,
+                    list(map(str, list(range(6))))
+                ),
                 BoolSetting('no_osd_time_spoilers', T(33004, ''), False, backport_from="no_spoilers").description(
                     T(33005, '')),
                 MultiUAOptionsSetting(
@@ -819,6 +840,11 @@ class Settings(object):
                 ).description(T(33094, '')),
                 BoolSetting('resume_seek_behind_onlydp', T(33096, ''), True).description(
                     T(33097, '')),
+                BoolSetting('seek_back_on_start', T(34049, 'Seek back on start'), util.altSeekRecommended).description(
+                    T(34050, "Issue a quick seek forward then back to the start of the video, when we start "
+                             "fresh (no resume point, not marker to immediately skip). Can fix A/V desync issues with "
+                             "certain setups (e.g. CoreELEC on Ugoos with passthrough). Only for DirectPlay. This still "
+                             "requires a sensible value for \"Delay after change of refresh rate\" in Kodi (default: Off, CE/LG: On)")),
                 OptionsSetting(
                     'player_stop_on_idle',
                     T(32946, 'Stop video playback on idle after'),
