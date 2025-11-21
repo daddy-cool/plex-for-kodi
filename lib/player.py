@@ -528,7 +528,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                     return self.player.getTime()
 
                 # wait for valid player time?
-                if util.addonSettings.coreelecWaitPlayerTime and self.player.getTime() < 0:
+                if util.addonSettings.coreelecWaitPlayerTime1 and self.player.getTime() < 0:
                     util.DEBUG_LOG("SeekAbsolute: Bad time: {0}, waiting for valid time", self.player.getTime())
                     tries = 0
                     while self.player.getTime() < 0 and tries < util.MONITOR.waitAmount(4):
