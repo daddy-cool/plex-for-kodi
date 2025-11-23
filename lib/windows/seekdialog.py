@@ -216,6 +216,8 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.resumeSeekBehindPause = util.getSetting('resume_seek_behind_pause')
         self.resumeSeekBehindAfter = util.getSetting('resume_seek_behind_after') / 1000.0
         self.resumeSeekBehindOnlyDP = util.getSetting('resume_seek_behind_onlydp')
+        self.shouldBlackout = util.getSetting('sbos_blackout')
+        self.blackout = False
         self.useAlternateSeek = util.getSetting('use_alternate_seek2')
         self.pausedAt = None
         self.isDirectPlay = True
@@ -423,6 +425,11 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.setProperty('skipMarkerName', T(32495, 'Skip intro'))
         self.bigSeekHideTimer = kodigui.PropertyTimer(self._winID, 0.5, 'hide.bigseek')
 
+        self.blackout = False
+        if self.shouldBlackout and self.handler and (self.handler.seekBackTo or self.handler.seekingBackTo):
+            self.setBoolProperty('show.blackout', True)
+            self.blackout = True
+
         if self.handler.playlist:
             self.handler.playlist.on('change', self.updateProperties)
             self.handler.playlist.on('current.changed', self.updateProperties)
@@ -473,6 +480,8 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.videoSettingsHaveChanged()
         self.update()
 
+        self.setBoolProperty("initialized", True)
+
     def onReInit(self):
         util.DEBUG_LOG("SeekDialog: onReInit")
         self.lastTimelineResponse = None
@@ -481,12 +490,18 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.waitingForBuffer = False
         self._abortBufferWait = False
 
+        self.blackout = False
+        if self.shouldBlackout and self.handler and (self.handler.seekBackTo or self.handler.seekingBackTo):
+            self.setBoolProperty('show.blackout', True)
+            self.blackout = True
+
         self.resetTimeout()
         self.resetSeeking()
         self.updateProperties()
         self.updateChapters()
         self.videoSettingsHaveChanged()
         self.updateProgress()
+        self.setBoolProperty("initialized", True)
 
     def setup(self, duration, meta, offset=0, bif_url=None, title='', title2='', chapters=None, keepMarkerDef=False):
         """
@@ -506,6 +521,7 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.setProperty('shuffled', (self.handler.playlist and self.handler.playlist.isShuffled) and '1' or '')
         self.setProperty('show.buffer', (util.addonSettings.playerShowBuffer and self.isDirectPlay) and '1' or '')
         self.setProperty('theme', 'modern')
+        self.setBoolProperty("initialized", False)
 
         self.killTimeKeeper()
 
@@ -2201,6 +2217,9 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
     def onPlayBackPaused(self):
         util.DEBUG_LOG("SeekDialog: OnPlaybackPaused")
 
+        if self.handler and self.handler.seekBackTo and not self.handler.seekBackToDone:
+            return
+
         # Need to resume the video when changing streams on CoreELEC
         if self.useAlternateSeek and self.videoPausedForAudioStreamChange:
             self.videoPausedForAudioStreamChange = False
@@ -2512,6 +2531,9 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         """
         Called ~1/s; can be wildly inaccurate.
         """
+        if self.handler and self.blackout and self.handler.seekBackToDone:
+            self.blackout = False
+            self.setBoolProperty('show.blackout', False)
 
         if self.handler and self.handler.player and self.handler.player.isExternal:
             return

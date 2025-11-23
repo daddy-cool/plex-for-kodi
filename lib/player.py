@@ -259,8 +259,10 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.bifURL = ''
         self.title = ''
         self.title2 = ''
-        self.seekOnStart = 0
+        self.seekOnStart = None
         self.seekBackTo = None
+        self.seekBackToDone = False
+        self.seekingBackTo = False
         self.unPauseAfterSeek = False
         self.waitingForSOS = False
         self.chapters = None
@@ -286,8 +288,10 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.offset = 0
         self.baseOffset = 0
         self.seeking = self.NO_SEEK
-        self.seekOnStart = 0
+        self.seekOnStart = None
         self.seekBackTo = None
+        self.seekBackToDone = False
+        self.seekingBackTo = False
         self.waitingForSOS = False
         self._lastDuration = 0
         self._subtitleStreamOffset = None
@@ -349,7 +353,7 @@ class SeekPlayerHandler(BasePlayerHandler):
         else:
             if not self.player.playerObject:
                 return 0
-            if self.seekOnStart:
+            if self.seekOnStart is not None:
                 return self.player.playerObject.startOffset + (self.seekOnStart / 1000)
             else:
                 return self.player.currentTime + self.player.playerObject.startOffset
@@ -527,22 +531,28 @@ class SeekPlayerHandler(BasePlayerHandler):
                         return self.reportedSeekPlayerTime / 1000.0
                     return self.player.getTime()
 
+                doPause = False
+                earlyPaused = False
+
+                if not skip_alt_seek_fix and self.seekBackTo:
+                    util.DEBUG_LOG("SeekAbsolute: Pausing for seek fix (state: {})", self.player.playState)
+                    doPause = True
+                    earlyPaused = self.player.playState in (self.player.STATE_PLAYING, self.player.STATE_BUFFERING)
+                    if earlyPaused:
+                        self.player.control('pause')
+
                 # wait for valid player time?
-                if util.addonSettings.coreelecWaitPlayerTime1 and self.player.getTime() < 0:
+                if not earlyPaused and util.addonSettings.coreelecWaitPlayerTime1 and self.player.getTime() < 0:
                     util.DEBUG_LOG("SeekAbsolute: Bad time: {0}, waiting for valid time", self.player.getTime())
                     tries = 0
                     while self.player.getTime() < 0 and tries < util.MONITOR.waitAmount(4):
                         util.MONITOR.waitFor()
+                        tries += 1
                     util.DEBUG_LOG("SeekAbsolute: Player time after waiting: {0}", self.player.getTime())
 
                 currentTime = getTime()
                 relativeSeekSeconds = seekSeconds - currentTime
                 self.skipFixForNextSeek = skip_alt_seek_fix
-                doPause = False
-
-                if not skip_alt_seek_fix:
-                    util.DEBUG_LOG("SeekAbsolute: Pausing for seek fix (state: {})", self.player.playState)
-                    doPause = True
 
                 # we need to allow for a little less than the actual seconds we wanted to seek, as all this is happening
                 # while the player is playing (otherwise abs(relativeSeekSeconds) > util.addonSettings.altseekValidSeekWindow / 1000.0
@@ -552,9 +562,10 @@ class SeekPlayerHandler(BasePlayerHandler):
                         # pause before seeking
                         self.pausedForSeek = True
                         # only unpause if we're currently playing
-                        if self.player.playState == self.player.STATE_PLAYING:
+                        if self.player.playState in (self.player.STATE_PLAYING, self.player.STATE_BUFFERING) or earlyPaused:
                             self.unPauseAfterSeek = True
-                        self.player.control('pause')
+                        if not earlyPaused:
+                            self.player.control('pause')
                         tries = 0
                         # wait until player is actually paused before continuing
                         while (self.player.playState in (self.player.STATE_PLAYING, self.player.STATE_BUFFERING) and
@@ -570,7 +581,9 @@ class SeekPlayerHandler(BasePlayerHandler):
                     util.DEBUG_LOG(
                         "SeekAbsolute: Not relative-seeking to offset: {0}, as offset diff is too small ({1}), current time: {2}. Resetting seekOnStart".format(
                             seekSeconds, relativeSeekSeconds, currentTime))
-                    self.seekOnStart = 0
+                    self.seekOnStart = None
+                    if earlyPaused:
+                        self.player.control('play')
             else:
                 util.DEBUG_LOG("SeekAbsolute: Seeking to {0}", self.seekOnStart)
                 self.player.seekTime(seekSeconds)
@@ -821,6 +834,7 @@ class SeekPlayerHandler(BasePlayerHandler):
             try:
                 to = self.seekBackTo
                 self.seekBackTo = None
+                self.seekingBackTo = True
                 self.waitingForSOS = False
                 self.unPauseAfterSeek = True
                 #self.reportedSeekPlayerTime = None
@@ -1045,7 +1059,7 @@ class SeekPlayerHandler(BasePlayerHandler):
             else:
                 util.DEBUG_LOG("SeekHandler: onPlayBackSeek: SeekOnStart not successful: {}", origSOS)
             self.waitingForSOS = False
-            self.seekOnStart = 0
+            self.seekOnStart = None
             if useSeekFix and self.dialog and appliedOffset is not None:
                 self.dialog.offset = appliedOffset
                 self.dialog.selectedOffset = appliedOffset
@@ -1058,6 +1072,10 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.skipFixForNextSeek = False
         self.updateOffset(offset=appliedOffset)
         # self.showOSD(from_seek=True)
+
+        if self.seekingBackTo:
+            self.seekingBackTo = False
+            self.seekBackToDone = True
 
         # seek back immediately?
         if self.seekBackTo is not None:

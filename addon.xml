@@ -34,45 +34,8 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Core/UI: Performance improvements
-- Core: Slimify backgroundthread.py import size
-- Core: Detect and store python version
-- Backgroundthread: Limit concurrency to 3 unless we're on python 3.14+ (overrides addonSetting if necessary)
-- Utils: Move more logging utils to the logging package (including _SHUTDOWN flag and showNotification)
-- CoreELEC/ResumeFix: Further improvements
-- CoreELEC/ResumeFix: Allow seeking to 0
-- CoreELEC/ResumeFix/Settings: Add setting to seek forward then back on start without a resume point (or any immediate seek action); still needs a sensible value for \"Delay after change of refresh rate\" (2.5s) in Kodi (default: Off, CE/LG: On)
-- CoreELEC/Player: Don't use the seek fix when seeking behind on pause/resume (assume we've seeked)
-- CoreELEC: Alternate Seek: Improve accuracy of Seek fix; widen lower bounds to twice the seek window size
-- CoreELEC: Alternate Seek: Pause while applying seek fix (auto and manual seeking)
-- CoreELEC/SeekFix: Wait until player actually paused when pausing for seek
-- CoreELEC/SeekFix: Prefer reported seek time over reported current player time if set and valid
-- SeekDialog: Don't show non-button OSD when Plextuary is used and we're pausing during seeking
-- SeekDialog: Document both OSD states in template
-- Episodes: Make sure we select the play button on higher UI tick rates
-- Episodes: Improve list handling when returning from playback and switching to a new season automatically
-- Episodes: Move play button wait-for-visibility logic outside of busy window context on first init
-- Episodes: Fill episodes after deletion (thanks @andybkma)
-- Movies: Play pre-roll clips or cinema trailers before playback
-- Watchlist: Try being more resilient when a removal didn't work; retry three times (experimental); also check watchlist state again after blindly removing
-- ThemeMusic: Implement fading
-- ThemeMusic: Cache theme locally to avoid UI hangs
-- PlayQueue: Implement immediately POSTing a playqueue request to the PMS
-- Player: Don't report timeline with video extras (clips, prerolls, trailers)
-- Player/SeekDialog/CombineChapters: Added option to toggle whether to combine virtual chapters with video chapters when both are present (thanks @daddy-cool)
-- SeekDialog: Markers: Consider any intro start offset below or equal to 2 seconds as an early skippable intro marker (was: 0 seconds)
-- SeekDialog: Markers: Fix Player not seeing early intro markers while initializing playback due to late initialization of button settings
-- Settings: Add setting to honor pre-roll definitions server-side (plays them back when starting a movie)
-- Settings: Add setting to play pre-rolls before trailers (instead of afterwards, which is Plex default)
-- Settings: Add setting similar to other Plex clients, that defined how many (if any) cinema trailers to play before playing a movie fresh
-- Settings: Implement user-aware ListSetting
-- Settings: Fix 'Video play completion behaviour' options and translations
-- AddonSettings: Add settings for theme music fade and caching
-- AddonSettings: Add "UI wait poll rate (Hz)" (default: 10hz); set to 100hz if you have a powerful device (e.g. Ugoos AM6B+)
-- AddonSettings: Add \"Use alternate seek\" prefer reported time; default: On
-- AddonSettings: Add \"Use alternate seek\" wait for valid player time; default: On
-- AddonSettings/CoreELEC: Reset resume fix wait for seek to 100ms (default now)
-- Update translations from POEditor
+- CoreELEC/Seek back on start/SeekDialog: Implement a blackout screen during seeking back on start
+- Settings: Add setting to blackout the screen while seeking back to start (Default: Off, CE/LG: On)
         </news>
         <assets>
             <icon>icon2.png</icon>

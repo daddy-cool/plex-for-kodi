@@ -845,6 +845,7 @@ class Settings(object):
                              "fresh (no resume point, no marker to immediately skip). Can fix A/V desync issues with "
                              "certain setups (e.g. CoreELEC on Ugoos with passthrough). Only for DirectPlay. This still "
                              "requires a sensible value for \"Delay after change of refresh rate\" in Kodi (default: Off, CE/LG: On)")),
+                BoolSetting('sbos_blackout', T(34060, 'Blackout screen while seeking back to start'), util.altSeekRecommended),
                 OptionsSetting(
                     'player_stop_on_idle',
                     T(32946, 'Stop video playback on idle after'),

@@ -2894,3 +2894,7 @@ msgstr ""
 msgctxt "#34059"
 msgid "The player time reporting might be inaccurate on playback start. Wait for a valid player time before seeking; Default: Off"
 msgstr ""
+
+msgctxt "#34060"
+msgid "Blackout while seeking back to start"
+msgstr ""
