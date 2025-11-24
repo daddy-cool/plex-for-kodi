@@ -3467,3 +3467,23 @@ msgstr "Pre-Roll-Clips vor Kinotrailern abspielen"
 msgctxt "#34055"
 msgid "Official Plex clients play the trailers first, then the preroll clips. Enabling this will do the opposite. Default: On. User-specific."
 msgstr "Die offiziellen Plex Clients spielen zuerst Kinotrailer, dann die Pre-Roll-Clips ab. Diese Einstellung invertiert das. Standard: An. Benutzerspezifisch."
+
+msgctxt "#34056"
+msgid "\"Use alternate seek\" prefer reported time"
+msgstr "\"Alternatives Spulen\" mitgeteilte Zeit präferieren"
+
+msgctxt "#34057"
+msgid "Use reported seek time instead of the current player time (usually more accurate); Default: On"
+msgstr "Verwende die mitgeteilte Zeit anstatt der aktuellen Player-Zeit (normalerweise akkurater); Standard: An"
+
+msgctxt "#34058"
+msgid "\"Use alternate seek\" wait for valid player time"
+msgstr "\"Alternatives Spulen\" warte auf valide Player-Zeit"
+
+msgctxt "#34059"
+msgid "The player time reporting might be inaccurate on playback start. Wait for a valid player time before seeking; Default: On"
+msgstr "Die Player-Zeit-Mitteilung kann inakkurat sein beim Starten einer Wiedergabe. Warte auf eine valide Player-Zeit vor dem Spulen; Standard: An"
+
+msgctxt "#34060"
+msgid "Blackout while seeking back to start"
+msgstr "Verdunkelung während Zurückspringen beim Start"
