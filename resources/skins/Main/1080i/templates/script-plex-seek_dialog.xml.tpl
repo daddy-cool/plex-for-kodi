@@ -1104,7 +1104,7 @@
 
 <!-- SKIP MARKER BUTTON -->
 <control type="grouplist" id="790">
-    <visible>String.IsEmpty(Window.Property(show.blackout)) + !String.IsEmpty(Window.Property(initialized))</visible>
+    <visible>!String.IsEmpty(Window.Property(initialized))</visible>
     <right>30</right>
     <top>797</top>
     <width>1670</width>

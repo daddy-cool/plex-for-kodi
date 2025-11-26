@@ -14,7 +14,7 @@ from iso639 import languages
 from . import backgroundthread
 from . import kodijsonrpc
 from . import colors
-from .windows import seekdialog, windowutils
+from .windows import seekdialog, windowutils, blackoutdialog
 from . import util
 from plexnet import plexplayer
 from plexnet import plexapp
@@ -276,6 +276,10 @@ class SeekPlayerHandler(BasePlayerHandler):
         self._progressHld = {}
         self.useAlternateSeek = util.getSetting('use_alternate_seek2')
         self.useResumeFix = self.useAlternateSeek
+        self.blackout = False
+        self.blackoutDialog = None
+        self.blackoutShown = False
+        self.postBlackoutVolume = None
         self.skipFixForNextSeek = False
         self.reportedSeekPlayerTime = None
         self.pausedForSeek = False
@@ -307,6 +311,9 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.skipFixForNextSeek = False
         self.pausedForSeek = False
         self.reportedSeekPlayerTime = None
+        self.blackout = False
+        self.blackoutShown = False
+        self.postBlackoutVolume = None
 
     def setup(self, duration, meta, offset, bif_url, title='', title2='', seeking=NO_SEEK, chapters=None,
               is_mapped=False):
@@ -328,6 +335,8 @@ class SeekPlayerHandler(BasePlayerHandler):
         self._subtitleStreamOffset = None
         self.isMapped = is_mapped
         self.playbackID = str(uuid.uuid4())
+        if not self.blackoutDialog:
+            self.blackoutDialog = blackoutdialog.BlackoutDialog.create(show=False)
         self.getDialog(setup=True)
         self.dialog.setup(self.duration, meta, int(self.baseOffset * 1000), self.bifURL, self.title, self.title2,
                           chapters=self.chapters, keepMarkerDef=seeking == self.SEEK_IN_PROGRESS)
@@ -502,6 +511,32 @@ class SeekPlayerHandler(BasePlayerHandler):
         else:
             self.seek(max(self.trueTime - 30, 0) * 1000, seeking=self.SEEK_REWIND)
 
+    def start_blackout(self):
+        if not self.blackoutShown:
+            # set flag as early as possible as we might get called multiple times
+            self.blackoutShown = True
+            util.DEBUG_LOG('SeekHandler: Blackout')
+            self.blackoutDialog.show()
+
+            # store current volume
+            self.postBlackoutVolume = self.getVolume()
+            util.DEBUG_LOG('SeekHandler: Setting volume to 1.')
+            self.setVolume(1)
+
+    def stop_blackout(self):
+        if self.blackoutShown:
+            if self.blackoutDialog.isOpen:
+                util.DEBUG_LOG('SeekHandler: Disabling Blackout')
+                self.blackoutDialog.doClose()
+
+            if self.postBlackoutVolume:
+                util.DEBUG_LOG('SeekHandler: Setting volume back to {}.', self.postBlackoutVolume)
+                self.setVolume(self.postBlackoutVolume)
+                self.postBlackoutVolume = None
+
+            self.blackout = False
+            self.blackoutShown = False
+
     def seekAbsolute(self, seek=None, skip_alt_seek_fix=False):
         self.seekOnStart = seek if seek is not None else self.seekOnStart if self.seekOnStart is not None else None
 
@@ -531,24 +566,21 @@ class SeekPlayerHandler(BasePlayerHandler):
                         return self.reportedSeekPlayerTime / 1000.0
                     return self.player.getTime()
 
-                doPause = False
-                earlyPaused = False
-
-                if not skip_alt_seek_fix and self.seekBackTo:
-                    util.DEBUG_LOG("SeekAbsolute: Pausing for seek fix (state: {})", self.player.playState)
-                    doPause = True
-                    earlyPaused = self.player.playState in (self.player.STATE_PLAYING, self.player.STATE_BUFFERING)
-                    if earlyPaused:
-                        self.player.control('pause')
 
                 # wait for valid player time?
-                if not earlyPaused and util.addonSettings.coreelecWaitPlayerTime1 and self.player.getTime() < 0:
+                if util.addonSettings.coreelecWaitPlayerTime1 and self.player.getTime() < 0:
                     util.DEBUG_LOG("SeekAbsolute: Bad time: {0}, waiting for valid time", self.player.getTime())
                     tries = 0
                     while self.player.getTime() < 0 and tries < util.MONITOR.waitAmount(4):
                         util.MONITOR.waitFor()
                         tries += 1
                     util.DEBUG_LOG("SeekAbsolute: Player time after waiting: {0}", self.player.getTime())
+
+                doPause = False
+
+                if not skip_alt_seek_fix:
+                    util.DEBUG_LOG("SeekAbsolute: Pausing for seek fix (state: {})", self.player.playState)
+                    doPause = True
 
                 currentTime = getTime()
                 relativeSeekSeconds = seekSeconds - currentTime
@@ -562,10 +594,9 @@ class SeekPlayerHandler(BasePlayerHandler):
                         # pause before seeking
                         self.pausedForSeek = True
                         # only unpause if we're currently playing
-                        if self.player.playState in (self.player.STATE_PLAYING, self.player.STATE_BUFFERING) or earlyPaused:
+                        if self.player.playState in (self.player.STATE_PLAYING, self.player.STATE_BUFFERING):
                             self.unPauseAfterSeek = True
-                        if not earlyPaused:
-                            self.player.control('pause')
+                        self.player.control('pause')
                         tries = 0
                         # wait until player is actually paused before continuing
                         while (self.player.playState in (self.player.STATE_PLAYING, self.player.STATE_BUFFERING) and
@@ -582,8 +613,9 @@ class SeekPlayerHandler(BasePlayerHandler):
                         "SeekAbsolute: Not relative-seeking to offset: {0}, as offset diff is too small ({1}), current time: {2}. Resetting seekOnStart".format(
                             seekSeconds, relativeSeekSeconds, currentTime))
                     self.seekOnStart = None
-                    if earlyPaused:
-                        self.player.control('play')
+                    self.seekBackTo = None
+                    self.seekingBackTo = False
+                    self.stop_blackout()
             else:
                 util.DEBUG_LOG("SeekAbsolute: Seeking to {0}", self.seekOnStart)
                 self.player.seekTime(seekSeconds)
@@ -591,12 +623,19 @@ class SeekPlayerHandler(BasePlayerHandler):
 
     def onAVChange(self):
         util.DEBUG_LOG('SeekHandler: onAVChange')
+        if self.blackout:
+            # this might occur even before AVStarted
+            self.start_blackout()
+
         self.player.trigger('changed.video')
         if self.dialog:
             self.dialog.onAVChange()
 
     def onAVStarted(self):
         util.DEBUG_LOG('SeekHandler: onAVStarted')
+        if self.blackout:
+            self.start_blackout()
+
         self.player.trigger('started.video')
 
         # fixme: move below embedded subtitle check?
@@ -966,6 +1005,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                         else:
                             util.DEBUG_LOG(
                                 "OnPlayBackSeek: SeekOnStart: Player not playing video anymore during initial evaluation")
+                            self.stop_blackout()
                             return
                 else:
                     util.DEBUG_LOG("SeekHandler: onPlayBackSeek: adjusted SOS is now less than 500ms, not triggering seek (player: {}, low: {}, high: {})", p_time, withinSOSLow, withinSOSHigh)
@@ -1008,10 +1048,12 @@ class SeekPlayerHandler(BasePlayerHandler):
                         if util.MONITOR.abortRequested():
                             util.DEBUG_LOG("OnPlayBackSeek: SeekOnStart: Abort requested while waiting for seek")
                             SOSSuccess = False
+                            self.stop_blackout()
                             break
                         elif not self.player.isPlayingVideo():
                             util.DEBUG_LOG("OnPlayBackSeek: SeekOnStart: Player not playing video while waiting for seek")
                             self.skipFixForNextSeek = False
+                            self.stop_blackout()
                             return
 
                         withinSOSHigh += 250
@@ -1076,12 +1118,16 @@ class SeekPlayerHandler(BasePlayerHandler):
         if self.seekingBackTo:
             self.seekingBackTo = False
             self.seekBackToDone = True
+            if self.blackout:
+                self.stop_blackout()
 
         # seek back immediately?
         if self.seekBackTo is not None:
             seekBackToStart()
         else:
             self.reportedSeekPlayerTime = None
+            if self.blackout:
+                self.stop_blackout()
 
     @property
     def subtitleStreamOffset(self):
@@ -1316,6 +1362,16 @@ class SeekPlayerHandler(BasePlayerHandler):
 
     def close(self):
         self.hideOSD(delete=True)
+        if self.blackoutDialog:
+            try:
+                d = self.blackoutDialog
+                self.blackoutDialog = None
+                d.doClose()
+                del d
+                util.garbageCollect()
+            except:
+                pass
+
 
     def sessionEnded(self):
         self.player.sessionID = None
@@ -1968,12 +2024,15 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
                 # probably not necessary
                 meta.playStart = introOffset // 1000
         else:
+            blackout = util.getSetting('initial_seek_blackout')
             if offset:
                 util.DEBUG_LOG("SeekOnStart: Using as SeekOnStart: {0}; offset: {1}", meta.playStart, offset)
                 self.handler.seekOnStart = meta.playStart * 1000
+                self.handler.blackout = blackout
             elif introOffset:
                 util.DEBUG_LOG("SeekOnStart: Seeking behind intro after playstart: {}", introOffset)
                 self.handler.seekOnStart = introOffset
+                self.handler.blackout = blackout
 
             # seek back on start
             if not self.handler.seekOnStart and util.getSetting('seek_back_on_start'):
@@ -1985,6 +2044,7 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
                 util.DEBUG_LOG("SeekOnStart: Seeking temporarily to: {}", max(to, 1000))
                 self.handler.seekOnStart = to
                 self.handler.seekBackTo = 50
+                self.handler.blackout = blackout
 
             self.handler.mode = self.handler.MODE_ABSOLUTE
 

@@ -216,8 +216,6 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.resumeSeekBehindPause = util.getSetting('resume_seek_behind_pause')
         self.resumeSeekBehindAfter = util.getSetting('resume_seek_behind_after') / 1000.0
         self.resumeSeekBehindOnlyDP = util.getSetting('resume_seek_behind_onlydp')
-        self.shouldBlackout = util.getSetting('sbos_blackout')
-        self.blackout = False
         self.useAlternateSeek = util.getSetting('use_alternate_seek2')
         self.pausedAt = None
         self.isDirectPlay = True
@@ -425,11 +423,6 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self.setProperty('skipMarkerName', T(32495, 'Skip intro'))
         self.bigSeekHideTimer = kodigui.PropertyTimer(self._winID, 0.5, 'hide.bigseek')
 
-        self.blackout = False
-        if self.shouldBlackout and self.handler and (self.handler.seekBackTo or self.handler.seekingBackTo):
-            self.setBoolProperty('show.blackout', True)
-            self.blackout = True
-
         if self.handler.playlist:
             self.handler.playlist.on('change', self.updateProperties)
             self.handler.playlist.on('current.changed', self.updateProperties)
@@ -489,11 +482,6 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         self._ignoreTick = False
         self.waitingForBuffer = False
         self._abortBufferWait = False
-
-        self.blackout = False
-        if self.shouldBlackout and self.handler and (self.handler.seekBackTo or self.handler.seekingBackTo):
-            self.setBoolProperty('show.blackout', True)
-            self.blackout = True
 
         self.resetTimeout()
         self.resetSeeking()
@@ -2531,10 +2519,6 @@ class SeekDialog(kodigui.BaseDialog, windowutils.GoHomeMixin, PlexSubtitleDownlo
         """
         Called ~1/s; can be wildly inaccurate.
         """
-        if self.handler and self.blackout and self.handler.seekBackToDone:
-            self.blackout = False
-            self.setBoolProperty('show.blackout', False)
-
         if self.handler and self.handler.player and self.handler.player.isExternal:
             return
 
