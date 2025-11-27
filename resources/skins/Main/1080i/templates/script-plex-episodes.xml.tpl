@@ -142,7 +142,7 @@
                 <aligny>top</aligny>
                 <textcolor>FFFFFFFF</textcolor>
                 <scroll>true</scroll>
-                <scrollspeed>5</scrollspeed>
+                <scrollspeed>35</scrollspeed>
                 <label>$INFO[Container(400).ListItem.Property(title)]</label>
             </control>
             <control type="button">
@@ -179,7 +179,7 @@
             <align>left</align>
             <aligny>top</aligny>
             <scroll>true</scroll>
-            <scrollspeed>5</scrollspeed>
+            <scrollspeed>25</scrollspeed>
             <textcolor>FFFFFFFF</textcolor>
             <label>$INFO[Container(400).ListItem.Property(show.title)]</label>
         </control>

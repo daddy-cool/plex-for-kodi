@@ -74,7 +74,7 @@
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
             <scroll>true</scroll>
-            <scrollspeed>15</scrollspeed>
+            <scrollspeed>35</scrollspeed>
             <label>[B]$INFO[VideoPlayer.TVShowTitle][/B]$INFO[VideoPlayer.Title, &#8226; ]$INFO[VideoPlayer.Season, &#8226; Season ]$INFO[VideoPlayer.Episode, Episode ]$INFO[Window.Property(ep.year), &#8226; ]</label>
         </control>
         <control type="label">
@@ -88,7 +88,7 @@
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
             <scroll>true</scroll>
-            <scrollspeed>15</scrollspeed>
+            <scrollspeed>35</scrollspeed>
             <label>[B]$INFO[VideoPlayer.TVShowTitle][/B]$INFO[VideoPlayer.Season, &#8226; Season ]$INFO[VideoPlayer.Episode, Episode ]$INFO[Window.Property(ep.year), &#8226; ]</label>
         </control>
         <control type="label">
@@ -102,7 +102,7 @@
             <aligny>center</aligny>
             <textcolor>FFFFFFFF</textcolor>
             <scroll>true</scroll>
-            <scrollspeed>15</scrollspeed>
+            <scrollspeed>35</scrollspeed>
             <label>[B]$INFO[VideoPlayer.Title][/B]$INFO[VideoPlayer.Year, &#8226; ]</label>
         </control>
         <control type="label">
