@@ -1346,8 +1346,8 @@ class SeekPlayerHandler(BasePlayerHandler):
         self.showOSD()
 
     def tick(self):
-        if (self.seeking != self.SEEK_IN_PROGRESS and not self.ended and self.player.started and not self.seekOnStart
-                and not self.seekBackTo and not self.pausedForSeek and not self.queuingNext and not self.queuingSpecific
+        if (self.seeking != self.SEEK_IN_PROGRESS and not self.ended and self.player.started and self.seekOnStart is None
+                and self.seekBackTo is None and not self.pausedForSeek and not self.queuingNext and not self.queuingSpecific
                 and not self.stoppedManually and self.player.isPlayingVideo() and self.player.playState != self.player.STATE_STOPPED):
             self.updateNowPlaying(t=self.dialog.timeKeeperTime if self.player.isExternal else None)
         else:
