@@ -525,14 +525,14 @@ class SeekPlayerHandler(BasePlayerHandler):
 
     def stop_blackout(self):
         if self.blackoutShown:
-            if self.blackoutDialog.isOpen:
-                util.DEBUG_LOG('SeekHandler: Disabling Blackout')
-                self.blackoutDialog.doClose()
-
             if self.postBlackoutVolume:
                 util.DEBUG_LOG('SeekHandler: Setting volume back to {}.', self.postBlackoutVolume)
                 self.setVolume(self.postBlackoutVolume)
                 self.postBlackoutVolume = None
+
+            if self.blackoutDialog.isOpen:
+                util.DEBUG_LOG('SeekHandler: Disabling Blackout')
+                self.blackoutDialog.doClose()
 
             self.blackout = False
             self.blackoutShown = False
@@ -1107,10 +1107,6 @@ class SeekPlayerHandler(BasePlayerHandler):
                 self.dialog.selectedOffset = appliedOffset
                 self.dialog.update()
 
-            if self.unPauseAfterSeek and not self.seekBackTo:
-                self.unPauseAfterSeek = False
-                self.player.control('play')
-
         self.skipFixForNextSeek = False
         self.updateOffset(offset=appliedOffset)
         # self.showOSD(from_seek=True)
@@ -1128,6 +1124,10 @@ class SeekPlayerHandler(BasePlayerHandler):
             self.reportedSeekPlayerTime = None
             if self.blackout:
                 self.stop_blackout()
+
+        if self.unPauseAfterSeek and not self.seekBackTo:
+            self.unPauseAfterSeek = False
+            self.player.control('play')
 
     @property
     def subtitleStreamOffset(self):
