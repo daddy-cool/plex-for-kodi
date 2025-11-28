@@ -3445,8 +3445,8 @@ msgid "Seek back on start"
 msgstr "Zurückspringen beim Start"
 
 msgctxt "#34050"
-msgid "Issue a quick seek forward then back to the start of the video, when we start fresh (no resume point, no marker to immediately skip). Can fix A/V desync issues with certain setups (e.g. CoreELEC on Ugoos with passthrough). Only for DirectPlay. This still requires a sensible value for \"Delay after change of refresh rate\" in Kodi (default: Off, CE/LG: On)"
-msgstr "Springe kurz vorwärts und dann zurück zum Start des Videos, wenn wir ein nicht bereits angefangenes Video starten (kein Wiedergabepunkt, keine Markierung, die sofort übersprungen würde). Kann A/V-Synchronisierungsfehler unter bestimmten Umständen beheben (z. B. CoreELEC on Ugoos with passthrough). Nur für Direkte Wiedergabe. Dies benötigt weiterhin einen passenden Wert für \"Verzögerung nach Änderung der Bildwiederholrate\" in Kodi (standard: Aus, CE/LG: An)"
+msgid "Issue a quick seek forward then back to the start of the video, when we start fresh (no resume point, no marker to immediately skip). Can fix A/V desync issues (e.g. CoreELEC on Ugoos with passthrough) and embedded subtitles showing late, with certain setups. Only for DirectPlay. This still requires a sensible value for \"Delay after change of refresh rate\" in Kodi (default: Off, CE/LG: On)"
+msgstr "Springe kurz vorwärts und dann zurück zum Start des Videos, wenn wir ein nicht bereits angefangenes Video starten (kein Wiedergabepunkt, keine Markierung, die sofort übersprungen würde). Kann A/V-Synchronisierungsfehler unter bestimmten Umständen beheben (z. B. CoreELEC on Ugoos with passthrough), sowie zu spät einsetzende eingebettete Untertitel. Nur für Direkte Wiedergabe. Dies benötigt weiterhin einen passenden Wert für \"Verzögerung nach Änderung der Bildwiederholrate\" in Kodi (standard: Aus, CE/LG: An)"
 
 msgctxt "#34051"
 msgid "Movies: Play pre-rolls"
