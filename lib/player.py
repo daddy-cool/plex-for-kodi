@@ -553,6 +553,8 @@ class SeekPlayerHandler(BasePlayerHandler):
                 util.DEBUG_LOG("SeekAbsolute: runtime error")
                 return False
 
+            util.setGlobalProperty('playback_seeking', '1', wait=True)
+
             # Some devices seem to have an issue with the self.player.seekTime function where after the seek the video
             # will be playing, but the audio won't for a few seconds(I've seen up to 15 seconds).  Using this alternate
             # way to seek avoids that issue.
@@ -1124,6 +1126,9 @@ class SeekPlayerHandler(BasePlayerHandler):
             self.reportedSeekPlayerTime = None
             if self.blackout:
                 self.stop_blackout()
+
+            util.setGlobalProperty('playback_initializing', '', wait=True)
+            util.setGlobalProperty('playback_seeking', '', wait=True)
 
         if self.unPauseAfterSeek and not self.seekBackTo:
             self.unPauseAfterSeek = False
@@ -2045,6 +2050,11 @@ class PlexPlayer(xbmc.Player, signalsmixin.SignalsMixin):
                 self.handler.seekOnStart = to
                 self.handler.seekBackTo = 50
                 self.handler.blackout = blackout
+
+            if self.handler.seekOnStart is not None:
+                util.setGlobalProperty('playback_initializing', '1', wait=True)
+            else:
+                util.setGlobalProperty('playback_initializing', '', wait=True)
 
             self.handler.mode = self.handler.MODE_ABSOLUTE
 
