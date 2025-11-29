@@ -588,9 +588,6 @@ class SeekPlayerHandler(BasePlayerHandler):
                 relativeSeekSeconds = seekSeconds - currentTime
                 self.skipFixForNextSeek = skip_alt_seek_fix
 
-                # we need to allow for a little less than the actual seconds we wanted to seek, as all this is happening
-                # while the player is playing (otherwise abs(relativeSeekSeconds) > util.addonSettings.altseekValidSeekWindow / 1000.0
-                # would be correct
                 if abs(relativeSeekSeconds) > min((util.addonSettings.altseekValidSeekWindow - 500), 1000) / 1000.0:
                     if doPause:
                         # pause before seeking
