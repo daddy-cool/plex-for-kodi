@@ -591,7 +591,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                 # we need to allow for a little less than the actual seconds we wanted to seek, as all this is happening
                 # while the player is playing (otherwise abs(relativeSeekSeconds) > util.addonSettings.altseekValidSeekWindow / 1000.0
                 # would be correct
-                if abs(relativeSeekSeconds) > min((util.addonSettings.altseekValidSeekWindow - 500), 500) / 1000.0:
+                if abs(relativeSeekSeconds) > min((util.addonSettings.altseekValidSeekWindow - 500), 1000) / 1000.0:
                     if doPause:
                         # pause before seeking
                         self.pausedForSeek = True
@@ -929,7 +929,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                 # we're seeking near 0 offset, or a time-critical seekBackTo, be a little harsher about the valid window
                 util.DEBUG_LOG("SeekHandler: onPlayBackSeek: Using smaller seek window as we're seeking near to 0 or "
                                "seeking back to start")
-                seekWindow = min(100, util.addonSettings.altseekValidSeekWindow / 2.0)
+                seekWindow = min(1000, util.addonSettings.altseekValidSeekWindow / 2.0)
 
             withinSOSLow = origSOS - seekWindow * 2
             # allow the upper bounds to move because we might be playing (and moving forward)
@@ -981,7 +981,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                 sosDiff = abs(origSOS - p_time * 1000)
 
                 needsReSeek = False
-                if useSeekFix and sosDiff > 500:
+                if useSeekFix and sosDiff > 1000:
                     # seekOnStart might've changed to 0
                     if self.player.isPlayingVideo() and (getTime() * 1000 < withinSOSLow or getTime() * 1000 > withinSOSHigh):
                         # special case for CE and start seek back
@@ -1010,7 +1010,7 @@ class SeekPlayerHandler(BasePlayerHandler):
                             self.stop_blackout()
                             return
                 else:
-                    util.DEBUG_LOG("SeekHandler: onPlayBackSeek: adjusted SOS is now less than 500ms, not triggering seek (player: {}, low: {}, high: {})", p_time, withinSOSLow, withinSOSHigh)
+                    util.DEBUG_LOG("SeekHandler: onPlayBackSeek: adjusted SOS is now less than 1000ms, not triggering seek (player: {}, low: {}, high: {})", p_time, withinSOSLow, withinSOSHigh)
 
                 # player time can change at any point as we're waiting for the seek to apply
                 p_time = getTime()
