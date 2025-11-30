@@ -537,6 +537,8 @@ class SeekPlayerHandler(BasePlayerHandler):
             self.blackout = False
             self.blackoutShown = False
 
+        util.setGlobalBoolProperty('playback_started', True)
+
     def seekAbsolute(self, seek=None, skip_alt_seek_fix=False):
         self.seekOnStart = seek if seek is not None else self.seekOnStart if self.seekOnStart is not None else None
 
@@ -625,6 +627,8 @@ class SeekPlayerHandler(BasePlayerHandler):
         if self.blackout:
             # this might occur even before AVStarted
             self.start_blackout()
+        else:
+            util.setGlobalBoolProperty('playback_started', False)
 
         self.player.trigger('changed.video')
         if self.dialog:
