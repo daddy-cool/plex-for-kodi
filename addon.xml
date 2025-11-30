@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="script.plexmod"
        name="Plex"
-       version="1.1.3-beta4"
+       version="1.1.3-beta4.1"
        provider-name="pannal">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
@@ -34,10 +34,7 @@
         <source>https://github.com/pannal/plex-for-kodi</source>
         <platform>all</platform>
         <news>
-- Player: Set global properties so Audio Offset Manager knows what we're doing
-- Player/SeekFix: Widen our seek window to at least +/-1 second (was +/-500ms)
-- Episodes/Movies/Shows: Include or exclude directors in cast lists
-- Settings/User Interface: Add setting to include or exclude directors in cast lists (user-setting, default: On (include))
+- Player: Set playback_started flag for a short time so Plextuary CPM can pick up the event for codec logo display
         </news>
         <assets>
             <icon>icon2.png</icon>
