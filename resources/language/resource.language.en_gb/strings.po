@@ -2898,3 +2898,7 @@ msgstr ""
 msgctxt "#34060"
 msgid "Blackout screen during initial seek"
 msgstr ""
+
+msgctxt "#34061"
+msgid "Show directors in cast lists"
+msgstr ""

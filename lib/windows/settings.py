@@ -715,6 +715,9 @@ class Settings(object):
                         ('unwatched', T(33010, 'Unwatched')),
                     ]
                 ),
+                BoolUserSetting(
+                    'show_directors', T(34061, 'Show directors in cast lists'), True
+                ),
                 MultiOptionsSetting(
                     'no_episode_spoilers4', T(33006, ''),
                     ['unwatched', 'blur_images', 'hide_summary'],

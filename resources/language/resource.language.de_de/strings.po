@@ -3487,3 +3487,7 @@ msgstr "Die Player-Zeit-Mitteilung kann inakkurat sein beim Starten einer Wieder
 msgctxt "#34060"
 msgid "Blackout screen during initial seek"
 msgstr "Verdunkeln während initialem Spulen"
+
+msgctxt "#34061"
+msgid "Show directors in cast lists"
+msgstr "Regisseure in Besetzungen anzeigen"
